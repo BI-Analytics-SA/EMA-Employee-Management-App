@@ -43,6 +43,19 @@ Add the same variable names for **Branch deploys** (or scope to branch `dev`) wi
 
 ---
 
+## Dev branch (one-time)
+
+If the `dev` branch does not exist on GitHub yet, create and push it from your machine:
+
+```bash
+git checkout -b dev   # if not already on dev
+git push -u origin dev
+```
+
+Then in Netlify, enable branch deploys for `dev` (see step 2 above).
+
+---
+
 ## Local development
 
 Keep `.env.local` pointing at **dev** (do not commit this file):
