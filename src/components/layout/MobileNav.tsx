@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Users, Home, UserPlus, FileStack, Settings, AlertTriangle } from "lucide-react";
+import { Users, Home, UserPlus, FileStack, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 

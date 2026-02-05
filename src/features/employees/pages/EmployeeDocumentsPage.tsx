@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -18,7 +18,6 @@ const sectionContentClass = "p-3";
 
 export function EmployeeDocumentsPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { isLoading: userLoading } = useCurrentUser();
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(

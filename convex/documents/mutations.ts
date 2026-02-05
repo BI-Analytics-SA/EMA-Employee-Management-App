@@ -3,7 +3,6 @@ import { v } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageEmployees,
-  getAuthenticatedUserProfile,
 } from "../lib/permissions";
 
 /**
