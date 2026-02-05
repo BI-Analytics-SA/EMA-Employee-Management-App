@@ -1,0 +1,77 @@
+{
+  "body8": {
+    "container": "form1"
+  },
+  "datePicker3": {
+    "container": "body8",
+    "row": 19
+  },
+  "datePicker4": {
+    "container": "body8",
+    "row": 24
+  },
+  "form1": {
+    "height": 0,
+    "width": 0
+  },
+  "formButton9": {
+    "container": "form1"
+  },
+  "formTitle8": {
+    "container": "form1",
+    "height": 0,
+    "width": 0
+  },
+  "numberInput8": {
+    "container": "body8",
+    "row": 69
+  },
+  "selDeptGroup_Cont2": {
+    "container": "body8",
+    "row": 49
+  },
+  "selShiftAlloc_Cont2": {
+    "container": "body8",
+    "row": 59
+  },
+  "selShift_Cont2": {
+    "container": "body8",
+    "row": 54
+  },
+  "selTraining_Cont2": {
+    "container": "body8",
+    "row": 44
+  },
+  "select2": {
+    "container": "body8",
+    "row": 29
+  },
+  "signature2": {
+    "container": "body8",
+    "row": 64
+  },
+  "textInput83": {
+    "container": "body8",
+    "row": 9
+  },
+  "textInput84": {
+    "container": "body8",
+    "row": 14
+  },
+  "textInput85": {
+    "container": "body8",
+    "row": 34
+  },
+  "textInput86": {
+    "container": "body8",
+    "row": 39
+  },
+  "textInput87": {
+    "container": "body8",
+    "row": 69
+  },
+  "textInput88": {
+    "container": "body8",
+    "row": 69
+  }
+}

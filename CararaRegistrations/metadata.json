@@ -1,0 +1,165 @@
+{
+  "toolscriptVersion": "1.0.0",
+  "version": "43.0.9",
+  "pageUuid": "9d4bea56-7a33-11ef-8b4a-7b87c4bfafe1",
+  "appTemplate": {
+    "mobileAppSettings": {
+      "object": {
+        "displaySetting": {
+          "object": {
+            "landscapeMode": false,
+            "tabletMode": true
+          }
+        },
+        "mobileOfflineModeBannerMode": "default",
+        "mobileOfflineModeDelaySync": false,
+        "mobileOfflineModeEnabled": false,
+        "mobileMultiscreenV2Enabled": false
+      }
+    },
+    "pageCodeFolders": {
+      "object": {
+        "captureImageScreen": {
+          "array": []
+        },
+        "AllFiles": {
+          "array": []
+        },
+        "AddImageURL": {
+          "array": []
+        },
+        "addImageURL": {
+          "array": []
+        },
+        "uploadImage": {
+          "array": []
+        },
+        "s3UploadImage": {
+          "array": []
+        },
+        "CheckEmpURL": {
+          "array": []
+        },
+        "btnDeleteImage": {
+          "array": []
+        },
+        "btnCaptureImage": {
+          "array": []
+        },
+        "DeleteImageS3": {
+          "array": []
+        },
+        "s3DeleteImage": {
+          "array": []
+        },
+        "deleteImageURL": {
+          "array": []
+        },
+        "deleteImage": {
+          "array": []
+        },
+        "addImage": {
+          "array": []
+        },
+        "formScreen": {
+          "array": []
+        },
+        "submitEmplDetails": {
+          "array": []
+        },
+        "employeeDetails": {
+          "array": []
+        },
+        "Shift": {
+          "array": []
+        },
+        "formScreen2Screen": {
+          "array": []
+        },
+        "submitForm2": {
+          "array": []
+        },
+        "selectShift": {
+          "array": []
+        },
+        "switchShift": {
+          "array": []
+        },
+        "datePickerDateOfBirth": {
+          "array": []
+        },
+        "submitEmplDetailsDev": {
+          "array": []
+        },
+        "emplDetails": {
+          "array": []
+        },
+        "datePicker_DateRegistered": {
+          "array": []
+        },
+        "selectTitle": {
+          "array": []
+        },
+        "datePickerDateOf": {
+          "array": []
+        },
+        "selectGender": {
+          "array": []
+        },
+        "selectEthnicGroup": {
+          "array": []
+        },
+        "selectDepartmentWorked": {
+          "array": []
+        },
+        "selectDeptGroup": {
+          "array": []
+        },
+        "selectResSuburb": {
+          "array": []
+        },
+        "selectResCity": {
+          "array": []
+        },
+        "selectResPostCode": {
+          "array": []
+        },
+        "datePickerDateRegistered": {
+          "array": []
+        },
+        "emplDetails2": {
+          "array": []
+        },
+        "addEmpl": {
+          "array": []
+        },
+        "addEmplScreen": {
+          "array": []
+        },
+        "deleteEmplDetails": {
+          "array": []
+        },
+        "listOfContracts": {
+          "array": []
+        },
+        "newContractScreen": {
+          "array": []
+        },
+        "Medical_Questionnaire": {
+          "array": []
+        },
+        "New_Medical_Quest": {
+          "array": []
+        },
+        "Edit_Medical_Quest": {
+          "array": []
+        }
+      }
+    },
+    "rootScreen": "tabscreen",
+    "isFetching": true,
+    "isMobileApp": true,
+    "version": "3.281.0",
+    "multiScreenMobileApp": true
+  }
+}

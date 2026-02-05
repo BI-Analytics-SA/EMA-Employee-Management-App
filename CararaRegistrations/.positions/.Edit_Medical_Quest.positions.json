@@ -1,0 +1,140 @@
+{
+  "Blood_Pressure2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Diabetes2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Empl_Details_FK2": {
+    "container": "body10",
+    "row": 1,
+    "height": 1,
+    "width": 12
+  },
+  "Empl_Sig_FileName_Edit": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Empl_Sig_URL_Edit": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "HepatitusA2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "HepatitusB2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Illness_Last_two_Years2": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Illness_Last_two_Years_Detail2": {
+    "container": "body10",
+    "row": 2,
+    "height": 1,
+    "width": 12
+  },
+  "Long_Term2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Long_Term_Detail2": {
+    "container": "body10",
+    "row": 4,
+    "height": 1,
+    "width": 12
+  },
+  "Notes2": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Nurse_Sig_FileName_Edit": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Nurse_Sig_URL_Edit": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "On_Treatment_Now2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Reason_Cant_Complete2": {
+    "container": "body10",
+    "row": 5,
+    "height": 1,
+    "width": 12
+  },
+  "Treated_TB2": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "Treated_TB_Detail2": {
+    "container": "body10",
+    "row": 3,
+    "height": 1,
+    "width": 12
+  },
+  "body10": {
+    "container": "formComponent7",
+    "height": 0,
+    "width": 0
+  },
+  "formButton11": {
+    "container": "formComponent7",
+    "height": 0,
+    "width": 0
+  },
+  "formComponent7": {
+    "height": 0,
+    "width": 0
+  },
+  "formTitle10": {
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "signature5": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "signature6": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  },
+  "spacer2": {
+    "type": "stack",
+    "container": "body10",
+    "height": 0,
+    "width": 0
+  }
+}

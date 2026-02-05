@@ -1,0 +1,14 @@
+{
+  "btnCaptureImage": {},
+  "btnDeleteImage": {},
+  "btnMedical": {
+    "type": "stack",
+    "height": 0,
+    "width": 0
+  },
+  "button6": {},
+  "button7": {},
+  "image1": {},
+  "keyValue1": {},
+  "spacer1": {}
+}

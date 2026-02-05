@@ -1,0 +1,11 @@
+{
+  "button4": {},
+  "collectionView1": {},
+  "container7": {},
+  "scanner1": {
+    "container": "container7"
+  },
+  "textInput1": {
+    "container": "container7"
+  }
+}

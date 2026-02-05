@@ -1,0 +1,140 @@
+{
+  "Blood_Pressure": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Diabetes": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Empl_Details_FK": {
+    "container": "body9",
+    "row": 1,
+    "height": 1,
+    "width": 12
+  },
+  "Empl_Signature_FileName": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Empl_Signature_URL": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "HepatitusA": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "HepatitusB": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Illness_Last_two_Years": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Illness_Last_two_Years_Detail": {
+    "container": "body9",
+    "row": 2,
+    "height": 1,
+    "width": 12
+  },
+  "Long_Term": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Long_Term_Detail": {
+    "container": "body9",
+    "row": 4,
+    "height": 1,
+    "width": 12
+  },
+  "Notes": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Nurse_Signature_FileName": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Nurse_Signature_URL": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "On_Treatment_Now": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Reason_Cant_Complete": {
+    "container": "body9",
+    "row": 5,
+    "height": 1,
+    "width": 12
+  },
+  "Treated_TB": {
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "Treated_TB_Detail": {
+    "container": "body9",
+    "row": 3,
+    "height": 1,
+    "width": 12
+  },
+  "body9": {
+    "container": "formComponent6",
+    "height": 0,
+    "width": 0
+  },
+  "formButton10": {
+    "container": "formComponent6",
+    "height": 0,
+    "width": 0
+  },
+  "formComponent6": {
+    "height": 0,
+    "width": 0
+  },
+  "formTitle9": {
+    "container": "formComponent6",
+    "height": 0,
+    "width": 0
+  },
+  "signature3": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "signature4": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  },
+  "spacer4": {
+    "type": "stack",
+    "container": "body9",
+    "height": 0,
+    "width": 0
+  }
+}
