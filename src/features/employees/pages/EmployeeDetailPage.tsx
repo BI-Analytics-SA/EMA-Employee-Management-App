@@ -3,7 +3,8 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, FileText, Stethoscope, Trash2, User } from "lucide-react";
+import { Loader2, Pencil, Camera, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
+import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { timestampToDateString } from "@/lib/validations/employee";
 import { useState } from "react";
@@ -44,6 +45,10 @@ export function EmployeeDetailPage() {
   const employee = useQuery(
     api.employees.queries.getById,
     employeeId ? { id: employeeId } : "skip"
+  );
+  const documents = useQuery(
+    api.documents.queries.listByEmployee,
+    employeeId ? { employeeId } : "skip"
   );
   const removeMutation = useMutation(api.employees.mutations.remove);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -147,6 +152,12 @@ export function EmployeeDetailPage() {
                 Medical
               </Button>
             </Link>
+            <Link to={`/employees/${employee._id}/documents`}>
+              <Button variant="outline" size="sm">
+                <FileStack className="h-4 w-4 mr-1" />
+                Documents
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
@@ -205,6 +216,33 @@ export function EmployeeDetailPage() {
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Date registered" value={timestampToDateString(employee.dateRegistered)} />
             <InfoRow label="Date engaged" value={timestampToDateString(employee.dateEngaged)} />
+          </div>
+        </section>
+
+        {/* Documents */}
+        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[260px] sm:flex-1`}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Documents</h3>
+          </div>
+          <div className={`${sectionContentClass} space-y-2`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-muted-foreground">
+                {documents === undefined ? "…" : documents.length} document{documents?.length !== 1 ? "s" : ""}
+              </span>
+              {documents && documents.length > 0 && (() => {
+                const hasExpiring = documents.some(
+                  (d) => d.expiryDate != null && getExpiryStatus(d.expiryDate, 30) !== "valid" && getExpiryStatus(d.expiryDate, 30) !== "none"
+                );
+                return hasExpiring ? (
+                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Some expiring soon</span>
+                ) : null;
+              })()}
+            </div>
+            <Link to={`/employees/${employee._id}/documents`}>
+              <Button variant="link" size="sm" className="h-auto p-0 text-primary">
+                View documents
+              </Button>
+            </Link>
           </div>
         </section>
       </div>

@@ -17,6 +17,16 @@ export default defineSchema({
         suburbs: v.array(v.string()),
         cities: v.array(v.string()),
         postCodes: v.array(v.string()),
+        documentTypes: v.optional(
+          v.array(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+              requiresExpiry: v.boolean(),
+              color: v.optional(v.string()),
+            })
+          )
+        ),
       })
     ),
     createdAt: v.number(),
@@ -168,6 +178,33 @@ export default defineSchema({
     .index("by_organization", ["organizationId"])
     .index("by_employee", ["employeeId"])
     .index("by_organization_employee", ["organizationId", "employeeId"]),
+
+  // Employee Documents
+  employeeDocuments: defineTable({
+    organizationId: v.id("organizations"),
+    employeeId: v.id("employees"),
+
+    documentType: v.string(),
+
+    storageId: v.id("_storage"),
+    fileUrl: v.string(),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSizeBytes: v.number(),
+
+    title: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    issuedBy: v.optional(v.string()),
+    issuedDate: v.optional(v.number()),
+    expiryDate: v.optional(v.number()),
+
+    createdAt: v.number(),
+    createdBy: v.id("userProfiles"),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_employee", ["employeeId"])
+    .index("by_organization_employee", ["organizationId", "employeeId"])
+    .index("by_organization_expiry", ["organizationId", "expiryDate"]),
 
   // Medical Questionnaires
   medicalQuestionnaires: defineTable({

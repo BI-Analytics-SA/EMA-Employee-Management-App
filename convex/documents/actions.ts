@@ -1,0 +1,15 @@
+import { mutation } from "../_generated/server";
+import { v } from "convex/values";
+import { getAuthenticatedUserProfile } from "../lib/permissions";
+
+/**
+ * Generate a signed upload URL for document upload.
+ * Caller must be authenticated.
+ */
+export const generateDocumentUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await getAuthenticatedUserProfile(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});

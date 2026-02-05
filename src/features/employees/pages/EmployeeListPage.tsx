@@ -6,13 +6,15 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, UserPlus, Search } from "lucide-react";
+import { BarcodeScanner } from "@/components/shared/BarcodeScanner";
+import { Loader2, UserPlus, Search, QrCode } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 
 export function EmployeeListPage() {
   const { organizationId, isLoading: userLoading } = useCurrentUser();
   const [searchId, setSearchId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.employees.queries.list,
@@ -61,14 +63,23 @@ export function EmployeeListPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Input
               placeholder="Enter ID number (13 digits)"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchId)}
               maxLength={13}
+              className="min-w-[180px] flex-1"
             />
+            <Button
+              variant="outline"
+              onClick={() => setScannerOpen(true)}
+              title="Scan for ID number"
+            >
+              <QrCode className="h-4 w-4 mr-2" />
+              Scan
+            </Button>
             <Button
               variant="secondary"
               onClick={() => setSearchQuery(searchId)}
@@ -89,6 +100,17 @@ export function EmployeeListPage() {
           </div>
         </CardContent>
       </Card>
+
+      <BarcodeScanner
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onDetected={(code) => {
+          const trimmed = code.trim();
+          setSearchId(trimmed);
+          setSearchQuery(trimmed);
+          setScannerOpen(false);
+        }}
+      />
 
       <Card>
         <CardContent className="p-0">

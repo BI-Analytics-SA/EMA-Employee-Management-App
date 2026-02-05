@@ -9,6 +9,10 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as documents_actions from "../documents/actions.js";
+import type * as documents_mutations from "../documents/mutations.js";
+import type * as documents_queries from "../documents/queries.js";
+import type * as employees_actions from "../employees/actions.js";
 import type * as employees_mutations from "../employees/mutations.js";
 import type * as employees_queries from "../employees/queries.js";
 import type * as http from "../http.js";
@@ -31,6 +35,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "documents/actions": typeof documents_actions;
+  "documents/mutations": typeof documents_mutations;
+  "documents/queries": typeof documents_queries;
+  "employees/actions": typeof employees_actions;
   "employees/mutations": typeof employees_mutations;
   "employees/queries": typeof employees_queries;
   http: typeof http;

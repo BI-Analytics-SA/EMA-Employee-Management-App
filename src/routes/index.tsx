@@ -17,6 +17,11 @@ import { EmployeeListPage } from "@/features/employees/pages/EmployeeListPage";
 import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPage";
 import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
 import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
+import { CaptureImagePage } from "@/features/employees/pages/CaptureImagePage";
+import { EmployeeDocumentsPage } from "@/features/employees/pages/EmployeeDocumentsPage";
+import { DocumentUploadPage } from "@/features/employees/pages/DocumentUploadPage";
+import { ExpiringDocumentsPage } from "@/features/documents/pages/ExpiringDocumentsPage";
+import { DocumentTypesPage } from "@/features/settings/DocumentTypesPage";
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -26,8 +31,6 @@ function PlaceholderPage({ title }: { title: string }) {
     </div>
   );
 }
-
-const CaptureImagePage = () => <PlaceholderPage title="Capture Image" />;
 
 // Contract Pages
 const ContractListPage = () => <PlaceholderPage title="Contracts" />;
@@ -74,6 +77,14 @@ export const router = createBrowserRouter([
             element: <TeamPage />,
           },
           {
+            path: "settings/document-types",
+            element: <DocumentTypesPage />,
+          },
+          {
+            path: "documents/expiring",
+            element: <ExpiringDocumentsPage />,
+          },
+          {
             path: "employees",
             children: [
               {
@@ -95,6 +106,19 @@ export const router = createBrowserRouter([
               {
                 path: ":id/capture",
                 element: <CaptureImagePage />,
+              },
+              {
+                path: ":id/documents",
+                children: [
+                  {
+                    index: true,
+                    element: <EmployeeDocumentsPage />,
+                  },
+                  {
+                    path: "upload",
+                    element: <DocumentUploadPage />,
+                  },
+                ],
               },
               {
                 path: ":id/contracts",

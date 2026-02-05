@@ -1,4 +1,4 @@
-import { Menu, LogOut, Users, Home, UserPlus } from "lucide-react";
+import { Menu, LogOut, Users, Home, UserPlus, FileStack, AlertTriangle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -24,7 +24,13 @@ export function Header({ title = "Employee Management", onMenuClick }: HeaderPro
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Employees", href: "/employees", icon: Users },
-    ...(isAdmin ? [{ label: "Team", href: "/settings/team", icon: UserPlus }] : []),
+    { label: "Expiring", href: "/documents/expiring", icon: AlertTriangle },
+    ...(isAdmin
+      ? [
+          { label: "Team", href: "/settings/team", icon: UserPlus },
+          { label: "Doc Types", href: "/settings/document-types", icon: FileStack },
+        ]
+      : []),
   ];
 
   return (

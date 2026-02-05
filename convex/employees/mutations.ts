@@ -178,6 +178,10 @@ export const remove = mutation({
       throw new Error("Access denied: You cannot delete employees");
     }
 
+    if (employee.imageStorageId) {
+      await ctx.storage.delete(employee.imageStorageId);
+    }
+
     await ctx.db.delete(args.id);
     return args.id;
   },

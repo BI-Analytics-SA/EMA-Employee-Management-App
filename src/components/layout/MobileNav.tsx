@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Users, Home, UserPlus } from "lucide-react";
+import { Users, Home, UserPlus, FileStack, Settings, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -17,6 +17,11 @@ export function MobileNav() {
       href: "/employees",
       icon: Users,
     },
+    {
+      label: "Expiring",
+      href: "/documents/expiring",
+      icon: AlertTriangle,
+    },
     // Only show Team/Invites for admins
     ...(isAdmin
       ? [
@@ -24,6 +29,11 @@ export function MobileNav() {
             label: "Team",
             href: "/settings/team",
             icon: UserPlus,
+          },
+          {
+            label: "Doc Types",
+            href: "/settings/document-types",
+            icon: FileStack,
           },
         ]
       : []),
