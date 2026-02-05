@@ -2,12 +2,16 @@
 
 This app uses **two Convex deployments** (dev and production) and **Netlify branch deploys** (dev and main).
 
+Convex Deploy Methods at the bottom
+
 ## Convex deployments
 
-| Environment | Deployment        | URL |
-|-------------|-------------------|-----|
-| Dev         | resilient-lemming-288 | https://resilient-lemming-288.convex.cloud |
-| Production  | energized-squirrel-967 | https://energized-squirrel-967.convex.cloud |
+
+| Environment | Deployment             | URL                                                                                        |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| Dev         | resilient-lemming-288  | [https://resilient-lemming-288.convex.cloud](https://resilient-lemming-288.convex.cloud)   |
+| Production  | energized-squirrel-967 | [https://energized-squirrel-967.convex.cloud](https://energized-squirrel-967.convex.cloud) |
+
 
 ---
 
@@ -21,19 +25,23 @@ In **Netlify Dashboard** → your site → **Site settings** → **Environment v
 
 Add these for **Production** context (or scope to branch `main`):
 
-| Variable | Value |
-|----------|-------|
-| `VITE_CONVEX_URL` | `https://energized-squirrel-967.convex.cloud` |
-| `VITE_CONVEX_SITE_URL` | `https://energized-squirrel-967.convex.site` |
+
+| Variable               | Value                                         |
+| ---------------------- | --------------------------------------------- |
+| `VITE_CONVEX_URL`      | `https://energized-squirrel-967.convex.cloud` |
+| `VITE_CONVEX_SITE_URL` | `https://energized-squirrel-967.convex.site`  |
+
 
 #### Branch deploys (dev branch)
 
 Add the same variable names for **Branch deploys** (or scope to branch `dev`) with **dev** Convex URLs:
 
-| Variable | Value |
-|----------|-------|
-| `VITE_CONVEX_URL` | `https://resilient-lemming-288.convex.cloud` |
-| `VITE_CONVEX_SITE_URL` | `https://resilient-lemming-288.convex.site` |
+
+| Variable               | Value                                        |
+| ---------------------- | -------------------------------------------- |
+| `VITE_CONVEX_URL`      | `https://resilient-lemming-288.convex.cloud` |
+| `VITE_CONVEX_SITE_URL` | `https://resilient-lemming-288.convex.site`  |
+
 
 ### 2. Branch deploys
 
@@ -73,12 +81,12 @@ VITE_CONVEX_SITE_URL=https://resilient-lemming-288.convex.site
 Convex production is **not** deployed on git push. Deploy when you’re ready:
 
 1. **Preview changes**
-   ```bash
+  ```bash
    npx convex deploy --dry-run
-   ```
+  ```
 2. **Deploy**
-   ```bash
+  ```bash
    npx convex deploy -y
-   ```
+  ```
 
 Deploy **before** merging to main when you add new functions or schema; deploy **after** when removing functions.
