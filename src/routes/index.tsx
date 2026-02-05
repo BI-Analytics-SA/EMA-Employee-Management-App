@@ -12,8 +12,11 @@ import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
 // Settings Pages
 import { TeamPage } from "@/features/settings/TeamPage";
 
-// Pages (will be created later)
-// For now, we'll use placeholder components
+// Employee Pages
+import { EmployeeListPage } from "@/features/employees/pages/EmployeeListPage";
+import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPage";
+import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
+import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -24,11 +27,6 @@ function PlaceholderPage({ title }: { title: string }) {
   );
 }
 
-// Employee Pages
-const EmployeeListPage = () => <PlaceholderPage title="Employees" />;
-const EmployeeDetailPage = () => <PlaceholderPage title="Employee Details" />;
-const AddEmployeePage = () => <PlaceholderPage title="Add Employee" />;
-const EditEmployeePage = () => <PlaceholderPage title="Edit Employee" />;
 const CaptureImagePage = () => <PlaceholderPage title="Capture Image" />;
 
 // Contract Pages

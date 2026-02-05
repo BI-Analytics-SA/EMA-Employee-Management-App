@@ -9,11 +9,14 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as employees_mutations from "../employees/mutations.js";
+import type * as employees_queries from "../employees/queries.js";
 import type * as http from "../http.js";
 import type * as invites_actions from "../invites/actions.js";
 import type * as invites_mutations from "../invites/mutations.js";
 import type * as invites_queries from "../invites/queries.js";
 import type * as lib_permissions from "../lib/permissions.js";
+import type * as migrations_stripEmployeeFields from "../migrations/stripEmployeeFields.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
 import type * as organizations_queries from "../organizations/queries.js";
 import type * as userProfiles_mutations from "../userProfiles/mutations.js";
@@ -28,11 +31,14 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "employees/mutations": typeof employees_mutations;
+  "employees/queries": typeof employees_queries;
   http: typeof http;
   "invites/actions": typeof invites_actions;
   "invites/mutations": typeof invites_mutations;
   "invites/queries": typeof invites_queries;
   "lib/permissions": typeof lib_permissions;
+  "migrations/stripEmployeeFields": typeof migrations_stripEmployeeFields;
   "organizations/mutations": typeof organizations_mutations;
   "organizations/queries": typeof organizations_queries;
   "userProfiles/mutations": typeof userProfiles_mutations;

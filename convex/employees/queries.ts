@@ -1,0 +1,88 @@
+import { query } from "../_generated/server";
+import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
+import { requireOrganizationAccess } from "../lib/permissions";
+
+/**
+ * List employees for the current user's organization with pagination
+ */
+export const list = query({
+  args: {
+    organizationId: v.id("organizations"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+
+    return await ctx.db
+      .query("employees")
+      .withIndex("by_organization_createdAt", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+  },
+});
+
+/**
+ * Get a single employee by ID (must belong to user's organization)
+ */
+export const getById = query({
+  args: { id: v.id("employees") },
+  handler: async (ctx, args) => {
+    const employee = await ctx.db.get(args.id);
+    if (!employee) {
+      return null;
+    }
+    await requireOrganizationAccess(ctx, employee.organizationId);
+    return employee;
+  },
+});
+
+/**
+ * Search employees by ID number (exact or prefix) within the organization
+ * Uses the search index for ID number lookup
+ */
+export const searchByIdNumber = query({
+  args: {
+    organizationId: v.id("organizations"),
+    idNumber: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+
+    const trimmed = args.idNumber.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const results = await ctx.db
+      .query("employees")
+      .withSearchIndex("search_employee", (q) =>
+        q.search("idNumber", trimmed).eq("organizationId", args.organizationId)
+      )
+      .take(20);
+
+    return results;
+  },
+});
+
+/**
+ * Get employee by organization and ID number (exact match, for lookup)
+ */
+export const getByOrganizationAndIdNumber = query({
+  args: {
+    organizationId: v.id("organizations"),
+    idNumber: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+
+    return await ctx.db
+      .query("employees")
+      .withIndex("by_organization_idNumber", (q) =>
+        q.eq("organizationId", args.organizationId).eq("idNumber", args.idNumber)
+      )
+      .unique();
+  },
+});

@@ -93,7 +93,6 @@ employees: defineTable({
 
   // Contact
   cellNumber: v.string(),
-  alternativeNumber: v.optional(v.string()),
 
   // Address
   resStreetNo: v.string(),
@@ -102,16 +101,11 @@ employees: defineTable({
   resCity: v.string(),
   resPostCode: v.string(),
 
-  // Work Info
-  departmentWorked: v.optional(v.string()),
-  deptGroup: v.optional(v.string()),
-  shift: v.optional(v.string()),
-  shiftAlloc: v.optional(v.string()),
-  training: v.optional(v.boolean()),
-
-  // Dates
+  // Status & Dates
   dateRegistered: v.optional(v.number()),
   dateEngaged: v.optional(v.number()),
+  taxNumber: v.optional(v.string()),
+  certificate: v.optional(v.string()),
 
   // Image (Convex file storage)
   imageStorageId: v.optional(v.id("_storage")),
@@ -287,32 +281,32 @@ EMA - Employee Management App/
 
 ## Implementation Phases
 
-### Phase 1: Project Foundation (2-3 days)
-- [ ] Initialize Vite + React + TypeScript
-- [ ] Configure TailwindCSS
-- [ ] Install Shadcn/ui components
-- [ ] Set up Convex project
-- [ ] Configure Convex Auth
-- [ ] Create base schema (organizations, users)
-- [ ] Set up React Router
-- [ ] Create layout components (AppShell, MobileNav)
+### Phase 1: Project Foundation (2-3 days) ✅
+- [x] Initialize Vite + React + TypeScript
+- [x] Configure TailwindCSS
+- [x] Install Shadcn/ui components
+- [x] Set up Convex project
+- [x] Configure Convex Auth
+- [x] Create base schema (organizations, users)
+- [x] Set up React Router
+- [x] Create layout components (AppShell, MobileNav)
 
-### Phase 2: Authentication & Multi-tenancy (3-4 days)
-- [ ] Implement Convex Auth (email/password)
-- [ ] Create login/signup pages
-- [ ] Organization selection/creation flow
-- [ ] Role-based permissions system
-- [ ] Protected route wrapper
-- [ ] User session management
+### Phase 2: Authentication & Multi-tenancy (3-4 days) ✅
+- [x] Implement Convex Auth (email/password)
+- [x] Create login/signup pages
+- [x] Organization selection/creation flow
+- [x] Role-based permissions system
+- [x] Protected route wrapper
+- [x] User session management
 
-### Phase 3: Employee CRUD & Search (4-5 days)
-- [ ] Employee schema with all fields
-- [ ] List query with pagination
-- [ ] Search by ID number
-- [ ] EmployeeList component
-- [ ] EmployeeForm (React Hook Form + Zod)
-- [ ] Add/Edit/Delete mutations
-- [ ] Employee details view
+### Phase 3: Employee CRUD & Search (4-5 days) ✅
+- [x] Employee schema with all fields
+- [x] List query with pagination
+- [x] Search by ID number
+- [x] EmployeeList component
+- [x] EmployeeForm (React Hook Form + Zod)
+- [x] Add/Edit/Delete mutations
+- [x] Employee details view
 
 ### Phase 4: Barcode/QR Scanner (2 days)
 - [ ] Integrate html5-qrcode library
@@ -402,6 +396,46 @@ Native HTML5 Canvas - no external dependencies, full touch support
 
 ### Form Validation
 Zod schema for 13-digit SA ID validation, required fields, etc.
+
+---
+
+## UI/UX Design Standards
+
+### Layout Philosophy
+Use **flex-wrap responsive layouts** that adapt dynamically to screen width. Sections flow horizontally until they can't fit, then wrap to the next row. This maximizes screen real estate on large displays while remaining mobile-friendly.
+
+### Section Cards
+All form sections and detail cards use consistent styling:
+```tsx
+// Section container classes
+const sectionClass = "rounded-lg border bg-card overflow-hidden";
+const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionTitleClass = "text-sm font-semibold text-foreground";
+const sectionContentClass = "p-3";
+
+// Card sizing for flex-wrap
+className={`${sectionClass} w-full sm:w-auto sm:min-w-[Xpx] sm:flex-1`}
+```
+
+### Form Fields
+- **Inputs:** Height `h-9` for compact forms
+- **Labels:** Text size `text-xs` for density
+- **Field wrappers:** Use flex with min-widths:
+  - Standard fields: `min-w-[100px] flex-1`
+  - Date fields: `min-w-[160px] flex-1` (calendar icon needs space)
+  - Wide fields: `min-w-[140px] flex-1`
+  - Narrow fields: `min-w-[70px] flex-1 max-w-[100px]`
+
+### Detail Pages (Dashboard Style)
+1. **Header card:** Photo placeholder + name/summary + action buttons
+2. **Info cards grid:** Flex-wrap sections below the header
+3. Use `InfoRow` pattern for consistent label/value display
+
+### Key Patterns
+- Container: `flex flex-wrap gap-3` for section grids
+- Inner fields: `flex flex-wrap gap-2` within sections
+- Mobile-first: `w-full` then `sm:w-auto sm:flex-1` for responsive
+- Prominent headers: `bg-muted/70` background with border
 
 ---
 

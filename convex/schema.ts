@@ -107,7 +107,6 @@ export default defineSchema({
 
     // Contact
     cellNumber: v.string(),
-    alternativeNumber: v.optional(v.string()),
 
     // Address
     resStreetNo: v.string(),
@@ -116,17 +115,9 @@ export default defineSchema({
     resCity: v.string(),
     resPostCode: v.string(),
 
-    // Work Info
-    departmentWorked: v.optional(v.string()),
-    deptGroup: v.optional(v.string()),
-    shift: v.optional(v.string()),
-    shiftAlloc: v.optional(v.string()),
-    training: v.optional(v.boolean()),
-
     // Status & Dates
     dateRegistered: v.optional(v.number()),
     dateEngaged: v.optional(v.number()),
-    lastDateWorked: v.optional(v.number()),
     taxNumber: v.optional(v.string()),
     certificate: v.optional(v.string()),
 
@@ -139,6 +130,8 @@ export default defineSchema({
     createdBy: v.optional(v.id("userProfiles")),
   })
     .index("by_organization", ["organizationId"])
+    .index("by_createdAt", ["createdAt"])
+    .index("by_organization_createdAt", ["organizationId", "createdAt"])
     .index("by_organization_idNumber", ["organizationId", "idNumber"])
     .index("by_organization_registered", ["organizationId", "dateRegistered"])
     .searchIndex("search_employee", {
