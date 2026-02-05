@@ -1,8 +1,11 @@
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Users, Home, UserPlus } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   title?: string;
@@ -12,10 +15,17 @@ interface HeaderProps {
 export function Header({ title = "Employee Management", onMenuClick }: HeaderProps) {
   const { signOut } = useAuth();
   const currentUser = useQuery(api.users.queries.getCurrentUser);
+  const { isAdmin } = useCurrentUser();
 
   const handleSignOut = async () => {
     await signOut();
   };
+
+  const navItems = [
+    { label: "Home", href: "/", icon: Home },
+    { label: "Employees", href: "/employees", icon: Users },
+    ...(isAdmin ? [{ label: "Team", href: "/settings/team", icon: UserPlus }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,9 +40,33 @@ export function Header({ title = "Employee Management", onMenuClick }: HeaderPro
           <span className="sr-only">Toggle menu</span>
         </Button>
 
-        <div className="flex-1 ml-2 md:ml-0">
+        <div className="ml-2 md:ml-0">
           <h1 className="text-lg font-semibold truncate">{title}</h1>
         </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1 ml-8">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              end={item.href === "/"}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )
+              }
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex-1" />
 
         <div className="flex items-center gap-2">
           {currentUser?.email && (

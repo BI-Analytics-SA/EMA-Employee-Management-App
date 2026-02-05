@@ -1,23 +1,34 @@
 import { NavLink } from "react-router-dom";
-import { Users, Home } from "lucide-react";
+import { Users, Home, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  {
-    label: "Home",
-    href: "/",
-    icon: Home,
-  },
-  {
-    label: "Employees",
-    href: "/employees",
-    icon: Users,
-  },
-  // Note: Contracts and Medical are accessed per-employee, not globally
-  // These are here as examples but may be removed later
-];
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export function MobileNav() {
+  const { isAdmin } = useCurrentUser();
+
+  const navItems = [
+    {
+      label: "Home",
+      href: "/",
+      icon: Home,
+    },
+    {
+      label: "Employees",
+      href: "/employees",
+      icon: Users,
+    },
+    // Only show Team/Invites for admins
+    ...(isAdmin
+      ? [
+          {
+            label: "Team",
+            href: "/settings/team",
+            icon: UserPlus,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
       <div className="flex h-16 items-center justify-around px-4">

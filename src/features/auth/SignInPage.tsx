@@ -1,7 +1,8 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useConvexAuth, useQuery } from "convex/react";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, UserPlus } from "lucide-react";
 
 /**
  * Parse Convex Auth errors into user-friendly messages
@@ -85,17 +86,49 @@ export function SignInPage() {
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const navigate = useNavigate();
-  const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
+  const [searchParams] = useSearchParams();
+  
+  // Get redirect URL and extract invite code if present
+  const redirectUrl = searchParams.get("redirect");
+  const inviteCode = useMemo(() => {
+    if (redirectUrl) {
+      try {
+        const url = new URL(redirectUrl, window.location.origin);
+        return url.searchParams.get("invite");
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }, [redirectUrl]);
+
+  // Query invite details if we have an invite code
+  const inviteDetails = useQuery(
+    api.invites.queries.getByCode,
+    inviteCode ? { code: inviteCode } : "skip"
+  );
+
+  // Default to sign-up flow if coming from an invite
+  const [flow, setFlow] = useState<"signIn" | "signUp">(inviteCode ? "signUp" : "signIn");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Redirect to home if already authenticated
+  // Update flow when invite code is detected
+  useEffect(() => {
+    if (inviteCode && flow === "signIn") {
+      setFlow("signUp");
+    }
+  }, [inviteCode, flow]);
+
+  // Redirect after authentication
   useEffect(() => {
     if (isAuthenticated && !isAuthLoading) {
-      navigate("/", { replace: true });
+      // Redirect to original destination or home
+      const destination = redirectUrl || "/";
+      navigate(destination, { replace: true });
     }
-  }, [isAuthenticated, isAuthLoading, navigate]);
+  }, [isAuthenticated, isAuthLoading, navigate, redirectUrl]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -146,9 +179,29 @@ export function SignInPage() {
           <CardDescription>
             {flow === "signIn"
               ? "Sign in to your Employee Management account"
+              : inviteDetails
+              ? "Create an account to join the team"
               : "Create a new account to get started"}
           </CardDescription>
         </CardHeader>
+
+        {/* Invite banner */}
+        {inviteDetails && flow === "signUp" && (
+          <div className="mx-6 mb-2 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="flex items-start gap-3">
+              <UserPlus className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-foreground">
+                  You've been invited to join {inviteDetails.organizationName}
+                </p>
+                <p className="text-muted-foreground mt-1">
+                  Create an account to accept your invitation as a{" "}
+                  <span className="font-medium">{inviteDetails.role}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -169,7 +222,15 @@ export function SignInPage() {
                 required
                 autoComplete="email"
                 disabled={isLoading}
+                defaultValue={inviteDetails?.email || ""}
+                readOnly={!!inviteDetails?.email && flow === "signUp"}
+                className={inviteDetails?.email && flow === "signUp" ? "bg-muted" : ""}
               />
+              {inviteDetails?.email && flow === "signUp" && (
+                <p className="text-xs text-muted-foreground">
+                  This invite is restricted to this email address
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

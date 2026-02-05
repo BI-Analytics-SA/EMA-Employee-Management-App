@@ -22,6 +22,42 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
 
+  // Invites (for inviting users to organizations)
+  invites: defineTable({
+    organizationId: v.id("organizations"),
+    // Unique invite code (URL-safe string)
+    code: v.string(),
+    // Email of the invited user (optional - can be open invite)
+    email: v.optional(v.string()),
+    // Role to assign when invite is used
+    role: v.union(
+      v.literal("admin"),
+      v.literal("manager"),
+      v.literal("nurse"),
+      v.literal("user")
+    ),
+    // Invite status
+    status: v.union(
+      v.literal("pending"),
+      v.literal("used"),
+      v.literal("revoked"),
+      v.literal("expired")
+    ),
+    // Expiry timestamp (optional - null means no expiry)
+    expiresAt: v.optional(v.number()),
+    // Who used this invite
+    usedBy: v.optional(v.id("userProfiles")),
+    usedAt: v.optional(v.number()),
+    // Email tracking
+    emailSentAt: v.optional(v.number()),
+    // Metadata
+    createdAt: v.number(),
+    createdBy: v.id("userProfiles"),
+  })
+    .index("by_code", ["code"])
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_status", ["organizationId", "status"]),
+
   // User Profiles (App-specific user data, links to auth users table)
   userProfiles: defineTable({
     // Link to the auth-managed users table

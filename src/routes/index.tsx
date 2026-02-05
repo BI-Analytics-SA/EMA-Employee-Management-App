@@ -3,9 +3,14 @@ import { createBrowserRouter } from "react-router-dom";
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { RequireProfile } from "@/components/auth/RequireProfile";
 
 // Auth Pages
 import { SignInPage } from "@/features/auth/SignInPage";
+import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
+
+// Settings Pages
+import { TeamPage } from "@/features/settings/TeamPage";
 
 // Pages (will be created later)
 // For now, we'll use placeholder components
@@ -41,15 +46,34 @@ export const router = createBrowserRouter([
     element: <SignInPage />,
   },
   {
+    // Onboarding - requires auth but not profile
+    path: "/onboarding",
+    element: <ProtectedRoute />,
+    children: [
+      {
+        index: true,
+        element: <OnboardingPage />,
+      },
+    ],
+  },
+  {
+    // Main app - requires auth AND profile
     path: "/",
     element: <ProtectedRoute />,
     children: [
       {
-        element: <AppShell />,
+        element: <RequireProfile />,
         children: [
+          {
+            element: <AppShell />,
+            children: [
           {
             index: true,
             element: <EmployeeListPage />,
+          },
+          {
+            path: "settings/team",
+            element: <TeamPage />,
           },
           {
             path: "employees",
@@ -106,6 +130,8 @@ export const router = createBrowserRouter([
               },
             ],
           },
+        ],
+      },
         ],
       },
     ],
