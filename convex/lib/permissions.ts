@@ -4,6 +4,25 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export type Role = "admin" | "manager" | "nurse" | "user";
 
+export type ModuleName = "contracts" | "medical";
+
+/**
+ * Require that the given module is enabled for the organization.
+ * Call before any contract or medical query/mutation.
+ */
+export async function requireModuleEnabled(
+  ctx: QueryCtx | MutationCtx,
+  organizationId: Id<"organizations">,
+  moduleName: ModuleName
+): Promise<void> {
+  const org = await ctx.db.get(organizationId);
+  if (!org) throw new Error("Organization not found");
+  const enabled = org.settings?.enabledModules?.[moduleName];
+  if (!enabled) {
+    throw new Error(`Module "${moduleName}" is not enabled for this organization`);
+  }
+}
+
 /**
  * Get the authenticated user's ID from Convex Auth
  */

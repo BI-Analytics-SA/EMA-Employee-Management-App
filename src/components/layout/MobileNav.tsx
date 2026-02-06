@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Users, Home, UserPlus, FileStack, AlertTriangle } from "lucide-react";
+import { Users, Home, UserPlus, FileStack, AlertTriangle, Layers, FileText, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -34,6 +34,21 @@ export function MobileNav() {
             label: "Doc Types",
             href: "/settings/document-types",
             icon: FileStack,
+          },
+          {
+            label: "Modules",
+            href: "/settings/modules",
+            icon: Layers,
+          },
+          {
+            label: "Contract template",
+            href: "/settings/contract-template",
+            icon: FileText,
+          },
+          {
+            label: "Export config",
+            href: "/settings/export-config",
+            icon: FileDown,
           },
         ]
       : []),

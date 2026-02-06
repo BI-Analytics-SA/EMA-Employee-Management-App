@@ -18,11 +18,17 @@ import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPag
 import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
 import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
 import { CaptureImagePage } from "@/features/employees/pages/CaptureImagePage";
+import { SignatureDemoPage } from "@/features/employees/pages/SignatureDemoPage";
 import { EmployeeDocumentsPage } from "@/features/employees/pages/EmployeeDocumentsPage";
 import { DocumentUploadPage } from "@/features/employees/pages/DocumentUploadPage";
 import { ExpiringDocumentsPage } from "@/features/documents/pages/ExpiringDocumentsPage";
 import { DocumentTypesPage } from "@/features/settings/DocumentTypesPage";
-
+import { ModulesPage } from "@/features/settings/ModulesPage";
+import { ContractListPage } from "@/features/employees/pages/ContractListPage";
+import { NewContractPage } from "@/features/employees/pages/NewContractPage";
+import { ContractDetailPage } from "@/features/employees/pages/ContractDetailPage";
+import { ContractTemplatePage } from "@/features/settings/ContractTemplatePage";
+import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="p-4">
@@ -31,10 +37,6 @@ function PlaceholderPage({ title }: { title: string }) {
     </div>
   );
 }
-
-// Contract Pages
-const ContractListPage = () => <PlaceholderPage title="Contracts" />;
-const NewContractPage = () => <PlaceholderPage title="New Contract" />;
 
 // Medical Pages
 const MedicalStatusPage = () => <PlaceholderPage title="Medical Questionnaire" />;
@@ -81,6 +83,18 @@ export const router = createBrowserRouter([
             element: <DocumentTypesPage />,
           },
           {
+            path: "settings/modules",
+            element: <ModulesPage />,
+          },
+          {
+            path: "settings/contract-template",
+            element: <ContractTemplatePage />,
+          },
+          {
+            path: "settings/export-config",
+            element: <ExportConfigPage />,
+          },
+          {
             path: "documents/expiring",
             element: <ExpiringDocumentsPage />,
           },
@@ -108,6 +122,10 @@ export const router = createBrowserRouter([
                 element: <CaptureImagePage />,
               },
               {
+                path: ":id/signature-demo",
+                element: <SignatureDemoPage />,
+              },
+              {
                 path: ":id/documents",
                 children: [
                   {
@@ -130,6 +148,10 @@ export const router = createBrowserRouter([
                   {
                     path: "new",
                     element: <NewContractPage />,
+                  },
+                  {
+                    path: ":contractId",
+                    element: <ContractDetailPage />,
                   },
                 ],
               },

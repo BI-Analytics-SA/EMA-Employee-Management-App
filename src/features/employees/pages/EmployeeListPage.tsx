@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarcodeScanner } from "@/components/shared/BarcodeScanner";
+import { ExportButton } from "@/features/employees/components/ExportButton";
 import { Loader2, UserPlus, Search, QrCode } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 
@@ -47,12 +48,15 @@ export function EmployeeListPage() {
     <div className="p-4 space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Employees</h1>
-        <Link to="/employees/new">
-          <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Employee
-          </Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportButton />
+          <Link to="/employees/new">
+            <Button>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Employee
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>

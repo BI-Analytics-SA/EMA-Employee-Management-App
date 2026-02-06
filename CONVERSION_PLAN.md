@@ -314,39 +314,46 @@ EMA - Employee Management App/
 - [x] Camera permission handling
 - [x] Integration with search
 
-### Phase 5: Image Capture & Storage (3 days)
-- [ ] ImageCapture component (camera API)
-- [ ] Convex file upload action
-- [ ] Image compression
-- [ ] Delete image functionality
+### Phase 5: Image Capture & Storage (3 days) ✅
+- [x] ImageCapture component (camera API)
+- [x] Convex file upload action
+- [x] Image compression
+- [x] Delete image functionality
 
-### Phase 6: Signature Capture (2-3 days)
-- [ ] SignatureCapture canvas component
-- [ ] Touch/mouse event handling
-- [ ] PNG conversion and upload
-- [ ] Clear/reset functionality
+### Phase 6: Signature Capture (2-3 days) ✅
+- [x] SignatureCapture canvas component
+- [x] Touch/mouse event handling
+- [x] PNG conversion and upload
+- [x] Clear/reset functionality
 
-### Phase 7: Contracts Module (3-4 days)
-- [ ] Contracts schema
-- [ ] Contract list by employee
-- [ ] Contract form with signature
-- [ ] Create contract mutation
+### Phase 7: Contracts Module (3-4 days) ✅
+- [x] Contracts schema
+- [x] Contract list by employee
+- [x] Contract form with signature
+- [x] Create contract mutation
 
-### Phase 8: Medical Questionnaire (3-4 days)
+### Phase 8: Medical Questionnaire (3-4 days) ⏭️ *Optional — deferred to a later stage*
 - [ ] Medical questionnaire schema
 - [ ] Status check query
 - [ ] Form with conditional fields
 - [ ] Dual signature capture (employee + nurse)
 - [ ] Create/Edit mutations
 
-### Phase 9: Mobile Optimization & PWA (2-3 days)
+### Phase 9: Employee Details Export to Excel (2-3 days) ✅
+- [x] Export config in organization settings (column definitions, renames, custom fields)
+- [x] Settings page for column management (drag-and-drop reorder, rename, add custom, data types)
+- [x] listAll employee query for export
+- [x] Export to Excel button on Employee List page
+- [x] Client-side xlsx generation with configurable columns and default values
+
+### Phase 10: Mobile Optimization & PWA (2-3 days)
 - [ ] Touch-friendly form optimization
 - [ ] Pull-to-refresh
 - [ ] PWA manifest
 - [ ] Service worker
 - [ ] Loading states and skeletons
 
-### Phase 10: Testing & Deployment (2-3 days)
+### Phase 11: Testing & Deployment (2-3 days)
 - [ ] Unit tests for validations
 - [ ] Integration tests for Convex functions
 - [ ] Manual flow testing

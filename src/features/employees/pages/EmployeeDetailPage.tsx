@@ -2,8 +2,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
+import { Loader2, Pencil, Camera, PenLine, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { timestampToDateString } from "@/lib/validations/employee";
@@ -51,6 +52,8 @@ export function EmployeeDetailPage() {
     employeeId ? { employeeId } : "skip"
   );
   const removeMutation = useMutation(api.employees.mutations.remove);
+  const contractsEnabled = useModuleEnabled("contracts");
+  const medicalEnabled = useModuleEnabled("medical");
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -140,18 +143,28 @@ export function EmployeeDetailPage() {
                 Photo
               </Button>
             </Link>
-            <Link to={`/employees/${employee._id}/contracts`}>
-              <Button variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-1" />
-                Contracts
+            <Link to={`/employees/${employee._id}/signature-demo`}>
+              <Button variant="outline" size="sm" title="Demo – test signature capture">
+                <PenLine className="h-4 w-4 mr-1" />
+                Test Signature
               </Button>
             </Link>
-            <Link to={`/employees/${employee._id}/medical`}>
-              <Button variant="outline" size="sm">
-                <Stethoscope className="h-4 w-4 mr-1" />
-                Medical
-              </Button>
-            </Link>
+            {contractsEnabled && (
+              <Link to={`/employees/${employee._id}/contracts`}>
+                <Button variant="outline" size="sm">
+                  <FileText className="h-4 w-4 mr-1" />
+                  Contracts
+                </Button>
+              </Link>
+            )}
+            {medicalEnabled && (
+              <Link to={`/employees/${employee._id}/medical`}>
+                <Button variant="outline" size="sm">
+                  <Stethoscope className="h-4 w-4 mr-1" />
+                  Medical
+                </Button>
+              </Link>
+            )}
             <Link to={`/employees/${employee._id}/documents`}>
               <Button variant="outline" size="sm">
                 <FileStack className="h-4 w-4 mr-1" />

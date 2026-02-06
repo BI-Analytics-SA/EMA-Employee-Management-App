@@ -25,6 +25,26 @@ export const list = query({
 });
 
 /**
+ * List all employees for an organization (unpaginated). For Excel export.
+ */
+export const listAll = query({
+  args: {
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+
+    return await ctx.db
+      .query("employees")
+      .withIndex("by_organization_createdAt", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
+/**
  * Get a single employee by ID (must belong to user's organization)
  */
 export const getById = query({

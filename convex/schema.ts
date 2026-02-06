@@ -27,6 +27,37 @@ export default defineSchema({
             })
           )
         ),
+        enabledModules: v.optional(
+          v.object({
+            contracts: v.optional(v.boolean()),
+            medical: v.optional(v.boolean()),
+          })
+        ),
+        contractTemplate: v.optional(
+          v.object({
+            companyName: v.optional(v.string()),
+            contractHeading: v.optional(v.string()),
+            contractCategory: v.optional(v.string()),
+            defaultTermsAndConditions: v.optional(v.string()),
+            employerSignatureStorageId: v.optional(v.id("_storage")),
+            employerSignatureUrl: v.optional(v.string()),
+          })
+        ),
+        exportConfig: v.optional(
+          v.object({
+            columns: v.array(
+              v.object({
+                id: v.string(),
+                source: v.union(v.literal("database"), v.literal("custom")),
+                dbField: v.optional(v.string()),
+                label: v.string(),
+                dataType: v.union(v.literal("text"), v.literal("number"), v.literal("date")),
+                defaultValue: v.optional(v.string()),
+                enabled: v.boolean(),
+              })
+            ),
+          })
+        ),
       })
     ),
     createdAt: v.number(),
@@ -158,19 +189,22 @@ export default defineSchema({
     idNumber: v.string(),
     signedDate: v.number(),
     startDate: v.number(),
-    season: v.string(),
-    bootsAmount: v.string(),
     employeeNo: v.string(),
-
-    training: v.boolean(),
-    deptGroup: v.string(),
-    shift: v.string(),
-    shiftAlloc: v.string(),
     dateEngaged: v.optional(v.number()),
+    contractHeading: v.optional(v.string()),
+    contractCategory: v.optional(v.string()),
+    placeOfSignature: v.optional(v.string()),
 
     // Signature (Convex file storage)
     signatureStorageId: v.optional(v.id("_storage")),
     signatureUrl: v.optional(v.string()),
+
+    // Rich text content (HTML from TipTap)
+    termsAndConditionsHtml: v.optional(v.string()),
+
+    // Generated PDF (Convex file storage)
+    pdfStorageId: v.optional(v.id("_storage")),
+    pdfUrl: v.optional(v.string()),
 
     createdAt: v.number(),
     createdBy: v.optional(v.id("userProfiles")),
