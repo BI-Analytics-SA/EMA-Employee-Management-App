@@ -92,10 +92,8 @@ export function EmployeeForm({
   });
 
   const selectClass = cn(
-    "flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   );
-
-  const inputClass = "h-8";
 
   // Section card styling - prominent header with background
   const sectionClass = "rounded-lg border bg-card overflow-hidden";
@@ -127,7 +125,6 @@ export function EmployeeForm({
                   {...form.register("idNumber")}
                   placeholder="9001015001087"
                   maxLength={13}
-                  className={inputClass}
                 />
                 {form.formState.errors.idNumber && (
                   <p className="text-xs text-destructive">{form.formState.errors.idNumber.message}</p>
@@ -135,7 +132,7 @@ export function EmployeeForm({
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="employeeNo" className="text-xs">Employee No</Label>
-                <Input id="employeeNo" {...form.register("employeeNo")} className={inputClass} />
+                <Input id="employeeNo" {...form.register("employeeNo")} />
               </div>
             </div>
           </div>
@@ -150,35 +147,35 @@ export function EmployeeForm({
             <div className="flex flex-wrap gap-2">
               <div className={narrowFieldClass}>
                 <Label htmlFor="resStreetNo" className="text-xs">Street No</Label>
-                <Input id="resStreetNo" {...form.register("resStreetNo")} className={inputClass} />
+                <Input id="resStreetNo" {...form.register("resStreetNo")} />
                 {form.formState.errors.resStreetNo && (
                   <p className="text-xs text-destructive">{form.formState.errors.resStreetNo.message}</p>
                 )}
               </div>
               <div className="space-y-1 min-w-[180px] flex-[2]">
                 <Label htmlFor="resStreetName" className="text-xs">Street Name</Label>
-                <Input id="resStreetName" {...form.register("resStreetName")} className={inputClass} />
+                <Input id="resStreetName" {...form.register("resStreetName")} />
                 {form.formState.errors.resStreetName && (
                   <p className="text-xs text-destructive">{form.formState.errors.resStreetName.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="resSuburb" className="text-xs">Suburb</Label>
-                <Input id="resSuburb" {...form.register("resSuburb")} className={inputClass} />
+                <Input id="resSuburb" {...form.register("resSuburb")} />
                 {form.formState.errors.resSuburb && (
                   <p className="text-xs text-destructive">{form.formState.errors.resSuburb.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="resCity" className="text-xs">City</Label>
-                <Input id="resCity" {...form.register("resCity")} className={inputClass} />
+                <Input id="resCity" {...form.register("resCity")} />
                 {form.formState.errors.resCity && (
                   <p className="text-xs text-destructive">{form.formState.errors.resCity.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="resPostCode" className="text-xs">Postal Code</Label>
-                <Input id="resPostCode" {...form.register("resPostCode")} className={inputClass} />
+                <Input id="resPostCode" {...form.register("resPostCode")} />
                 {form.formState.errors.resPostCode && (
                   <p className="text-xs text-destructive">{form.formState.errors.resPostCode.message}</p>
                 )}
@@ -196,7 +193,7 @@ export function EmployeeForm({
             <div className="flex flex-wrap gap-2">
               <div className={wideFieldClass}>
                 <Label htmlFor="cellNumber" className="text-xs">Cell Number</Label>
-                <Input id="cellNumber" {...form.register("cellNumber")} className={inputClass} />
+                <Input id="cellNumber" {...form.register("cellNumber")} />
                 {form.formState.errors.cellNumber && (
                   <p className="text-xs text-destructive">{form.formState.errors.cellNumber.message}</p>
                 )}
@@ -222,39 +219,39 @@ export function EmployeeForm({
               </div>
               <div className={narrowFieldClass}>
                 <Label htmlFor="initials" className="text-xs">Initials</Label>
-                <Input id="initials" {...form.register("initials")} className={inputClass} />
+                <Input id="initials" {...form.register("initials")} />
                 {form.formState.errors.initials && (
                   <p className="text-xs text-destructive">{form.formState.errors.initials.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="firstName" className="text-xs">First Name</Label>
-                <Input id="firstName" {...form.register("firstName")} className={inputClass} />
+                <Input id="firstName" {...form.register("firstName")} />
                 {form.formState.errors.firstName && (
                   <p className="text-xs text-destructive">{form.formState.errors.firstName.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="secondName" className="text-xs">Second Name</Label>
-                <Input id="secondName" {...form.register("secondName")} className={inputClass} />
+                <Input id="secondName" {...form.register("secondName")} />
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="lastName" className="text-xs">Last Name</Label>
-                <Input id="lastName" {...form.register("lastName")} className={inputClass} />
+                <Input id="lastName" {...form.register("lastName")} />
                 {form.formState.errors.lastName && (
                   <p className="text-xs text-destructive">{form.formState.errors.lastName.message}</p>
                 )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="knownAs" className="text-xs">Known As</Label>
-                <Input id="knownAs" {...form.register("knownAs")} className={inputClass} />
+                <Input id="knownAs" {...form.register("knownAs")} />
                 {form.formState.errors.knownAs && (
                   <p className="text-xs text-destructive">{form.formState.errors.knownAs.message}</p>
                 )}
               </div>
               <div className={dateFieldClass}>
                 <Label htmlFor="dateOfBirth" className="text-xs">Date of Birth</Label>
-                <Input id="dateOfBirth" type="date" {...form.register("dateOfBirth")} className={inputClass} />
+                <Input id="dateOfBirth" type="date" {...form.register("dateOfBirth")} />
                 {form.formState.errors.dateOfBirth && (
                   <p className="text-xs text-destructive">{form.formState.errors.dateOfBirth.message}</p>
                 )}
@@ -288,19 +285,19 @@ export function EmployeeForm({
             <div className="flex flex-wrap gap-2">
               <div className={fieldClass}>
                 <Label htmlFor="taxNumber" className="text-xs">Tax Number</Label>
-                <Input id="taxNumber" {...form.register("taxNumber")} className={inputClass} />
+                <Input id="taxNumber" {...form.register("taxNumber")} />
               </div>
               <div className={dateFieldClass}>
                 <Label htmlFor="dateRegistered" className="text-xs">Date Registered</Label>
-                <Input id="dateRegistered" type="date" {...form.register("dateRegistered")} className={inputClass} />
+                <Input id="dateRegistered" type="date" {...form.register("dateRegistered")} />
               </div>
               <div className={dateFieldClass}>
                 <Label htmlFor="dateEngaged" className="text-xs">Date Engaged</Label>
-                <Input id="dateEngaged" type="date" {...form.register("dateEngaged")} className={inputClass} />
+                <Input id="dateEngaged" type="date" {...form.register("dateEngaged")} />
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="certificate" className="text-xs">Certificate</Label>
-                <Input id="certificate" {...form.register("certificate")} className={inputClass} />
+                <Input id="certificate" {...form.register("certificate")} />
               </div>
             </div>
           </div>

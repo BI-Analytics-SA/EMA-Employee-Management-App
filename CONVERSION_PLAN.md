@@ -346,12 +346,12 @@ EMA - Employee Management App/
 - [x] Export to Excel button on Employee List page
 - [x] Client-side xlsx generation with configurable columns and default values
 
-### Phase 10: Mobile Optimization & PWA (2-3 days)
-- [ ] Touch-friendly form optimization
-- [ ] Pull-to-refresh
-- [ ] PWA manifest
-- [ ] Service worker
-- [ ] Loading states and skeletons
+### Phase 10: Mobile Optimization & PWA (2-3 days) ✅
+- [x] Touch-friendly form optimization
+- [x] Pull-to-refresh
+- [x] PWA manifest
+- [x] Service worker
+- [x] Loading states and skeletons
 
 ### Phase 11: Testing & Deployment (2-3 days)
 - [ ] Unit tests for validations
@@ -360,7 +360,50 @@ EMA - Employee Management App/
 - [ ] Netlify deployment config
 - [ ] Documentation
 
-**Total Estimated Duration: 26-34 days**
+### Phase 12: *(Reserved)*
+
+### Phase 13: Design Specification & Visual Overhaul (5-7 days)
+
+#### 13.1 — Design Specification Document
+- [ ] Create `DESIGN_SPEC.md` with full visual language definition
+- [ ] Define colour palette (primary, secondary, accent, neutrals, semantic colours)
+- [ ] Define typography scale (font families, sizes, weights, line-heights for mobile & desktop)
+- [ ] Define spacing & sizing tokens (padding, margins, border-radius, elevation/shadow)
+- [ ] Define iconography style and icon set (e.g. Lucide, Phosphor)
+- [ ] Document component-level design tokens (buttons, inputs, cards, modals, toasts, etc.)
+
+#### 13.2 — Reference & Inspiration
+- [ ] Collect comparison screenshots of current app state (mobile + desktop)
+- [ ] Curate list of reference websites/apps to mimic (with links and notes on what to borrow)
+- [ ] Create annotated mockups or side-by-side comparisons showing current vs. target design
+- [ ] Document specific UI patterns to adopt (e.g. bottom sheets, floating action buttons, card layouts)
+
+#### 13.3 — Mobile Field Sizing & Text Overflow Audit
+- [ ] Audit all form fields for minimum touch-target sizes (48×48 dp recommended)
+- [ ] Audit all input fields for minimum width so labels and values are never truncated
+- [ ] Audit all table/list cells for text overflow — ensure ellipsis or wrapping, no clipping
+- [ ] Audit select/dropdown fields on mobile — verify readability of options
+- [ ] Audit button text and icon spacing on small screens (≤ 360px width)
+- [ ] Document minimum field widths per field type and enforce via Tailwind utilities / CSS variables
+- [ ] Test on real devices or emulators (iPhone SE, Galaxy S8, Pixel 5) and capture evidence
+
+#### 13.4 — Global UI Refresh
+- [ ] Update Tailwind theme config (`tailwind.config.js`) with new design tokens
+- [ ] Update Shadcn/ui theme (CSS variables in `globals.css`) to match spec
+- [ ] Refine AppShell / Header / MobileNav with improved visual hierarchy and polish
+- [ ] Update all form components to match new sizing and spacing standards
+- [ ] Update all card / section components for consistent look across pages
+- [ ] Improve empty states, error states, and loading skeletons
+
+#### 13.5 — Home / Landing Page Redesign
+- [ ] Design a dashboard-style landing page (post-login) with at-a-glance stats and quick actions
+- [ ] Add welcome message with user name / role
+- [ ] Add summary cards (total employees, recent registrations, pending contracts, etc.)
+- [ ] Add quick-action buttons (New Employee, Scan Barcode, Export, etc.)
+- [ ] Add recent activity feed or timeline
+- [ ] Ensure landing page is responsive and looks great on mobile and desktop
+
+**Total Estimated Duration: 33-44 days**
 
 ---
 

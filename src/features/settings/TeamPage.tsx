@@ -420,7 +420,7 @@ export function TeamPage() {
                               <select
                                 value={member.role}
                                 onChange={(e) => handleUpdateRole(member._id, e.target.value as Role)}
-                                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                                className="h-11 rounded-md border border-input bg-background px-3 py-2 text-sm"
                               >
                                 {ROLE_OPTIONS.map((r) => (
                                   <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -471,7 +471,7 @@ export function TeamPage() {
                         id="role"
                         value={newInviteRole}
                         onChange={(e) => setNewInviteRole(e.target.value as Role)}
-                        className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        className="w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm"
                         disabled={isSubmitting}
                       >
                         <option value="user">User - Can manage employees</option>
@@ -486,7 +486,7 @@ export function TeamPage() {
                         id="expires"
                         value={expiresInDays ?? "never"}
                         onChange={(e) => setExpiresInDays(e.target.value === "never" ? undefined : Number(e.target.value))}
-                        className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        className="w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm"
                         disabled={isSubmitting}
                       >
                         <option value="1">1 day</option>

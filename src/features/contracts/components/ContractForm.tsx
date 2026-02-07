@@ -51,7 +51,6 @@ const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-3";
 const fieldClass = "space-y-1 min-w-[100px] flex-1";
 const dateFieldClass = "space-y-1 min-w-[160px] flex-1";
-const inputClass = "h-8";
 
 export const ContractForm = forwardRef<ContractFormHandle, Props>(function ContractForm({
   defaultValues,
@@ -317,7 +316,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   <Input
                     id="nameSurname"
                     {...form.register("nameSurname")}
-                    className={inputClass}
                   />
                   {form.formState.errors.nameSurname && (
                     <p className="text-xs text-destructive">{form.formState.errors.nameSurname.message}</p>
@@ -325,14 +323,14 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                 </div>
                 <div className={fieldClass}>
                   <Label htmlFor="idNumber" className="text-xs">ID Number</Label>
-                  <Input id="idNumber" {...form.register("idNumber")} className={inputClass} />
+                  <Input id="idNumber" {...form.register("idNumber")} />
                   {form.formState.errors.idNumber && (
                     <p className="text-xs text-destructive">{form.formState.errors.idNumber.message}</p>
                   )}
                 </div>
                 <div className={fieldClass}>
                   <Label htmlFor="employeeNo" className="text-xs">Employee No</Label>
-                  <Input id="employeeNo" {...form.register("employeeNo")} className={inputClass} />
+                  <Input id="employeeNo" {...form.register("employeeNo")} />
                   {form.formState.errors.employeeNo && (
                     <p className="text-xs text-destructive">{form.formState.errors.employeeNo.message}</p>
                   )}
@@ -343,7 +341,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     id="signedDate"
                     type="date"
                     {...form.register("signedDate")}
-                    className={inputClass}
                   />
                   {form.formState.errors.signedDate && (
                     <p className="text-xs text-destructive">{form.formState.errors.signedDate.message}</p>
@@ -355,7 +352,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     id="startDate"
                     type="date"
                     {...form.register("startDate")}
-                    className={inputClass}
                   />
                   {form.formState.errors.startDate && (
                     <p className="text-xs text-destructive">{form.formState.errors.startDate.message}</p>
@@ -367,7 +363,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     id="dateEngaged"
                     type="date"
                     {...form.register("dateEngaged")}
-                    className={inputClass}
                   />
                 </div>
                 <div className={cn(fieldClass, "min-w-[200px]")}>
@@ -375,7 +370,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   <Input
                     id="contractHeading"
                     {...form.register("contractHeading")}
-                    className={inputClass}
                     placeholder="e.g. Co-Employment"
                   />
                 </div>
@@ -384,7 +378,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   <Input
                     id="contractCategory"
                     {...form.register("contractCategory")}
-                    className={inputClass}
                     placeholder="e.g. Limited Duration Contract Form"
                   />
                 </div>
@@ -393,7 +386,6 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   <Input
                     id="placeOfSignature"
                     {...form.register("placeOfSignature")}
-                    className={inputClass}
                     placeholder="e.g. East London"
                   />
                 </div>
