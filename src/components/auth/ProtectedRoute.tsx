@@ -14,7 +14,7 @@ export function ProtectedRoute() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-10 w-10 animate-spin text-accent" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>

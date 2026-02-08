@@ -1,6 +1,6 @@
 import { useCurrentUser } from "./useCurrentUser";
 
-export type ModuleName = "contracts" | "medical";
+export type ModuleName = "contracts" | "medical" | "documents" | "exporting";
 
 /**
  * Returns whether the given add-on module is enabled for the current user's organization.

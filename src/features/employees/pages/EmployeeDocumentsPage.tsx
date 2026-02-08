@@ -12,9 +12,9 @@ import { useState } from "react";
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
-const sectionContentClass = "p-3";
+const sectionContentClass = "p-4";
 
 export function EmployeeDocumentsPage() {
   const { id } = useParams<{ id: string }>();
@@ -76,7 +76,7 @@ export function EmployeeDocumentsPage() {
   const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <Link to={`/employees/${employeeId}`}>
@@ -85,7 +85,7 @@ export function EmployeeDocumentsPage() {
               Back
             </Button>
           </Link>
-          <h1 className="text-xl font-bold truncate">{displayName}</h1>
+          <h1 className="text-2xl font-bold truncate">{displayName}</h1>
         </div>
         <Link to={`/employees/${employeeId}/documents/upload`}>
           <Button size="sm">

@@ -129,7 +129,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-10 w-10"
             onClick={() => {
               const scanner = scannerRef.current;
               if (scanner?.isScanning) {

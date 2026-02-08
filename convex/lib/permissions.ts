@@ -2,7 +2,7 @@ import { QueryCtx, MutationCtx } from "../_generated/server";
 import { Id, Doc } from "../_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-export type Role = "admin" | "manager" | "nurse" | "user";
+export type Role = "admin" | "manager" | "user";
 
 export type ModuleName = "contracts" | "medical";
 
@@ -90,13 +90,12 @@ export async function requireOrganizationAccess(
 
 /**
  * Check if a user has a minimum required role
- * Role hierarchy: admin > manager > nurse > user
+ * Role hierarchy: admin > manager > user
  */
 export function hasMinimumRole(userRole: Role, requiredRole: Role): boolean {
   const roleHierarchy: Record<Role, number> = {
-    admin: 4,
-    manager: 3,
-    nurse: 2,
+    admin: 3,
+    manager: 2,
     user: 1,
   };
 
@@ -148,13 +147,6 @@ export function canManageUsers(role: Role): boolean {
  */
 export function canManageContracts(role: Role): boolean {
   return hasMinimumRole(role, "manager");
-}
-
-/**
- * Check if user can create/edit medical questionnaires (nurse+)
- */
-export function canManageMedical(role: Role): boolean {
-  return hasMinimumRole(role, "nurse");
 }
 
 /**

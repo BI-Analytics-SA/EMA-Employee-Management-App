@@ -6,9 +6,10 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
   side?: "left" | "right";
+  className?: string;
 }
 
-export function Sheet({ open, onOpenChange, children, side = "left" }: SheetProps) {
+export function Sheet({ open, onOpenChange, children, side = "left", className }: SheetProps) {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -40,9 +41,10 @@ export function Sheet({ open, onOpenChange, children, side = "left" }: SheetProp
       />
       <div
         className={cn(
-          "fixed top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-background shadow-lg transition-transform duration-200 ease-out",
+          "fixed top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-background shadow-lg transition-transform duration-200 ease-out overflow-y-auto",
           side === "left" ? "left-0" : "right-0",
-          side === "left" ? (mounted ? "translate-x-0" : "-translate-x-full") : (mounted ? "translate-x-0" : "translate-x-full")
+          side === "left" ? (mounted ? "translate-x-0" : "-translate-x-full") : (mounted ? "translate-x-0" : "translate-x-full"),
+          className
         )}
         role="dialog"
         aria-modal="true"

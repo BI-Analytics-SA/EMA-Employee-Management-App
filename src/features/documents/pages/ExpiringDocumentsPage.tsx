@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, ExternalLink } from "lucide-react";
 import { ExpiryBadge, formatExpiryDate } from "@/components/shared/ExpiryBadge";
@@ -12,6 +13,7 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 
 export function ExpiringDocumentsPage() {
   const { isLoading: userLoading } = useCurrentUser();
+  const documentsEnabled = useModuleEnabled("documents");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization);
   const [daysFilter, setDaysFilter] = useState<30 | 60 | 90>(90);
   const [viewingDoc, setViewingDoc] = useState<{
@@ -37,6 +39,14 @@ export function ExpiringDocumentsPage() {
     );
   }
 
+  if (!documentsEnabled) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">The Documents module is not enabled for your organization.</p>
+      </div>
+    );
+  }
+
   if (!organization) {
     return (
       <div className="p-4">
@@ -46,9 +56,9 @@ export function ExpiringDocumentsPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Expiring documents</h1>
+        <h1 className="text-2xl font-bold">Expiring documents</h1>
         <div className="flex gap-2">
           {([30, 60, 90] as const).map((d) => (
             <Button
@@ -64,12 +74,12 @@ export function ExpiringDocumentsPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-3 py-2 border-b">
+        <div className="bg-muted/70 px-4 py-3 border-b">
           <h2 className="text-sm font-semibold">
             Documents expiring in the next {daysFilter} days (or already expired)
           </h2>
         </div>
-        <div className="p-3">
+        <div className="p-4">
           {expiring === undefined ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

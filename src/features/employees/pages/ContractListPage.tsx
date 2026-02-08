@@ -72,7 +72,7 @@ export function ContractListPage() {
   const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between gap-2">
         <Link to={`/employees/${employeeId}`}>
           <Button variant="ghost" size="sm">
@@ -80,7 +80,7 @@ export function ContractListPage() {
             Back
           </Button>
         </Link>
-        <h1 className="text-xl font-bold truncate">{displayName}</h1>
+        <h1 className="text-2xl font-bold truncate">{displayName}</h1>
         {canManageContracts ? (
           <Link to={`/employees/${employeeId}/contracts/new`}>
             <Button size="sm">
@@ -94,10 +94,10 @@ export function ContractListPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-3 py-2 border-b">
+        <div className="bg-muted/70 px-4 py-3 border-b">
           <h2 className="text-sm font-semibold">Contracts</h2>
         </div>
-        <div className="p-3">
+        <div className="p-4">
           {contracts.length === 0 ? (
             <p className="text-muted-foreground text-sm">No contracts yet.</p>
           ) : (
@@ -121,7 +121,7 @@ export function ContractListPage() {
                       </p>
                     </div>
                     {c.pdfUrl ? (
-                      <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5" title="PDF generated">
+                      <span className="text-xs text-success flex items-center gap-0.5" title="PDF generated">
                         <FileCheck className="h-3.5 w-3.5" /> PDF
                       </span>
                     ) : (
@@ -130,7 +130,7 @@ export function ContractListPage() {
                     {c.signatureUrl ? (
                       <span className="text-xs text-muted-foreground">Signed</span>
                     ) : (
-                      <span className="text-xs text-amber-600 dark:text-amber-400">No signature</span>
+                      <span className="text-xs text-warning">No signature</span>
                     )}
                   </Link>
                   {canManageContracts && (

@@ -46,9 +46,9 @@ export type ContractFormHandle = {
 };
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
-const sectionContentClass = "p-3";
+const sectionContentClass = "p-4";
 const fieldClass = "space-y-1 min-w-[100px] flex-1";
 const dateFieldClass = "space-y-1 min-w-[160px] flex-1";
 

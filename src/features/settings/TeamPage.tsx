@@ -32,16 +32,15 @@ import {
 } from "lucide-react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-type Role = "admin" | "manager" | "nurse" | "user";
+type Role = "admin" | "manager" | "user";
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",
   manager: "Manager",
-  nurse: "Nurse",
   user: "User",
 };
 
-const ROLE_OPTIONS: Role[] = ["admin", "manager", "nurse", "user"];
+const ROLE_OPTIONS: Role[] = ["admin", "manager", "user"];
 
 const STATUS_ICONS = {
   pending: Clock,
@@ -51,10 +50,10 @@ const STATUS_ICONS = {
 };
 
 const STATUS_COLORS = {
-  pending: "text-yellow-600 bg-yellow-50",
-  used: "text-green-600 bg-green-50",
-  revoked: "text-red-600 bg-red-50",
-  expired: "text-gray-600 bg-gray-50",
+  pending: "text-warning-foreground bg-warning/15",
+  used: "text-success bg-success/15",
+  revoked: "text-destructive bg-destructive/15",
+  expired: "text-muted-foreground bg-muted",
 };
 
 function formatLastLogin(ts: number | undefined): string {
@@ -250,7 +249,7 @@ export function TeamPage() {
       <div className="p-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-6">
-            <AlertCircle className="h-5 w-5 text-yellow-500" />
+            <AlertCircle className="h-5 w-5 text-warning" />
             <p>Only administrators can manage the team.</p>
           </CardContent>
         </Card>
@@ -259,7 +258,7 @@ export function TeamPage() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Team</h1>
@@ -304,17 +303,17 @@ export function TeamPage() {
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 p-3 text-sm bg-red-50 border border-red-200 rounded-md">
-          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <span className="text-red-700">{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto text-red-500 hover:text-red-700">×</button>
+        <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <span className="text-destructive">{error}</span>
+          <button onClick={() => setError(null)} className="ml-auto text-destructive hover:text-destructive/80">×</button>
         </div>
       )}
       {success && (
-        <div className="flex items-start gap-3 p-3 text-sm bg-green-50 border border-green-200 rounded-md">
-          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-          <span className="text-green-700">{success}</span>
-          <button onClick={() => setSuccess(null)} className="ml-auto text-green-500 hover:text-green-700">×</button>
+        <div className="flex items-start gap-3 p-3 text-sm bg-success/10 border border-success/30 rounded-lg">
+          <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
+          <span className="text-success">{success}</span>
+          <button onClick={() => setSuccess(null)} className="ml-auto text-success hover:text-success/80">×</button>
         </div>
       )}
 
@@ -400,16 +399,15 @@ export function TeamPage() {
                             Last login: {formatLastLogin(member.lastLoginAt)}
                           </div>
                         </div>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          member.role === "admin" ? "bg-purple-100 text-purple-800" :
-                          member.role === "manager" ? "bg-blue-100 text-blue-800" :
-                          member.role === "nurse" ? "bg-green-100 text-green-800" :
-                          "bg-gray-100 text-gray-800"
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          member.role === "admin" ? "bg-primary/15 text-primary" :
+                          member.role === "manager" ? "bg-accent/15 text-accent" :
+                          "bg-muted text-muted-foreground"
                         }`}>
                           {ROLE_LABELS[member.role as Role]}
                         </span>
                         {isDeactivated && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600">Inactive</span>
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive">Inactive</span>
                         )}
                       </div>
 
@@ -427,7 +425,7 @@ export function TeamPage() {
                                 ))}
                               </select>
                               {member.isActive ? (
-                                <Button variant="outline" size="sm" onClick={() => handleDeactivate(member._id, member.name)} className="text-amber-600">
+                                <Button variant="outline" size="sm" onClick={() => handleDeactivate(member._id, member.name)} className="text-warning">
                                   <UserX className="h-4 w-4 mr-1" />
                                   Deactivate
                                 </Button>
@@ -437,7 +435,7 @@ export function TeamPage() {
                                   Reactivate
                                 </Button>
                               )}
-                              <Button variant="outline" size="sm" onClick={() => handleDeleteClick(member._id, member.name)} className="text-red-600 hover:text-red-700">
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteClick(member._id, member.name)} className="text-destructive hover:text-destructive/80">
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
                               </Button>
@@ -475,7 +473,6 @@ export function TeamPage() {
                         disabled={isSubmitting}
                       >
                         <option value="user">User - Can manage employees</option>
-                        <option value="nurse">Nurse - Can manage medical records</option>
                         <option value="manager">Manager - Can manage contracts</option>
                         <option value="admin">Admin - Full access</option>
                       </select>
@@ -577,10 +574,10 @@ export function TeamPage() {
                             <div className="text-muted-foreground text-xs mt-1 flex flex-wrap items-center gap-x-1">
                               {invite.email && <span>For: {invite.email}</span>}
                               {invite.email && invite.emailSentAt && (
-                                <span className="inline-flex items-center gap-1 text-green-600"><Mail className="h-3 w-3" />email sent</span>
+                                <span className="inline-flex items-center gap-1 text-success"><Mail className="h-3 w-3" />email sent</span>
                               )}
                               {invite.email && !invite.emailSentAt && invite.effectiveStatus === "pending" && (
-                                <span className="text-yellow-600">(email not sent)</span>
+                                <span className="text-warning">(email not sent)</span>
                               )}
                               <span>· Created by {invite.creatorName}</span>
                               {invite.usedByName && <span>· Used by {invite.usedByName}</span>}
@@ -596,12 +593,12 @@ export function TeamPage() {
                                 </Button>
                               )}
                               <Button variant="outline" size="sm" onClick={() => copyInviteLink(invite.code)} title="Copy invite link">
-                                {copiedCode === invite.code ? <Check className="h-4 w-4 text-green-500" /> : <Link2 className="h-4 w-4" />}
+                                {copiedCode === invite.code ? <Check className="h-4 w-4 text-success" /> : <Link2 className="h-4 w-4" />}
                               </Button>
                               <Button variant="outline" size="sm" onClick={() => copyInviteCode(invite.code)} title="Copy code">
-                                {copiedCode === invite.code ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                {copiedCode === invite.code ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => handleRevokeInvite(invite._id)} className="text-red-600 hover:text-red-700">
+                              <Button variant="outline" size="sm" onClick={() => handleRevokeInvite(invite._id)} className="text-destructive hover:text-destructive/80">
                                 Revoke
                               </Button>
                             </>

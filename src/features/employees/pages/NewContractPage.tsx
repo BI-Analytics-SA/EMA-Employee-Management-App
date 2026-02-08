@@ -111,7 +111,7 @@ export function NewContractPage() {
   const template = organization?.settings?.contractTemplate;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Link to={`/employees/${employeeId}/contracts`}>
           <Button variant="ghost" size="sm">
@@ -119,7 +119,7 @@ export function NewContractPage() {
             Back
           </Button>
         </Link>
-        <h1 className="text-xl font-bold truncate">New contract · {displayName}</h1>
+        <h1 className="text-2xl font-bold truncate">New contract · {displayName}</h1>
       </div>
 
       <ContractForm

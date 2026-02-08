@@ -31,6 +31,8 @@ export default defineSchema({
           v.object({
             contracts: v.optional(v.boolean()),
             medical: v.optional(v.boolean()),
+            documents: v.optional(v.boolean()),
+            exporting: v.optional(v.boolean()),
           })
         ),
         contractTemplate: v.optional(
@@ -74,7 +76,6 @@ export default defineSchema({
     role: v.union(
       v.literal("admin"),
       v.literal("manager"),
-      v.literal("nurse"),
       v.literal("user")
     ),
     // Invite status
@@ -110,7 +111,6 @@ export default defineSchema({
     role: v.union(
       v.literal("admin"),
       v.literal("manager"),
-      v.literal("nurse"),
       v.literal("user")
     ),
     isActive: v.boolean(),

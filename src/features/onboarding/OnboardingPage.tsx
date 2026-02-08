@@ -190,7 +190,7 @@ export function OnboardingPage() {
               className="w-full h-auto p-4 flex flex-col items-center gap-2"
               onClick={() => setMode("create")}
             >
-              <Building2 className="h-8 w-8 text-primary" />
+              <Building2 className="h-8 w-8 text-accent" />
               <div className="text-center">
                 <div className="font-semibold">Create an Organization</div>
                 <div className="text-sm text-muted-foreground">
@@ -204,7 +204,7 @@ export function OnboardingPage() {
               className="w-full h-auto p-4 flex flex-col items-center gap-2"
               onClick={() => setMode("join")}
             >
-              <UserPlus className="h-8 w-8 text-primary" />
+              <UserPlus className="h-8 w-8 text-accent" />
               <div className="text-center">
                 <div className="font-semibold">Join an Organization</div>
                 <div className="text-sm text-muted-foreground">
@@ -224,8 +224,8 @@ export function OnboardingPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <UserPlus className="h-6 w-6 text-primary" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+              <UserPlus className="h-6 w-6 text-accent" />
             </div>
             <CardTitle className="text-2xl">Join Organization</CardTitle>
             <CardDescription>
@@ -236,9 +236,9 @@ export function OnboardingPage() {
           <form onSubmit={handleJoinOrg}>
             <CardContent className="space-y-4">
               {error && (
-                <div className="flex items-start gap-3 p-3 text-sm bg-red-50 border border-red-200 rounded-md">
-                  <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-red-700">{error}</span>
+                <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <span className="text-destructive">{error}</span>
                 </div>
               )}
 
@@ -261,15 +261,15 @@ export function OnboardingPage() {
                       <span className="text-muted-foreground">Checking invite code...</span>
                     ) : inviteDetails ? (
                       <>
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                        <span className="text-green-600">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                        <span className="text-success">
                           Valid invite to join <strong>{inviteDetails.organizationName}</strong> as {inviteDetails.role}
                         </span>
                       </>
                     ) : (
                       <>
-                        <AlertCircle className="h-3.5 w-3.5 text-red-500" />
-                        <span className="text-red-600">Invalid or expired invite code</span>
+                        <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                        <span className="text-destructive">Invalid or expired invite code</span>
                       </>
                     )}
                   </div>
@@ -324,8 +324,8 @@ export function OnboardingPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Building2 className="h-6 w-6 text-primary" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+            <Building2 className="h-6 w-6 text-accent" />
           </div>
           <CardTitle className="text-2xl">Create Your Organization</CardTitle>
           <CardDescription>
@@ -336,9 +336,9 @@ export function OnboardingPage() {
         <form onSubmit={handleCreateOrg}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="flex items-start gap-3 p-3 text-sm bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <span className="text-red-700">{error}</span>
+              <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-destructive">{error}</span>
               </div>
             )}
 
@@ -380,13 +380,13 @@ export function OnboardingPage() {
                     <span className="text-muted-foreground">Checking availability...</span>
                   ) : isSlugAvailable ? (
                     <>
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                      <span className="text-green-600">This URL is available</span>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                      <span className="text-success">This URL is available</span>
                     </>
                   ) : (
                     <>
-                      <AlertCircle className="h-3.5 w-3.5 text-red-500" />
-                      <span className="text-red-600">This URL is already taken</span>
+                      <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                      <span className="text-destructive">This URL is already taken</span>
                     </>
                   )}
                 </div>

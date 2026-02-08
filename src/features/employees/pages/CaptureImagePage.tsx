@@ -90,7 +90,7 @@ export function CaptureImagePage() {
   const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between gap-2">
         <Link to={`/employees/${employeeId}`}>
           <Button variant="ghost" size="sm">
@@ -98,12 +98,12 @@ export function CaptureImagePage() {
             Back
           </Button>
         </Link>
-        <h1 className="text-xl font-bold truncate">{displayName}</h1>
+        <h1 className="text-2xl font-bold truncate">{displayName}</h1>
         <div className="w-16" />
       </div>
 
       {employee.imageUrl && (
-        <div className="rounded-lg border bg-card overflow-hidden p-3">
+        <div className="rounded-lg border bg-card overflow-hidden p-4">
           <p className="text-sm font-medium text-muted-foreground mb-2">Current photo</p>
           <div className="flex flex-wrap items-start gap-4">
             <div className="w-24 h-24 rounded-lg overflow-hidden border bg-muted shrink-0">

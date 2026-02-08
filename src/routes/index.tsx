@@ -18,7 +18,6 @@ import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPag
 import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
 import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
 import { CaptureImagePage } from "@/features/employees/pages/CaptureImagePage";
-import { SignatureDemoPage } from "@/features/employees/pages/SignatureDemoPage";
 import { EmployeeDocumentsPage } from "@/features/employees/pages/EmployeeDocumentsPage";
 import { DocumentUploadPage } from "@/features/employees/pages/DocumentUploadPage";
 import { ExpiringDocumentsPage } from "@/features/documents/pages/ExpiringDocumentsPage";
@@ -120,10 +119,6 @@ export const router = createBrowserRouter([
               {
                 path: ":id/capture",
                 element: <CaptureImagePage />,
-              },
-              {
-                path: ":id/signature-demo",
-                element: <SignatureDemoPage />,
               },
               {
                 path: ":id/documents",

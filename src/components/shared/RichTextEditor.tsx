@@ -31,7 +31,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("bold") && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("bold") && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editor.can().chain().focus().toggleBold().run()}
       >
@@ -41,7 +41,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("italic") && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("italic") && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
       >
@@ -51,7 +51,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("underline") && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("underline") && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         disabled={!editor.can().chain().focus().toggleUnderline().run()}
       >
@@ -62,7 +62,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("heading", { level: 1 }) && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("heading", { level: 1 }) && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
       >
         <Heading1 className="h-4 w-4" />
@@ -71,7 +71,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("heading", { level: 2 }) && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("heading", { level: 2 }) && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         <Heading2 className="h-4 w-4" />
@@ -80,7 +80,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("bulletList") && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("bulletList") && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
         <List className="h-4 w-4" />
@@ -89,7 +89,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         type="button"
         variant="ghost"
         size="icon"
-        className={cn("h-8 w-8", editor.isActive("orderedList") && "bg-accent text-accent-foreground")}
+        className={cn("h-9 w-9", editor.isActive("orderedList") && "bg-accent/15 text-accent")}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
         <ListOrdered className="h-4 w-4" />

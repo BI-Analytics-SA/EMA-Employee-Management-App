@@ -148,7 +148,7 @@ export function ContractDetailPage() {
   const hasPdf = !!contract.pdfUrl;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Link to={`/employees/${employeeId}/contracts`}>
@@ -157,7 +157,7 @@ export function ContractDetailPage() {
               Back
             </Button>
           </Link>
-          <h1 className="text-xl font-bold truncate">
+          <h1 className="text-2xl font-bold truncate">
             Contract · {displayName} · {timestampToDateString(contract.signedDate)}
           </h1>
         </div>

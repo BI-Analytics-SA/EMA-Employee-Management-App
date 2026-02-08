@@ -289,10 +289,10 @@ function mergeSettingsWithModules(
         cities?: string[];
         postCodes?: string[];
         documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[];
-        enabledModules?: { contracts?: boolean; medical?: boolean };
+        enabledModules?: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean };
       }
     | undefined,
-  enabledModules: { contracts?: boolean; medical?: boolean }
+  enabledModules: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean }
 ) {
   const s = existing ?? {};
   return {
@@ -313,7 +313,7 @@ function mergeSettingsWithModules(
  */
 export const toggleModule = mutation({
   args: {
-    moduleName: v.union(v.literal("contracts"), v.literal("medical")),
+    moduleName: v.union(v.literal("contracts"), v.literal("medical"), v.literal("documents"), v.literal("exporting")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {

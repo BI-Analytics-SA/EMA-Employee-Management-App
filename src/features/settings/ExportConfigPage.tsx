@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowLeft, GripVertical, Plus, Trash2 } from "lucide-react";
@@ -114,7 +115,7 @@ function SortableColumnRow({
           value={column.label}
           onChange={(e) => onUpdate(column.id, { label: e.target.value })}
           placeholder="Column label"
-          className="h-8 text-sm"
+          className="h-10 text-sm"
         />
       </div>
       <span
@@ -122,7 +123,7 @@ function SortableColumnRow({
           "rounded px-2 py-0.5 text-xs font-medium",
           column.source === "database"
             ? "bg-muted text-muted-foreground"
-            : "bg-primary/10 text-primary"
+            : "bg-accent/10 text-accent"
         )}
       >
         {column.source === "database" ? "Database" : "Custom"}
@@ -134,7 +135,7 @@ function SortableColumnRow({
             onChange={(e) =>
               onUpdate(column.id, { dataType: e.target.value as ExportColumn["dataType"] })
             }
-            className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 rounded-md border border-input bg-background px-2 text-sm"
           >
             <option value="text">Text</option>
             <option value="number">Number</option>
@@ -145,7 +146,7 @@ function SortableColumnRow({
               value={column.defaultValue ?? ""}
               onChange={(e) => onUpdate(column.id, { defaultValue: e.target.value })}
               placeholder="Default value"
-              className="h-8 text-sm"
+              className="h-10 text-sm"
             />
           </div>
           <Button
@@ -166,6 +167,7 @@ function SortableColumnRow({
 
 export function ExportConfigPage() {
   const { isAdmin, isLoading: userLoading } = useCurrentUser();
+  const exportingEnabled = useModuleEnabled("exporting");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
 
@@ -244,6 +246,20 @@ export function ExportConfigPage() {
     );
   }
 
+  if (!exportingEnabled) {
+    return (
+      <div className="p-4 space-y-4">
+        <Link to="/settings/modules">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Modules
+          </Button>
+        </Link>
+        <p className="text-muted-foreground">The Export to Excel module is not enabled for your organization.</p>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="p-4">
@@ -253,7 +269,7 @@ export function ExportConfigPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Link to="/settings/modules" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />

@@ -14,9 +14,9 @@ export function SelectedFileCard({ file, onRemove }: SelectedFileCardProps) {
   const Icon = isPdfType ? FileText : ImageIcon;
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500/30 bg-green-50/50 dark:bg-green-950/20">
-      <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded bg-green-100 dark:bg-green-900/30">
-        <Icon className="h-5 w-5 text-green-700 dark:text-green-300" />
+    <div className="flex items-center gap-3 p-3 rounded-lg border border-success/30 bg-success/10">
+      <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-success/15">
+        <Icon className="h-5 w-5 text-success" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{file.name}</p>

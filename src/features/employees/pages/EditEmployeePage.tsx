@@ -79,8 +79,8 @@ export function EditEmployeePage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-3">Edit Employee</h1>
+    <div className="p-4 md:p-6">
+      <h1 className="text-2xl font-bold mb-4">Edit Employee</h1>
       <EmployeeForm
         organizationId={organizationId}
         employee={employee}

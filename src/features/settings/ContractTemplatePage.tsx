@@ -9,14 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
 export function ContractTemplatePage() {
   const { isAdmin, isLoading: userLoading } = useCurrentUser();
+  const contractsEnabled = useModuleEnabled("contracts");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const updateContractTemplate = useMutation(api.organizations.mutations.updateContractTemplate);
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
@@ -88,6 +90,20 @@ export function ContractTemplatePage() {
     );
   }
 
+  if (!contractsEnabled) {
+    return (
+      <div className="p-4 space-y-4">
+        <Link to="/settings/modules">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Modules
+          </Button>
+        </Link>
+        <p className="text-muted-foreground">The Contracts module is not enabled for your organization.</p>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="p-4">
@@ -97,7 +113,7 @@ export function ContractTemplatePage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Link to="/settings/modules" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />

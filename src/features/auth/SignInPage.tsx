@@ -171,8 +171,12 @@ export function SignInPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-card">
         <CardHeader className="text-center">
+          {/* Pepl logo/brand */}
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg">
+            P
+          </div>
           <CardTitle className="text-2xl">
             {flow === "signIn" ? "Welcome Back" : "Create Account"}
           </CardTitle>
@@ -187,7 +191,7 @@ export function SignInPage() {
 
         {/* Invite banner */}
         {inviteDetails && flow === "signUp" && (
-          <div className="mx-6 mb-2 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+          <div className="mx-6 mb-2 p-4 bg-accent/5 border border-accent/20 rounded-lg">
             <div className="flex items-start gap-3">
               <UserPlus className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
@@ -206,9 +210,9 @@ export function SignInPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="flex items-start gap-3 p-3 text-sm bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <span className="text-red-700">{error}</span>
+              <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-destructive">{error}</span>
               </div>
             )}
 

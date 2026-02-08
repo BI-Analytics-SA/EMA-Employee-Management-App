@@ -4,7 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, PenLine, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
+import { Loader2, Pencil, Camera, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { timestampToDateString } from "@/lib/validations/employee";
@@ -21,19 +21,19 @@ const ETHNIC: Record<string, string> = {
   B: "Black",
 };
 
-// Section card styling - matches form styling
+// Section card styling
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
-const sectionContentClass = "p-3 text-sm";
+const sectionContentClass = "p-4 text-sm";
 
 // Info row component
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value) return null;
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 min-h-[28px]">
       <span className="text-muted-foreground shrink-0">{label}:</span>
-      <span>{value}</span>
+      <span className="truncate">{value}</span>
     </div>
   );
 }
@@ -54,6 +54,7 @@ export function EmployeeDetailPage() {
   const removeMutation = useMutation(api.employees.mutations.remove);
   const contractsEnabled = useModuleEnabled("contracts");
   const medicalEnabled = useModuleEnabled("medical");
+  const documentsEnabled = useModuleEnabled("documents");
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -78,15 +79,15 @@ export function EmployeeDetailPage() {
 
   if (!employeeId || employee === undefined) {
     return (
-      <div className="p-4">
-        <p className="text-muted-foreground">Loading…</p>
+      <div className="p-4 md:p-6">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
 
   if (employee === null) {
     return (
-      <div className="p-4">
+      <div className="p-4 md:p-6">
         <p className="text-destructive">Employee not found.</p>
         <Link to="/employees">
           <Button variant="link" className="mt-2">Back to list</Button>
@@ -95,29 +96,31 @@ export function EmployeeDetailPage() {
     );
   }
 
+  const initials = `${employee.firstName?.[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
+
   return (
-    <div className="p-4 space-y-4">
-      {/* Dashboard Header - Photo, Name, Actions */}
-      <div className={sectionClass}>
-        <div className="p-4 flex flex-col sm:flex-row gap-4">
-          {/* Photo placeholder */}
+    <div className="space-y-6 p-4 md:p-6">
+      {/* Profile header card */}
+      <div className="rounded-xl border bg-card p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+          {/* Avatar */}
           <div className="shrink-0 flex justify-center sm:justify-start">
-            <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center border">
-              {employee.imageUrl ? (
-                <img
-                  src={employee.imageUrl}
-                  alt={`${employee.firstName} ${employee.lastName}`}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              ) : (
-                <User className="w-12 h-12 text-muted-foreground" />
-              )}
-            </div>
+            {employee.imageUrl ? (
+              <img
+                src={employee.imageUrl}
+                alt={`${employee.firstName} ${employee.lastName}`}
+                className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold ring-2 ring-border">
+                {initials || <User className="h-8 w-8" />}
+              </div>
+            )}
           </div>
 
-          {/* Name and summary */}
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-xl font-bold">
+          {/* Name + subtitle */}
+          <div className="flex-1 min-w-0 text-center sm:text-left">
+            <h1 className="text-2xl font-bold truncate">
               {TITLES[employee.title] ?? employee.title} {employee.firstName} {employee.lastName}
             </h1>
             <p className="text-muted-foreground text-sm">
@@ -129,30 +132,24 @@ export function EmployeeDetailPage() {
             </p>
           </div>
 
-          {/* Action buttons - vertical on mobile, horizontal on desktop */}
+          {/* Action buttons */}
           <div className="flex flex-wrap justify-center sm:justify-end gap-2">
             <Link to={`/employees/${employee._id}/edit`}>
               <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 mr-1" />
+                <Pencil className="h-4 w-4" />
                 Edit
               </Button>
             </Link>
             <Link to={`/employees/${employee._id}/capture`}>
               <Button variant="outline" size="sm">
-                <Camera className="h-4 w-4 mr-1" />
+                <Camera className="h-4 w-4" />
                 Photo
-              </Button>
-            </Link>
-            <Link to={`/employees/${employee._id}/signature-demo`}>
-              <Button variant="outline" size="sm" title="Demo – test signature capture">
-                <PenLine className="h-4 w-4 mr-1" />
-                Test Signature
               </Button>
             </Link>
             {contractsEnabled && (
               <Link to={`/employees/${employee._id}/contracts`}>
                 <Button variant="outline" size="sm">
-                  <FileText className="h-4 w-4 mr-1" />
+                  <FileText className="h-4 w-4" />
                   Contracts
                 </Button>
               </Link>
@@ -160,17 +157,19 @@ export function EmployeeDetailPage() {
             {medicalEnabled && (
               <Link to={`/employees/${employee._id}/medical`}>
                 <Button variant="outline" size="sm">
-                  <Stethoscope className="h-4 w-4 mr-1" />
+                  <Stethoscope className="h-4 w-4" />
                   Medical
                 </Button>
               </Link>
             )}
-            <Link to={`/employees/${employee._id}/documents`}>
-              <Button variant="outline" size="sm">
-                <FileStack className="h-4 w-4 mr-1" />
-                Documents
-              </Button>
-            </Link>
+            {documentsEnabled && (
+              <Link to={`/employees/${employee._id}/documents`}>
+                <Button variant="outline" size="sm">
+                  <FileStack className="h-4 w-4" />
+                  Documents
+                </Button>
+              </Link>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -178,17 +177,17 @@ export function EmployeeDetailPage() {
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              <Trash2 className="h-4 w-4 mr-1" />
-              {isDeleting ? "Deleting…" : "Delete"}
+              <Trash2 className="h-4 w-4" />
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </div>
       </div>
 
       {/* Info Cards Grid */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         {/* Personal */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[300px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
@@ -201,7 +200,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Contact */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[220px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[240px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Contact</h3>
           </div>
@@ -211,7 +210,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Address */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[300px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Address</h3>
           </div>
@@ -222,7 +221,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Dates */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[260px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Dates</h3>
           </div>
@@ -233,31 +232,33 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Documents */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[260px] sm:flex-1`}>
-          <div className={sectionHeaderClass}>
-            <h3 className={sectionTitleClass}>Documents</h3>
-          </div>
-          <div className={`${sectionContentClass} space-y-2`}>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-muted-foreground">
-                {documents === undefined ? "…" : documents.length} document{documents?.length !== 1 ? "s" : ""}
-              </span>
-              {documents && documents.length > 0 && (() => {
-                const hasExpiring = documents.some(
-                  (d) => d.expiryDate != null && getExpiryStatus(d.expiryDate, 30) !== "valid" && getExpiryStatus(d.expiryDate, 30) !== "none"
-                );
-                return hasExpiring ? (
-                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Some expiring soon</span>
-                ) : null;
-              })()}
+        {documentsEnabled && (
+          <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+            <div className={sectionHeaderClass}>
+              <h3 className={sectionTitleClass}>Documents</h3>
             </div>
-            <Link to={`/employees/${employee._id}/documents`}>
-              <Button variant="link" size="sm" className="h-auto p-0 text-primary">
-                View documents
-              </Button>
-            </Link>
-          </div>
-        </section>
+            <div className={`${sectionContentClass} space-y-2`}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-muted-foreground">
+                  {documents === undefined ? "..." : documents.length} document{documents?.length !== 1 ? "s" : ""}
+                </span>
+                {documents && documents.length > 0 && (() => {
+                  const hasExpiring = documents.some(
+                    (d) => d.expiryDate != null && getExpiryStatus(d.expiryDate, 30) !== "valid" && getExpiryStatus(d.expiryDate, 30) !== "none"
+                  );
+                  return hasExpiring ? (
+                    <span className="inline-flex items-center rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-medium text-warning-foreground">Some expiring soon</span>
+                  ) : null;
+                })()}
+              </div>
+              <Link to={`/employees/${employee._id}/documents`}>
+                <Button variant="link" size="sm" className="h-auto p-0 text-accent">
+                  View documents
+                </Button>
+              </Link>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

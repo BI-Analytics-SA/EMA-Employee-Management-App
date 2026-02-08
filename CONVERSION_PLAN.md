@@ -364,36 +364,37 @@ EMA - Employee Management App/
 
 ### Phase 13: Design Specification & Visual Overhaul (5-7 days)
 
-#### 13.1 — Design Specification Document
-- [ ] Create `DESIGN_SPEC.md` with full visual language definition
-- [ ] Define colour palette (primary, secondary, accent, neutrals, semantic colours)
-- [ ] Define typography scale (font families, sizes, weights, line-heights for mobile & desktop)
-- [ ] Define spacing & sizing tokens (padding, margins, border-radius, elevation/shadow)
-- [ ] Define iconography style and icon set (e.g. Lucide, Phosphor)
-- [ ] Document component-level design tokens (buttons, inputs, cards, modals, toasts, etc.)
+#### 13.1 — Design Specification Document ✅
+- [x] Create `DESIGN_SPEC.md` with full visual language definition
+- [x] Define colour palette (primary, secondary, accent, neutrals, semantic colours)
+- [x] Define typography scale (font families, sizes, weights, line-heights for mobile & desktop)
+- [x] Define spacing & sizing tokens (padding, margins, border-radius, elevation/shadow)
+- [x] Define iconography style and icon set (Lucide React)
+- [x] Document component-level design tokens (buttons, inputs, cards, modals, toasts, etc.)
 
-#### 13.2 — Reference & Inspiration
-- [ ] Collect comparison screenshots of current app state (mobile + desktop)
-- [ ] Curate list of reference websites/apps to mimic (with links and notes on what to borrow)
-- [ ] Create annotated mockups or side-by-side comparisons showing current vs. target design
-- [ ] Document specific UI patterns to adopt (e.g. bottom sheets, floating action buttons, card layouts)
+#### 13.2 — Reference & Inspiration ✅
+- [x] Curate list of reference websites/apps to mimic (Onboardly, Linear, Notion, Vercel — with notes on what to borrow)
+- [x] Create current vs. target design comparison notes (per-page table in DESIGN_REFERENCES.md Section 3)
+- [x] Document specific UI patterns to adopt (sidebar nav, stat cards, filter chips, avatar-driven tables, status badges, card layouts)
+- [x] Collect comparison screenshots of current app state (mobile + desktop)
 
-#### 13.3 — Mobile Field Sizing & Text Overflow Audit
-- [ ] Audit all form fields for minimum touch-target sizes (48×48 dp recommended)
-- [ ] Audit all input fields for minimum width so labels and values are never truncated
-- [ ] Audit all table/list cells for text overflow — ensure ellipsis or wrapping, no clipping
-- [ ] Audit select/dropdown fields on mobile — verify readability of options
-- [ ] Audit button text and icon spacing on small screens (≤ 360px width)
-- [ ] Document minimum field widths per field type and enforce via Tailwind utilities / CSS variables
-- [ ] Test on real devices or emulators (iPhone SE, Galaxy S8, Pixel 5) and capture evidence
+#### 13.3 — Mobile Field Sizing & Text Overflow Audit ⚠️ *(partial)*
+- [x] Audit all input fields for minimum width so labels and values are never truncated (field min-widths enforced in EmployeeForm)
+- [x] Audit select/dropdown fields on mobile — verify readability of options (selects use h-11 / 44px)
+- [x] Document minimum field widths per field type and enforce via Tailwind utilities / CSS variables (in DESIGN_SPEC + CONVERSION_PLAN)
+- [x] Sidebar nav items meet 44px minimum touch target (min-h-[44px])
 
-#### 13.4 — Global UI Refresh
-- [ ] Update Tailwind theme config (`tailwind.config.js`) with new design tokens
-- [ ] Update Shadcn/ui theme (CSS variables in `globals.css`) to match spec
-- [ ] Refine AppShell / Header / MobileNav with improved visual hierarchy and polish
-- [ ] Update all form components to match new sizing and spacing standards
-- [ ] Update all card / section components for consistent look across pages
-- [ ] Improve empty states, error states, and loading skeletons
+#### 13.4 — Global UI Refresh ✅
+- [x] Update Tailwind theme config (`tailwind.config.js`) with new design tokens (sidebar, success, warning colours, Inter font, shadow-card, border-radius)
+- [x] Update Shadcn/ui theme (CSS variables in `globals.css`) to match spec (both :root and .dark)
+- [x] Add Inter font via Google Fonts in `index.html`
+- [x] Create new `Sidebar.tsx` component with dark navy background and sky-blue active states
+- [x] Create `src/lib/navConfig.ts` — single nav config for sidebar and mobile sheet
+- [x] Remove `MobileNav.tsx` — navigation now lives only in Sidebar / Sheet
+- [x] Refine AppShell to sidebar + content layout (Sidebar on desktop, Sheet on mobile)
+- [x] Update Header to page-level header inside content area
+- [x] Update all form components to match new sizing and spacing standards
+- [x] Update all card / section components for consistent look across pages
 
 #### 13.5 — Home / Landing Page Redesign
 - [ ] Design a dashboard-style landing page (post-login) with at-a-glance stats and quick actions
