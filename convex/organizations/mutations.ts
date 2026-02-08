@@ -98,8 +98,18 @@ export const updateSettings = mutation({
       throw new Error("Only organization admins can update settings");
     }
 
+    // Preserve existing module/template/export settings when updating base settings
+    const org = await ctx.db.get(args.organizationId);
+    const s = org?.settings;
+
     await ctx.db.patch(args.organizationId, {
-      settings: args.settings,
+      settings: {
+        ...args.settings,
+        documentTypes: s?.documentTypes,
+        enabledModules: s?.enabledModules,
+        contractTemplate: s?.contractTemplate,
+        exportConfig: s?.exportConfig,
+      },
     });
 
     return { success: true };
@@ -113,21 +123,25 @@ const documentTypeValidator = v.object({
   color: v.optional(v.string()),
 });
 
+type OrgSettings = Doc<"organizations">["settings"];
+
 /** Build full settings object so required arrays are never undefined when patching. */
 function mergeSettings(
-  existing: { departments?: string[]; deptGroups?: string[]; shifts?: string[]; shiftAllocations?: string[]; suburbs?: string[]; cities?: string[]; postCodes?: string[]; documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[] } | undefined,
+  existing: OrgSettings | undefined,
   override: { documentTypes: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
 ) {
-  const s = existing ?? {};
   return {
-    departments: s.departments ?? [],
-    deptGroups: s.deptGroups ?? [],
-    shifts: s.shifts ?? [],
-    shiftAllocations: s.shiftAllocations ?? [],
-    suburbs: s.suburbs ?? [],
-    cities: s.cities ?? [],
-    postCodes: s.postCodes ?? [],
+    departments: existing?.departments ?? [],
+    deptGroups: existing?.deptGroups ?? [],
+    shifts: existing?.shifts ?? [],
+    shiftAllocations: existing?.shiftAllocations ?? [],
+    suburbs: existing?.suburbs ?? [],
+    cities: existing?.cities ?? [],
+    postCodes: existing?.postCodes ?? [],
     documentTypes: override.documentTypes,
+    enabledModules: existing?.enabledModules,
+    contractTemplate: existing?.contractTemplate,
+    exportConfig: existing?.exportConfig,
   };
 }
 
@@ -279,32 +293,21 @@ export const removeDocumentType = mutation({
 
 /** Build full settings object with required arrays and updated enabledModules. */
 function mergeSettingsWithModules(
-  existing:
-    | {
-        departments?: string[];
-        deptGroups?: string[];
-        shifts?: string[];
-        shiftAllocations?: string[];
-        suburbs?: string[];
-        cities?: string[];
-        postCodes?: string[];
-        documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[];
-        enabledModules?: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean };
-      }
-    | undefined,
+  existing: OrgSettings | undefined,
   enabledModules: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean }
 ) {
-  const s = existing ?? {};
   return {
-    departments: s.departments ?? [],
-    deptGroups: s.deptGroups ?? [],
-    shifts: s.shifts ?? [],
-    shiftAllocations: s.shiftAllocations ?? [],
-    suburbs: s.suburbs ?? [],
-    cities: s.cities ?? [],
-    postCodes: s.postCodes ?? [],
-    documentTypes: s.documentTypes,
+    departments: existing?.departments ?? [],
+    deptGroups: existing?.deptGroups ?? [],
+    shifts: existing?.shifts ?? [],
+    shiftAllocations: existing?.shiftAllocations ?? [],
+    suburbs: existing?.suburbs ?? [],
+    cities: existing?.cities ?? [],
+    postCodes: existing?.postCodes ?? [],
+    documentTypes: existing?.documentTypes,
     enabledModules,
+    contractTemplate: existing?.contractTemplate,
+    exportConfig: existing?.exportConfig,
   };
 }
 
@@ -323,7 +326,7 @@ export const toggleModule = mutation({
       throw new Error("Organization not found");
     }
     const currentModules = org.settings?.enabledModules ?? {};
-    const newEnabledModules = {
+    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {
       ...currentModules,
       [args.moduleName]: args.enabled,
     };

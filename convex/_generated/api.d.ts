@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as contracts_actions from "../contracts/actions.js";
 import type * as contracts_mutations from "../contracts/mutations.js";
 import type * as contracts_queries from "../contracts/queries.js";
+import type * as dashboard_queries from "../dashboard/queries.js";
 import type * as documents_actions from "../documents/actions.js";
 import type * as documents_mutations from "../documents/mutations.js";
 import type * as documents_queries from "../documents/queries.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   "contracts/actions": typeof contracts_actions;
   "contracts/mutations": typeof contracts_mutations;
   "contracts/queries": typeof contracts_queries;
+  "dashboard/queries": typeof dashboard_queries;
   "documents/actions": typeof documents_actions;
   "documents/mutations": typeof documents_mutations;
   "documents/queries": typeof documents_queries;

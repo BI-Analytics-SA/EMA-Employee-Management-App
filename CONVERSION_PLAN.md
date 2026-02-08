@@ -396,13 +396,13 @@ EMA - Employee Management App/
 - [x] Update all form components to match new sizing and spacing standards
 - [x] Update all card / section components for consistent look across pages
 
-#### 13.5 — Home / Landing Page Redesign
-- [ ] Design a dashboard-style landing page (post-login) with at-a-glance stats and quick actions
-- [ ] Add welcome message with user name / role
-- [ ] Add summary cards (total employees, recent registrations, pending contracts, etc.)
-- [ ] Add quick-action buttons (New Employee, Scan Barcode, Export, etc.)
-- [ ] Add recent activity feed or timeline
-- [ ] Ensure landing page is responsive and looks great on mobile and desktop
+#### 13.5 — Home / Landing Page Redesign ✅
+- [x] Design a dashboard-style landing page (post-login) with at-a-glance stats and quick actions
+- [x] Add welcome message with user name / role
+- [x] Add summary cards (total employees, expiring documents, contracts, pending invites)
+- [x] Add quick-action buttons (Add Employee, View Employees, Export, Expiring Documents)
+- [x] Add recently added employees list (last 5, with avatar, name, ID, date)
+- [x] Ensure landing page is responsive and looks great on mobile and desktop
 
 **Total Estimated Duration: 33-44 days**
 

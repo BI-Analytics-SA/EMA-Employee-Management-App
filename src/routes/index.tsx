@@ -12,6 +12,9 @@ import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
 // Settings Pages
 import { TeamPage } from "@/features/settings/TeamPage";
 
+// Home Page
+import { HomePage } from "@/features/home/HomePage";
+
 // Employee Pages
 import { EmployeeListPage } from "@/features/employees/pages/EmployeeListPage";
 import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPage";
@@ -71,7 +74,7 @@ export const router = createBrowserRouter([
             children: [
           {
             index: true,
-            element: <EmployeeListPage />,
+            element: <HomePage />,
           },
           {
             path: "settings/team",
