@@ -20,7 +20,6 @@ export function useCurrentUser() {
     role: profile?.role,
     isAdmin: profile?.role === "admin",
     isManager: profile?.role === "admin" || profile?.role === "manager",
-    isNurse: profile?.role === "admin" || profile?.role === "manager" || profile?.role === "nurse",
     userName: profile?.name,
   };
 }
@@ -28,7 +27,7 @@ export function useCurrentUser() {
 /**
  * Hook for checking if user has a minimum required role
  */
-export function useHasRole(requiredRole: "admin" | "manager" | "nurse" | "user"): boolean {
+export function useHasRole(requiredRole: "admin" | "manager" | "user"): boolean {
   const { role, isLoading } = useCurrentUser();
 
   if (isLoading || !role) {
@@ -36,9 +35,8 @@ export function useHasRole(requiredRole: "admin" | "manager" | "nurse" | "user")
   }
 
   const roleHierarchy: Record<string, number> = {
-    admin: 4,
-    manager: 3,
-    nurse: 2,
+    admin: 3,
+    manager: 2,
     user: 1,
   };
 

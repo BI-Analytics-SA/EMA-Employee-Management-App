@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ type DocumentTypeRow = {
 
 export function DocumentTypesPage() {
   const { organizationId, isAdmin, isLoading: userLoading } = useCurrentUser();
+  const documentsEnabled = useModuleEnabled("documents");
   const organization = useQuery(
     api.organizations.queries.getCurrentUserOrganization,
     undefined
@@ -131,6 +133,14 @@ export function DocumentTypesPage() {
     );
   }
 
+  if (!documentsEnabled) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">The Documents module is not enabled for your organization.</p>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="p-4">
@@ -140,17 +150,17 @@ export function DocumentTypesPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl font-bold">Document types</h1>
+    <div className="space-y-6 p-4 md:p-6">
+      <h1 className="text-2xl font-bold">Document types</h1>
       <p className="text-sm text-muted-foreground">
         Define the types of documents employees can upload (e.g. ID Book, Warnings, Certificates).
       </p>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
-      {success && <p className="text-sm text-green-600">{success}</p>}
+      {success && <p className="text-sm text-success">{success}</p>}
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-3 py-2 border-b flex items-center justify-between">
+        <div className="bg-muted/70 px-4 py-3 border-b flex items-center justify-between">
           <h2 className="text-sm font-semibold">Types</h2>
           {!isAdding ? (
             <Button size="sm" onClick={() => setIsAdding(true)}>
@@ -159,7 +169,7 @@ export function DocumentTypesPage() {
             </Button>
           ) : null}
         </div>
-        <div className="p-3 space-y-3">
+        <div className="p-4 space-y-3">
           {isAdding && (
             <div className="flex flex-wrap gap-3 items-end p-3 rounded-lg border bg-muted/30">
               <div className="space-y-1">

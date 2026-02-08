@@ -39,19 +39,19 @@ const statusConfig: Record<
 > = {
   expired: {
     label: "Expired",
-    className: "bg-destructive/15 text-destructive border-destructive/30",
+    className: "bg-destructive/15 text-destructive",
   },
   expiring_soon: {
     label: "Expiring soon",
-    className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
+    className: "bg-warning/15 text-warning-foreground",
   },
   valid: {
     label: "Valid",
-    className: "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30",
+    className: "bg-success/15 text-success",
   },
   none: {
     label: "No expiry",
-    className: "bg-muted text-muted-foreground border-border",
+    className: "bg-muted text-muted-foreground",
   },
 };
 
@@ -68,7 +68,7 @@ export function ExpiryBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
         config.className,
         className
       )}

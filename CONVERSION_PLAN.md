@@ -314,46 +314,97 @@ EMA - Employee Management App/
 - [x] Camera permission handling
 - [x] Integration with search
 
-### Phase 5: Image Capture & Storage (3 days)
-- [ ] ImageCapture component (camera API)
-- [ ] Convex file upload action
-- [ ] Image compression
-- [ ] Delete image functionality
+### Phase 5: Image Capture & Storage (3 days) ✅
+- [x] ImageCapture component (camera API)
+- [x] Convex file upload action
+- [x] Image compression
+- [x] Delete image functionality
 
-### Phase 6: Signature Capture (2-3 days)
-- [ ] SignatureCapture canvas component
-- [ ] Touch/mouse event handling
-- [ ] PNG conversion and upload
-- [ ] Clear/reset functionality
+### Phase 6: Signature Capture (2-3 days) ✅
+- [x] SignatureCapture canvas component
+- [x] Touch/mouse event handling
+- [x] PNG conversion and upload
+- [x] Clear/reset functionality
 
-### Phase 7: Contracts Module (3-4 days)
-- [ ] Contracts schema
-- [ ] Contract list by employee
-- [ ] Contract form with signature
-- [ ] Create contract mutation
+### Phase 7: Contracts Module (3-4 days) ✅
+- [x] Contracts schema
+- [x] Contract list by employee
+- [x] Contract form with signature
+- [x] Create contract mutation
 
-### Phase 8: Medical Questionnaire (3-4 days)
+### Phase 8: Medical Questionnaire (3-4 days) ⏭️ *Optional — deferred to a later stage*
 - [ ] Medical questionnaire schema
 - [ ] Status check query
 - [ ] Form with conditional fields
 - [ ] Dual signature capture (employee + nurse)
 - [ ] Create/Edit mutations
 
-### Phase 9: Mobile Optimization & PWA (2-3 days)
-- [ ] Touch-friendly form optimization
-- [ ] Pull-to-refresh
-- [ ] PWA manifest
-- [ ] Service worker
-- [ ] Loading states and skeletons
+### Phase 9: Employee Details Export to Excel (2-3 days) ✅
+- [x] Export config in organization settings (column definitions, renames, custom fields)
+- [x] Settings page for column management (drag-and-drop reorder, rename, add custom, data types)
+- [x] listAll employee query for export
+- [x] Export to Excel button on Employee List page
+- [x] Client-side xlsx generation with configurable columns and default values
 
-### Phase 10: Testing & Deployment (2-3 days)
+### Phase 10: Mobile Optimization & PWA (2-3 days) ✅
+- [x] Touch-friendly form optimization
+- [x] Pull-to-refresh
+- [x] PWA manifest
+- [x] Service worker
+- [x] Loading states and skeletons
+
+### Phase 11: Testing & Deployment (2-3 days)
 - [ ] Unit tests for validations
 - [ ] Integration tests for Convex functions
 - [ ] Manual flow testing
 - [ ] Netlify deployment config
 - [ ] Documentation
 
-**Total Estimated Duration: 26-34 days**
+### Phase 12: *(Reserved)*
+
+### Phase 13: Design Specification & Visual Overhaul (5-7 days)
+
+#### 13.1 — Design Specification Document ✅
+- [x] Create `DESIGN_SPEC.md` with full visual language definition
+- [x] Define colour palette (primary, secondary, accent, neutrals, semantic colours)
+- [x] Define typography scale (font families, sizes, weights, line-heights for mobile & desktop)
+- [x] Define spacing & sizing tokens (padding, margins, border-radius, elevation/shadow)
+- [x] Define iconography style and icon set (Lucide React)
+- [x] Document component-level design tokens (buttons, inputs, cards, modals, toasts, etc.)
+
+#### 13.2 — Reference & Inspiration ✅
+- [x] Curate list of reference websites/apps to mimic (Onboardly, Linear, Notion, Vercel — with notes on what to borrow)
+- [x] Create current vs. target design comparison notes (per-page table in DESIGN_REFERENCES.md Section 3)
+- [x] Document specific UI patterns to adopt (sidebar nav, stat cards, filter chips, avatar-driven tables, status badges, card layouts)
+- [x] Collect comparison screenshots of current app state (mobile + desktop)
+
+#### 13.3 — Mobile Field Sizing & Text Overflow Audit ⚠️ *(partial)*
+- [x] Audit all input fields for minimum width so labels and values are never truncated (field min-widths enforced in EmployeeForm)
+- [x] Audit select/dropdown fields on mobile — verify readability of options (selects use h-11 / 44px)
+- [x] Document minimum field widths per field type and enforce via Tailwind utilities / CSS variables (in DESIGN_SPEC + CONVERSION_PLAN)
+- [x] Sidebar nav items meet 44px minimum touch target (min-h-[44px])
+
+#### 13.4 — Global UI Refresh ✅
+- [x] Update Tailwind theme config (`tailwind.config.js`) with new design tokens (sidebar, success, warning colours, Inter font, shadow-card, border-radius)
+- [x] Update Shadcn/ui theme (CSS variables in `globals.css`) to match spec (both :root and .dark)
+- [x] Add Inter font via Google Fonts in `index.html`
+- [x] Create new `Sidebar.tsx` component with dark navy background and sky-blue active states
+- [x] Create `src/lib/navConfig.ts` — single nav config for sidebar and mobile sheet
+- [x] Remove `MobileNav.tsx` — navigation now lives only in Sidebar / Sheet
+- [x] Refine AppShell to sidebar + content layout (Sidebar on desktop, Sheet on mobile)
+- [x] Update Header to page-level header inside content area
+- [x] Update all form components to match new sizing and spacing standards
+- [x] Update all card / section components for consistent look across pages
+
+#### 13.5 — Home / Landing Page Redesign ✅
+- [x] Design a dashboard-style landing page (post-login) with at-a-glance stats and quick actions
+- [x] Add welcome message with user name / role
+- [x] Add summary cards (total employees, expiring documents, contracts, pending invites)
+- [x] Add quick-action buttons (Add Employee, View Employees, Export, Expiring Documents)
+- [x] Add recently added employees list (last 5, with avatar, name, ID, date)
+- [x] Ensure landing page is responsive and looks great on mobile and desktop
+
+**Total Estimated Duration: 33-44 days**
 
 ---
 

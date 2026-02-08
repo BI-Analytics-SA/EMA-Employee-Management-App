@@ -1,6 +1,8 @@
 import { mutation } from "../_generated/server";
+import type { Id, Doc } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireRole } from "../lib/permissions";
 
 /**
  * Create a new organization
@@ -96,8 +98,18 @@ export const updateSettings = mutation({
       throw new Error("Only organization admins can update settings");
     }
 
+    // Preserve existing module/template/export settings when updating base settings
+    const org = await ctx.db.get(args.organizationId);
+    const s = org?.settings;
+
     await ctx.db.patch(args.organizationId, {
-      settings: args.settings,
+      settings: {
+        ...args.settings,
+        documentTypes: s?.documentTypes,
+        enabledModules: s?.enabledModules,
+        contractTemplate: s?.contractTemplate,
+        exportConfig: s?.exportConfig,
+      },
     });
 
     return { success: true };
@@ -111,21 +123,25 @@ const documentTypeValidator = v.object({
   color: v.optional(v.string()),
 });
 
+type OrgSettings = Doc<"organizations">["settings"];
+
 /** Build full settings object so required arrays are never undefined when patching. */
 function mergeSettings(
-  existing: { departments?: string[]; deptGroups?: string[]; shifts?: string[]; shiftAllocations?: string[]; suburbs?: string[]; cities?: string[]; postCodes?: string[]; documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[] } | undefined,
+  existing: OrgSettings | undefined,
   override: { documentTypes: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
 ) {
-  const s = existing ?? {};
   return {
-    departments: s.departments ?? [],
-    deptGroups: s.deptGroups ?? [],
-    shifts: s.shifts ?? [],
-    shiftAllocations: s.shiftAllocations ?? [],
-    suburbs: s.suburbs ?? [],
-    cities: s.cities ?? [],
-    postCodes: s.postCodes ?? [],
+    departments: existing?.departments ?? [],
+    deptGroups: existing?.deptGroups ?? [],
+    shifts: existing?.shifts ?? [],
+    shiftAllocations: existing?.shiftAllocations ?? [],
+    suburbs: existing?.suburbs ?? [],
+    cities: existing?.cities ?? [],
+    postCodes: existing?.postCodes ?? [],
     documentTypes: override.documentTypes,
+    enabledModules: existing?.enabledModules,
+    contractTemplate: existing?.contractTemplate,
+    exportConfig: existing?.exportConfig,
   };
 }
 
@@ -271,6 +287,332 @@ export const removeDocumentType = mutation({
       settings: mergeSettings(org.settings, { documentTypes: newTypes }),
     });
 
+    return { success: true };
+  },
+});
+
+/** Build full settings object with required arrays and updated enabledModules. */
+function mergeSettingsWithModules(
+  existing: OrgSettings | undefined,
+  enabledModules: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean }
+) {
+  return {
+    departments: existing?.departments ?? [],
+    deptGroups: existing?.deptGroups ?? [],
+    shifts: existing?.shifts ?? [],
+    shiftAllocations: existing?.shiftAllocations ?? [],
+    suburbs: existing?.suburbs ?? [],
+    cities: existing?.cities ?? [],
+    postCodes: existing?.postCodes ?? [],
+    documentTypes: existing?.documentTypes,
+    enabledModules,
+    contractTemplate: existing?.contractTemplate,
+    exportConfig: existing?.exportConfig,
+  };
+}
+
+/**
+ * Toggle an add-on module for the organization (admin only).
+ */
+export const toggleModule = mutation({
+  args: {
+    moduleName: v.union(v.literal("contracts"), v.literal("medical"), v.literal("documents"), v.literal("exporting")),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const profile = await requireRole(ctx, "admin");
+    const org = await ctx.db.get(profile.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+    const currentModules = org.settings?.enabledModules ?? {};
+    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {
+      ...currentModules,
+      [args.moduleName]: args.enabled,
+    };
+    const newSettings = mergeSettingsWithModules(org.settings, newEnabledModules);
+    await ctx.db.patch(profile.organizationId, {
+      settings: newSettings,
+    });
+    return { success: true };
+  },
+});
+
+const contractTemplateValidator = v.object({
+  companyName: v.optional(v.string()),
+  contractHeading: v.optional(v.string()),
+  contractCategory: v.optional(v.string()),
+  defaultTermsAndConditions: v.optional(v.string()),
+});
+
+/**
+ * Update contract template defaults for the organization (admin only).
+ */
+export const updateContractTemplate = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    contractTemplate: contractTemplateValidator,
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+
+    if (!profile || profile.role !== "admin") {
+      throw new Error("Only organization admins can update contract template");
+    }
+
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    const current = org.settings?.contractTemplate ?? {};
+    const newTemplate = {
+      companyName:
+        args.contractTemplate.companyName !== undefined
+          ? args.contractTemplate.companyName
+          : current.companyName,
+      contractHeading:
+        args.contractTemplate.contractHeading !== undefined
+          ? args.contractTemplate.contractHeading
+          : current.contractHeading,
+      contractCategory:
+        args.contractTemplate.contractCategory !== undefined
+          ? args.contractTemplate.contractCategory
+          : current.contractCategory,
+      defaultTermsAndConditions:
+        args.contractTemplate.defaultTermsAndConditions !== undefined
+          ? args.contractTemplate.defaultTermsAndConditions
+          : current.defaultTermsAndConditions,
+      employerSignatureStorageId: (current as { employerSignatureStorageId?: Id<"_storage"> }).employerSignatureStorageId,
+      employerSignatureUrl: (current as { employerSignatureUrl?: string }).employerSignatureUrl,
+    };
+
+    const s = org.settings;
+    type OrgSettings = NonNullable<Doc<"organizations">["settings"]>;
+    const newSettings = {
+      departments: s?.departments ?? [],
+      deptGroups: s?.deptGroups ?? [],
+      shifts: s?.shifts ?? [],
+      shiftAllocations: s?.shiftAllocations ?? [],
+      suburbs: s?.suburbs ?? [],
+      cities: s?.cities ?? [],
+      postCodes: s?.postCodes ?? [],
+      documentTypes: s?.documentTypes,
+      enabledModules: s?.enabledModules,
+      contractTemplate: newTemplate,
+      exportConfig: s?.exportConfig,
+    };
+    await ctx.db.patch(args.organizationId, {
+      settings: newSettings as unknown as OrgSettings,
+    });
+
+    return { success: true };
+  },
+});
+
+const exportColumnValidator = v.object({
+  id: v.string(),
+  source: v.union(v.literal("database"), v.literal("custom")),
+  dbField: v.optional(v.string()),
+  label: v.string(),
+  dataType: v.union(v.literal("text"), v.literal("number"), v.literal("date")),
+  defaultValue: v.optional(v.string()),
+  enabled: v.boolean(),
+});
+
+/**
+ * Update organization export config (column definitions for Excel export). Admin only.
+ */
+export const updateExportConfig = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    columns: v.array(exportColumnValidator),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+
+    if (!profile || profile.role !== "admin") {
+      throw new Error("Only organization admins can update export configuration");
+    }
+
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    const s = org.settings;
+    type OrgSettings = NonNullable<Doc<"organizations">["settings"]>;
+    const newSettings = {
+      departments: s?.departments ?? [],
+      deptGroups: s?.deptGroups ?? [],
+      shifts: s?.shifts ?? [],
+      shiftAllocations: s?.shiftAllocations ?? [],
+      suburbs: s?.suburbs ?? [],
+      cities: s?.cities ?? [],
+      postCodes: s?.postCodes ?? [],
+      documentTypes: s?.documentTypes,
+      enabledModules: s?.enabledModules,
+      contractTemplate: s?.contractTemplate,
+      exportConfig: { columns: args.columns },
+    };
+    await ctx.db.patch(args.organizationId, {
+      settings: newSettings as unknown as OrgSettings,
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Save uploaded employer (organization signatory) signature to contract template. Admin only.
+ */
+export const saveEmployerSignature = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+
+    if (!profile || profile.role !== "admin") {
+      throw new Error("Only organization admins can update employer signature");
+    }
+
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    const current = org.settings?.contractTemplate ?? {};
+    const existingStorageId = (current as { employerSignatureStorageId?: Id<"_storage"> }).employerSignatureStorageId;
+    if (existingStorageId) {
+      try {
+        await ctx.storage.delete(existingStorageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
+    }
+
+    const signatureUrl = await ctx.storage.getUrl(args.storageId);
+    const newTemplate = {
+      ...current,
+      employerSignatureStorageId: args.storageId,
+      employerSignatureUrl: signatureUrl ?? undefined,
+    };
+    const s = org.settings;
+    const newSettings = {
+      departments: s?.departments ?? [],
+      deptGroups: s?.deptGroups ?? [],
+      shifts: s?.shifts ?? [],
+      shiftAllocations: s?.shiftAllocations ?? [],
+      suburbs: s?.suburbs ?? [],
+      cities: s?.cities ?? [],
+      postCodes: s?.postCodes ?? [],
+      documentTypes: s?.documentTypes,
+      enabledModules: s?.enabledModules,
+      contractTemplate: newTemplate,
+      exportConfig: s?.exportConfig,
+    };
+    type OrgSettings = NonNullable<Doc<"organizations">["settings"]>;
+    await ctx.db.patch(args.organizationId, {
+      settings: newSettings as unknown as OrgSettings,
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Remove employer signature from contract template and delete from storage. Admin only.
+ */
+export const deleteEmployerSignature = mutation({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+
+    if (!profile || profile.role !== "admin") {
+      throw new Error("Only organization admins can delete employer signature");
+    }
+
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    const current = org.settings?.contractTemplate ?? {};
+    const storageId = (current as { employerSignatureStorageId?: Id<"_storage"> }).employerSignatureStorageId;
+    if (storageId) {
+      try {
+        await ctx.storage.delete(storageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
+    }
+
+    const newTemplate = {
+      companyName: (current as { companyName?: string }).companyName,
+      contractHeading: (current as { contractHeading?: string }).contractHeading,
+      contractCategory: (current as { contractCategory?: string }).contractCategory,
+      defaultTermsAndConditions: (current as { defaultTermsAndConditions?: string }).defaultTermsAndConditions,
+      // employerSignatureStorageId and employerSignatureUrl intentionally omitted (deleted)
+    };
+    const s = org.settings;
+    type OrgSettingsDel = NonNullable<Doc<"organizations">["settings"]>;
+    const newSettings = {
+      departments: s?.departments ?? [],
+      deptGroups: s?.deptGroups ?? [],
+      shifts: s?.shifts ?? [],
+      shiftAllocations: s?.shiftAllocations ?? [],
+      suburbs: s?.suburbs ?? [],
+      cities: s?.cities ?? [],
+      postCodes: s?.postCodes ?? [],
+      documentTypes: s?.documentTypes,
+      enabledModules: s?.enabledModules,
+      contractTemplate: newTemplate,
+      exportConfig: s?.exportConfig,
+    };
+    await ctx.db.patch(args.organizationId, {
+      settings: newSettings as unknown as OrgSettingsDel,
+    });
     return { success: true };
   },
 });

@@ -165,7 +165,7 @@ export function DocumentUploadPage() {
   const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Link to={`/employees/${employeeId}/documents`}>
           <Button variant="ghost" size="sm">
@@ -173,7 +173,7 @@ export function DocumentUploadPage() {
             Back
           </Button>
         </Link>
-        <h1 className="text-xl font-bold truncate">{displayName}</h1>
+        <h1 className="text-2xl font-bold truncate">{displayName}</h1>
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden p-4 space-y-4">

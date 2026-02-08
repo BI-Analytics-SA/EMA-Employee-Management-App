@@ -28,12 +28,11 @@ import {
 } from "lucide-react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-type Role = "admin" | "manager" | "nurse" | "user";
+type Role = "admin" | "manager" | "user";
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",
   manager: "Manager",
-  nurse: "Nurse",
   user: "User",
 };
 
@@ -45,10 +44,10 @@ const STATUS_ICONS = {
 };
 
 const STATUS_COLORS = {
-  pending: "text-yellow-600 bg-yellow-50",
-  used: "text-green-600 bg-green-50",
-  revoked: "text-red-600 bg-red-50",
-  expired: "text-gray-600 bg-gray-50",
+  pending: "text-warning-foreground bg-warning/15",
+  used: "text-success bg-success/15",
+  revoked: "text-destructive bg-destructive/15",
+  expired: "text-muted-foreground bg-muted",
 };
 
 export function InvitesPage() {
@@ -167,7 +166,7 @@ export function InvitesPage() {
       <div className="p-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-6">
-            <AlertCircle className="h-5 w-5 text-yellow-500" />
+            <AlertCircle className="h-5 w-5 text-warning" />
             <p>Only administrators can manage invites.</p>
           </CardContent>
         </Card>
@@ -193,12 +192,12 @@ export function InvitesPage() {
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 p-3 text-sm bg-red-50 border border-red-200 rounded-md">
-          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <span className="text-red-700">{error}</span>
+        <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <span className="text-destructive">{error}</span>
           <button
             onClick={() => setError(null)}
-            className="ml-auto text-red-500 hover:text-red-700"
+            className="ml-auto text-destructive hover:text-destructive/80"
           >
             ×
           </button>
@@ -206,12 +205,12 @@ export function InvitesPage() {
       )}
 
       {success && (
-        <div className="flex items-start gap-3 p-3 text-sm bg-green-50 border border-green-200 rounded-md">
-          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-          <span className="text-green-700">{success}</span>
+        <div className="flex items-start gap-3 p-3 text-sm bg-success/10 border border-success/30 rounded-lg">
+          <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
+          <span className="text-success">{success}</span>
           <button
             onClick={() => setSuccess(null)}
-            className="ml-auto text-green-500 hover:text-green-700"
+            className="ml-auto text-success hover:text-success/80"
           >
             ×
           </button>
@@ -239,7 +238,6 @@ export function InvitesPage() {
                     disabled={isSubmitting}
                   >
                     <option value="user">User - Can manage employees</option>
-                    <option value="nurse">Nurse - Can manage medical records</option>
                     <option value="manager">Manager - Can manage contracts</option>
                     <option value="admin">Admin - Full access</option>
                   </select>
@@ -378,13 +376,13 @@ export function InvitesPage() {
                         <div className="text-muted-foreground text-xs mt-1 flex flex-wrap items-center gap-x-1">
                           {invite.email && <span>For: {invite.email}</span>}
                           {invite.email && invite.emailSentAt && (
-                            <span className="inline-flex items-center gap-1 text-green-600">
+                            <span className="inline-flex items-center gap-1 text-success">
                               <Mail className="h-3 w-3" />
                               email sent
                             </span>
                           )}
                           {invite.email && !invite.emailSentAt && invite.effectiveStatus === "pending" && (
-                            <span className="text-yellow-600">(email not sent)</span>
+                            <span className="text-warning">(email not sent)</span>
                           )}
                           <span>· Created by {invite.creatorName}</span>
                           {invite.usedByName && <span>· Used by {invite.usedByName}</span>}
@@ -417,7 +415,7 @@ export function InvitesPage() {
                             title="Copy invite link"
                           >
                             {copiedCode === invite.code ? (
-                              <Check className="h-4 w-4 text-green-500" />
+                              <Check className="h-4 w-4 text-success" />
                             ) : (
                               <Link2 className="h-4 w-4" />
                             )}
@@ -429,7 +427,7 @@ export function InvitesPage() {
                             title="Copy code"
                           >
                             {copiedCode === invite.code ? (
-                              <Check className="h-4 w-4 text-green-500" />
+                              <Check className="h-4 w-4 text-success" />
                             ) : (
                               <Copy className="h-4 w-4" />
                             )}
@@ -438,7 +436,7 @@ export function InvitesPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleRevokeInvite(invite._id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-destructive hover:text-destructive/80"
                           >
                             Revoke
                           </Button>

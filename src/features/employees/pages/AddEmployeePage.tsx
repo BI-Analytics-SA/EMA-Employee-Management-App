@@ -51,8 +51,8 @@ export function AddEmployeePage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-3">Add Employee</h1>
+    <div className="p-4 md:p-6">
+      <h1 className="text-2xl font-bold mb-4">Add Employee</h1>
       <EmployeeForm
         organizationId={organizationId}
         onSubmit={handleSubmit}
