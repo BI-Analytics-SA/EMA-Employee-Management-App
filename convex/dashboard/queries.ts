@@ -14,7 +14,7 @@ export const getDashboardStats = query({
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
-    const profile = await requireOrganizationAccess(ctx, args.organizationId);
+    await requireOrganizationAccess(ctx, args.organizationId);
 
     // --- Total employees ---
     const employees = await ctx.db

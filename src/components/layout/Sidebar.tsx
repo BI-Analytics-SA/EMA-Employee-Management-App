@@ -15,7 +15,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideToggle }: SidebarProps) {
-  const { isAdmin, userName } = useCurrentUser();
+  const { isAdmin } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const medicalEnabled = useModuleEnabled("medical");
   const documentsEnabled = useModuleEnabled("documents");
@@ -33,15 +33,6 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideT
 
   const filteredMainNavItems = filterByModule(mainNavItems);
   const filteredSettingsNavItems = filterByModule(settingsNavItems);
-
-  const initials = userName
-    ? userName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "?";
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
