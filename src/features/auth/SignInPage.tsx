@@ -48,7 +48,10 @@ function getErrorMessage(error: unknown, flow: "signIn" | "signUp"): string {
   if (
     lowerMessage.includes("already exists") ||
     lowerMessage.includes("duplicate") ||
-    lowerMessage.includes("account exists")
+    lowerMessage.includes("account exists") ||
+    lowerMessage.includes("email already") ||
+    lowerMessage.includes("user already") ||
+    lowerMessage.includes("already registered")
   ) {
     return "An account with this email already exists. Please sign in instead.";
   }
@@ -151,7 +154,11 @@ export function SignInPage() {
       await signIn("password", formData);
       // Navigation will happen automatically via the useEffect above
     } catch (err) {
-      setError(getErrorMessage(err, flow));
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      console.error("[Auth error]", err);
+      const friendly = getErrorMessage(err, flow);
+      const showDebug = searchParams.get("debug") === "1";
+      setError(showDebug ? `${friendly} (Debug: ${rawMessage})` : friendly);
     } finally {
       setIsLoading(false);
     }
