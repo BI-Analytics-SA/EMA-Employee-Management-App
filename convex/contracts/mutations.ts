@@ -19,10 +19,15 @@ const createArgs = {
   contractCategory: v.optional(v.string()),
   placeOfSignature: v.optional(v.string()),
   termsAndConditionsHtml: v.optional(v.string()),
+  templateId: v.optional(v.string()),
+  companyName: v.optional(v.string()),
+  employerSignatureUrl: v.optional(v.string()),
+  employerSignatureStorageId: v.optional(v.id("_storage")),
 };
 
 /**
  * Create a new contract. Contracts module must be enabled; caller must be manager+.
+ * When using a template, pass templateId and snapshot (companyName, employerSignatureUrl or employerSignatureStorageId).
  */
 export const create = mutation({
   args: createArgs,
@@ -45,9 +50,33 @@ export const create = mutation({
       throw new Error("Employee does not belong to this organization");
     }
 
+    if (args.templateId !== undefined) {
+      const org = await ctx.db.get(args.organizationId);
+      const templates = org?.settings?.contractTemplates ?? [];
+      const template = templates.find((t) => t.id === args.templateId);
+      if (!template) {
+        throw new Error("Template not found or does not belong to this organization");
+      }
+    }
+
     const now = Date.now();
     return await ctx.db.insert("contracts", {
-      ...args,
+      organizationId: args.organizationId,
+      employeeId: args.employeeId,
+      nameSurname: args.nameSurname,
+      idNumber: args.idNumber,
+      signedDate: args.signedDate,
+      startDate: args.startDate,
+      employeeNo: args.employeeNo,
+      dateEngaged: args.dateEngaged,
+      contractHeading: args.contractHeading,
+      contractCategory: args.contractCategory,
+      placeOfSignature: args.placeOfSignature,
+      termsAndConditionsHtml: args.termsAndConditionsHtml,
+      templateId: args.templateId,
+      companyName: args.companyName,
+      employerSignatureUrl: args.employerSignatureUrl,
+      employerSignatureStorageId: args.employerSignatureStorageId,
       createdAt: now,
       createdBy: profile._id,
     });

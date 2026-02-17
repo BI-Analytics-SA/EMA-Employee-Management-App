@@ -1,14 +1,16 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { getEffectiveTemplates, getDefaultTemplate } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { ContractForm } from "@/features/contracts/components/ContractForm";
 import type { ContractFormValues } from "@/lib/validations/contract";
 import { Loader2, ArrowLeft } from "lucide-react";
-import { Id } from "../../../../convex/_generated/dataModel";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Label } from "@/components/ui/label";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
@@ -27,6 +29,15 @@ export function NewContractPage() {
   const saveContractSignature = useMutation(api.contracts.actions.saveContractSignature);
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
+  const defaultTemplate = useMemo(() => getDefaultTemplate(organization ?? undefined), [organization]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const selectedTemplate =
+    templates.find((t) => t.id === (selectedTemplateId ?? defaultTemplate?.id)) ??
+    defaultTemplate ??
+    templates[0] ??
+    null;
 
   const handleSubmit = async (
     values: ContractFormValues,
@@ -50,6 +61,10 @@ export function NewContractPage() {
         contractCategory: values.contractCategory || undefined,
         placeOfSignature: values.placeOfSignature || undefined,
         termsAndConditionsHtml: html.termsAndConditionsHtml || undefined,
+        templateId: selectedTemplate?.id,
+        companyName: selectedTemplate?.companyName,
+        employerSignatureUrl: selectedTemplate?.employerSignatureUrl,
+        employerSignatureStorageId: selectedTemplate?.employerSignatureStorageId as Id<"_storage"> | undefined,
       });
       const uploadUrl = await generateUploadUrl();
       const response = await fetch(uploadUrl, {
@@ -108,7 +123,6 @@ export function NewContractPage() {
 
   const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
   const nameSurname = `${employee.firstName} ${employee.secondName ?? ""} ${employee.lastName}`.trim();
-  const template = organization?.settings?.contractTemplate;
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -122,21 +136,41 @@ export function NewContractPage() {
         <h1 className="text-2xl font-bold truncate">New contract · {displayName}</h1>
       </div>
 
+      {templates.length > 1 && (
+        <div className="space-y-2">
+          <Label htmlFor="template-select" className="text-xs">Template</Label>
+          <select
+            id="template-select"
+            className="flex h-9 w-full max-w-xs rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={selectedTemplateId ?? selectedTemplate?.id ?? ""}
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+          >
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+                {t.isDefault ? " (default)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <ContractForm
+        key={selectedTemplate?.id ?? "single"}
         defaultValues={{
           nameSurname,
           idNumber: employee.idNumber,
           employeeNo: employee.employeeNo ?? "",
-          contractHeading: template?.contractHeading ?? "",
-          contractCategory: template?.contractCategory ?? "",
-          termsAndConditionsHtml: template?.defaultTermsAndConditions ?? "",
+          contractHeading: selectedTemplate?.contractHeading ?? "",
+          contractCategory: selectedTemplate?.contractCategory ?? "",
+          termsAndConditionsHtml: selectedTemplate?.defaultTermsAndConditions ?? "",
         }}
         onSubmit={handleSubmit}
         onCancel={() => navigate(`/employees/${employeeId}/contracts`)}
         isSubmitting={isSubmitting}
         submitLabel="Create contract"
-        companyName={template?.companyName ?? ""}
-        employerSignatureUrl={template?.employerSignatureUrl ?? undefined}
+        companyName={selectedTemplate?.companyName ?? ""}
+        employerSignatureUrl={selectedTemplate?.employerSignatureUrl ?? undefined}
       />
     </div>
   );

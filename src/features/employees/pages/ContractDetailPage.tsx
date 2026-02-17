@@ -10,6 +10,7 @@ import type { ContractFormValues } from "@/lib/validations/contract";
 import { timestampToDateString } from "@/lib/validations/contract";
 import { Loader2, ArrowLeft, FileText, FileDown, Trash2, ExternalLink } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { getDefaultTemplate } from "@/lib/contractTemplates";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
@@ -40,10 +41,20 @@ export function ContractDetailPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingPdf, setDeletingPdf] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const contractFormRef = useRef<ContractFormHandle>(null);
 
-  const companyName = organization?.settings?.contractTemplate?.companyName ?? "";
+  const defaultTemplate = contract ? getDefaultTemplate(organization ?? undefined) : null;
+  const companyName =
+    (contract?.companyName !== undefined && contract.companyName !== "")
+      ? contract.companyName
+      : (defaultTemplate?.companyName ?? organization?.settings?.contractTemplate?.companyName ?? "");
+  const employerSignatureUrl =
+    contract?.employerSignatureUrl ??
+    defaultTemplate?.employerSignatureUrl ??
+    organization?.settings?.contractTemplate?.employerSignatureUrl ??
+    undefined;
 
   const handleSubmit = async (
     values: ContractFormValues,
@@ -177,8 +188,16 @@ export function ContractDetailPage() {
               type="button"
               variant="outline"
               onClick={() => contractFormRef.current?.generatePdf()}
+              disabled={generatingPdf}
             >
-              Generate PDF
+              {generatingPdf ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  Generating…
+                </>
+              ) : (
+                "Generate PDF"
+              )}
             </Button>
             <Button
               type="button"
@@ -262,6 +281,7 @@ export function ContractDetailPage() {
       {canManageContracts && (
         <ContractForm
           ref={contractFormRef}
+          onGeneratingPdfChange={setGeneratingPdf}
           defaultValues={{
             nameSurname: contract.nameSurname,
             idNumber: contract.idNumber,
@@ -281,7 +301,7 @@ export function ContractDetailPage() {
           contractId={contractIdTyped}
           companyName={companyName}
           signatureUrl={contract.signatureUrl}
-          employerSignatureUrl={organization?.settings?.contractTemplate?.employerSignatureUrl ?? undefined}
+          employerSignatureUrl={employerSignatureUrl}
         />
       )}
 
