@@ -196,13 +196,14 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
             {state === "active" && cameras.length >= 2 && (
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10"
+                variant="outline"
+                size="lg"
+                className="h-12 gap-2 px-4"
                 onClick={handleSwitchCamera}
                 aria-label="Switch camera"
               >
-                <SwitchCamera className="h-4 w-4" />
+                <SwitchCamera className="h-6 w-6" />
+                <span className="text-sm font-medium">Switch</span>
               </Button>
             )}
             <Button
