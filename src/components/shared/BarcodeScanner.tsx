@@ -146,15 +146,28 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
 
   const handleSwitchCamera = () => {
     if (cameras.length < 2) return;
+    const scanner = scannerRef.current;
+    if (!scanner?.isScanning) return;
     const idx = cameras.findIndex((c) => c.deviceId === currentDeviceId);
     const nextIdx = idx >= 0 ? (idx + 1) % cameras.length : 0;
     const nextId = cameras[nextIdx].deviceId;
     nextDeviceIdRef.current = nextId;
-    setSwitchTrigger((t) => t + 1);
-    const scanner = scannerRef.current;
-    if (scanner?.isScanning) {
-      scanner.stop().catch(() => {});
-    }
+    // Library throws "Cannot transition to a new state, already under transition"
+    // if we start a new scanner before this one has fully stopped. So wait for
+    // stop() to complete (and a brief delay for cleanup) before re-running the effect.
+    setState("requesting");
+    scanner
+      .stop()
+      .then(() => {
+        scannerRef.current = null;
+        requestAnimationFrame(() => {
+          setSwitchTrigger((t) => t + 1);
+        });
+      })
+      .catch(() => {
+        scannerRef.current = null;
+        setSwitchTrigger((t) => t + 1);
+      });
   };
 
   if (!open) return null;
