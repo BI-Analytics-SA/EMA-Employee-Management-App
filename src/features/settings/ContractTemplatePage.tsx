@@ -49,14 +49,16 @@ export function ContractTemplatePage() {
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
 
+  // Run migration when org has legacy-only template, or has no templates at all (migration creates default).
   useEffect(() => {
-    if (hasLegacyOnly && organization?._id && !migrating) {
+    const shouldMigrate = (hasLegacyOnly || templates.length === 0) && organization?._id && !migrating;
+    if (shouldMigrate) {
       setMigrating(true);
       migrateContractTemplates({})
         .then(() => setMigrating(false))
         .catch(() => setMigrating(false));
     }
-  }, [hasLegacyOnly, organization?._id, migrateContractTemplates, migrating]);
+  }, [hasLegacyOnly, templates.length, organization?._id, migrateContractTemplates, migrating]);
 
   useEffect(() => {
     if (selected) {
