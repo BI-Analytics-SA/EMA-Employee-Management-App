@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, AlertCircle, UserPlus } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 
 /**
  * Parse Convex Auth errors into user-friendly messages
@@ -181,9 +182,11 @@ export function SignInPage() {
       <Card className="w-full max-w-md shadow-card">
         <CardHeader className="text-center">
           {/* Pepl logo/brand */}
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg">
-            P
-          </div>
+          <img
+            src={logoImg}
+            alt="Pepl"
+            className="mx-auto mb-3 h-12 w-12 shrink-0 rounded-xl object-contain"
+          />
           <CardTitle className="text-2xl">
             {flow === "signIn" ? "Welcome Back" : "Create Account"}
           </CardTitle>
