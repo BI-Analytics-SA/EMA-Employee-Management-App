@@ -49,6 +49,17 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
       nextDeviceIdRef.current ?? { facingMode: "environment" };
     nextDeviceIdRef.current = null;
 
+    // Library uses our videoConstraints as-is and does NOT merge cameraIdOrConfig into it,
+    // so we must include camera selection (facingMode or deviceId) here for it to take effect.
+    const baseConstraints = {
+      width: { ideal: 1280, min: 640 },
+      height: { ideal: 720, min: 480 },
+    };
+    const videoConstraints =
+      typeof cameraIdOrConfig === "string"
+        ? { ...baseConstraints, deviceId: { exact: cameraIdOrConfig } }
+        : { ...baseConstraints, facingMode: "environment" };
+
     const startScanner = async () => {
       const element = document.getElementById(READER_ID);
       if (!element || !mounted) return;
@@ -61,16 +72,12 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         });
         scannerRef.current = html5QrCode;
 
-        // Prefer back camera: use deviceId when switching, else facingMode "environment"
         await html5QrCode.start(
           cameraIdOrConfig,
           {
             fps: 6,
             qrbox: (width, height) => ({ width: Math.min(320, width), height: Math.min(140, height * 0.35) }),
-            videoConstraints: {
-              width: { ideal: 1280, min: 640 },
-              height: { ideal: 720, min: 480 },
-            },
+            videoConstraints,
           },
           (decodedText) => {
             if (!mounted) return;
@@ -138,15 +145,16 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
   }, [open, switchTrigger, onDetected, onClose]);
 
   const handleSwitchCamera = () => {
-    const scanner = scannerRef.current;
-    if (!scanner?.isScanning || cameras.length < 2) return;
+    if (cameras.length < 2) return;
     const idx = cameras.findIndex((c) => c.deviceId === currentDeviceId);
     const nextIdx = idx >= 0 ? (idx + 1) % cameras.length : 0;
     const nextId = cameras[nextIdx].deviceId;
     nextDeviceIdRef.current = nextId;
-    scanner.stop().then(() => {
-      setSwitchTrigger((t) => t + 1);
-    }).catch(() => {});
+    setSwitchTrigger((t) => t + 1);
+    const scanner = scannerRef.current;
+    if (scanner?.isScanning) {
+      scanner.stop().catch(() => {});
+    }
   };
 
   if (!open) return null;
