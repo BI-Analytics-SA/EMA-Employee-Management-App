@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Loader2, X, CameraOff, SwitchCamera } from "lucide-react";
-import { getVideoDevices, type CameraDevice } from "@/lib/camera";
+import { getToggleCameras, type CameraDevice } from "@/lib/camera";
 
 const READER_ID = "barcode-scanner-reader";
 
@@ -106,8 +106,8 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         if (!mountedRef.current) return;
         setState("active");
 
-        // Fetch camera list (labels available after permission granted)
-        const list = await getVideoDevices();
+        // Fetch camera pair [back, front] for toggle (labels available after permission granted)
+        const list = await getToggleCameras();
         if (!mountedRef.current) return;
         setCameras(list);
 

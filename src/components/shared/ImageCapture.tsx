@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, X, CameraOff, SwitchCamera } from "lucide-react";
-import { getVideoDevices, getVideoConstraints, type CameraDevice } from "@/lib/camera";
+import { getToggleCameras, getVideoConstraints, type CameraDevice } from "@/lib/camera";
 
 const DEFAULT_MAX_SIZE_KB = 500;
 const MAX_DIMENSION = 1024;
@@ -126,7 +126,7 @@ export function ImageCapture({
         const track = stream.getVideoTracks()[0];
         const settings = track?.getSettings?.();
         setCurrentDeviceId(settings?.deviceId ?? deviceId ?? null);
-        getVideoDevices().then(setCameras);
+        getToggleCameras().then(setCameras);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         if (msg.includes("NotAllowedError") || msg.includes("Permission")) {

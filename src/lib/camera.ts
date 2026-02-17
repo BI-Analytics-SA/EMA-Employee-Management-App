@@ -26,7 +26,7 @@ export function isFrontCamera(label: string): boolean {
 }
 
 /**
- * Enumerate video input devices. Labels may be empty until camera permission has been granted.
+ * Enumerate ALL video input devices. Labels may be empty until camera permission has been granted.
  * Sorts so back/rear camera is first when labels are available (for default selection).
  */
 export async function getVideoDevices(): Promise<CameraDevice[]> {
@@ -49,6 +49,26 @@ export async function getVideoDevices(): Promise<CameraDevice[]> {
   });
 
   return videoInputs;
+}
+
+/**
+ * Returns a pair [backCamera, frontCamera] for simple toggle switching.
+ * Modern phones often have 3+ back cameras (ultra-wide, main, telephoto);
+ * this picks the first back and first front camera so toggle always flips direction.
+ * Returns only cameras that were found (may be 0, 1, or 2 entries).
+ */
+export async function getToggleCameras(): Promise<CameraDevice[]> {
+  const all = await getVideoDevices();
+  const back = all.find((c) => BACK_LABEL_PATTERNS.test(c.label));
+  const front = all.find((c) => isFrontCamera(c.label));
+
+  // If we couldn't classify (labels empty / unusual), fall back to first two
+  if (!back && !front) return all.slice(0, 2);
+
+  const result: CameraDevice[] = [];
+  if (back) result.push(back);
+  if (front) result.push(front);
+  return result;
 }
 
 /**
