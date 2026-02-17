@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, CameraOff } from "lucide-react";
+import { Loader2, X, CameraOff, SwitchCamera } from "lucide-react";
+import { getVideoDevices, type CameraDevice } from "@/lib/camera";
 
 const READER_ID = "barcode-scanner-reader";
 
@@ -26,17 +27,27 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [state, setState] = useState<ScannerState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [cameras, setCameras] = useState<CameraDevice[]>([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
+  const [switchTrigger, setSwitchTrigger] = useState(0);
+  const nextDeviceIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!open) {
       setState("idle");
       setErrorMessage("");
+      setCameras([]);
+      setCurrentDeviceId(null);
       return;
     }
 
     let mounted = true;
     setState("requesting");
     setErrorMessage("");
+
+    const cameraIdOrConfig: string | { facingMode: "environment" } =
+      nextDeviceIdRef.current ?? { facingMode: "environment" };
+    nextDeviceIdRef.current = null;
 
     const startScanner = async () => {
       const element = document.getElementById(READER_ID);
@@ -50,10 +61,9 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         });
         scannerRef.current = html5QrCode;
 
-        // First arg must be camera ID string OR object with exactly 1 key (library constraint)
-        // Higher resolution via config.videoConstraints improves barcode recognition (Code 128 on SA IDs)
+        // Prefer back camera: use deviceId when switching, else facingMode "environment"
         await html5QrCode.start(
-          { facingMode: "environment" },
+          cameraIdOrConfig,
           {
             fps: 6,
             qrbox: (width, height) => ({ width: Math.min(320, width), height: Math.min(140, height * 0.35) }),
@@ -75,7 +85,15 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           }
         );
 
-        if (mounted) setState("active");
+        if (!mounted) return;
+        const settings = html5QrCode.getRunningTrackSettings?.();
+        const deviceId = (typeof cameraIdOrConfig === "string" ? cameraIdOrConfig : settings?.deviceId) ?? null;
+        setCurrentDeviceId(deviceId);
+        setState("active");
+        // Fetch camera list for switch button (labels may be filled after permission)
+        getVideoDevices().then((list) => {
+          if (mounted) setCameras(list);
+        });
       } catch (err) {
         if (!mounted) return;
         scannerRef.current = null;
@@ -117,7 +135,19 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         scannerRef.current = null;
       }
     };
-  }, [open, onDetected, onClose]);
+  }, [open, switchTrigger, onDetected, onClose]);
+
+  const handleSwitchCamera = () => {
+    const scanner = scannerRef.current;
+    if (!scanner?.isScanning || cameras.length < 2) return;
+    const idx = cameras.findIndex((c) => c.deviceId === currentDeviceId);
+    const nextIdx = idx >= 0 ? (idx + 1) % cameras.length : 0;
+    const nextId = cameras[nextIdx].deviceId;
+    nextDeviceIdRef.current = nextId;
+    scanner.stop().then(() => {
+      setSwitchTrigger((t) => t + 1);
+    }).catch(() => {});
+  };
 
   if (!open) return null;
 
@@ -126,21 +156,35 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
       <div className="relative w-full max-w-lg rounded-lg bg-card shadow-lg overflow-hidden">
         <div className="flex items-center justify-between border-b bg-muted/70 px-3 py-2">
           <h3 className="text-sm font-semibold">Scan ID Number</h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10"
-            onClick={() => {
-              const scanner = scannerRef.current;
-              if (scanner?.isScanning) {
-                scanner.stop().then(onClose);
-              } else {
-                onClose();
-              }
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {state === "active" && cameras.length >= 2 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10"
+                onClick={handleSwitchCamera}
+                aria-label="Switch camera"
+              >
+                <SwitchCamera className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => {
+                const scanner = scannerRef.current;
+                if (scanner?.isScanning) {
+                  scanner.stop().then(onClose);
+                } else {
+                  onClose();
+                }
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="p-4 min-h-[320px] flex flex-col items-center justify-center relative">
