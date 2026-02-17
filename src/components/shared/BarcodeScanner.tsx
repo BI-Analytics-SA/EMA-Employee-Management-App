@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Loader2, X, CameraOff, SwitchCamera } from "lucide-react";
-import { getToggleCameras, type CameraDevice } from "@/lib/camera";
+import { getVideoDevices, friendlyLabel, type CameraDevice } from "@/lib/camera";
 
 const READER_ID = "barcode-scanner-reader";
 
@@ -106,8 +106,8 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         if (!mountedRef.current) return;
         setState("active");
 
-        // Fetch camera pair [back, front] for toggle (labels available after permission granted)
-        const list = await getToggleCameras();
+        // Fetch all cameras (labels available after permission granted)
+        const list = await getVideoDevices();
         if (!mountedRef.current) return;
         setCameras(list);
 
@@ -192,42 +192,27 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
       <div className="relative w-full max-w-lg rounded-lg bg-card shadow-lg overflow-hidden">
         <div className="flex items-center justify-between border-b bg-muted/70 px-3 py-2">
           <h3 className="text-sm font-semibold">Scan ID Number</h3>
-          <div className="flex items-center gap-1">
-            {state === "active" && cameras.length >= 2 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="h-12 gap-2 px-4"
-                onClick={handleSwitchCamera}
-                aria-label="Switch camera"
-              >
-                <SwitchCamera className="h-6 w-6" />
-                <span className="text-sm font-medium">Switch</span>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => {
-                const scanner = scannerRef.current;
-                if (scanner?.isScanning) {
-                  scanner
-                    .stop()
-                    .then(() => {
-                      scannerRef.current = null;
-                      onCloseRef.current();
-                    })
-                    .catch(() => onCloseRef.current());
-                } else {
-                  onCloseRef.current();
-                }
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10"
+            onClick={() => {
+              const scanner = scannerRef.current;
+              if (scanner?.isScanning) {
+                scanner
+                  .stop()
+                  .then(() => {
+                    scannerRef.current = null;
+                    onCloseRef.current();
+                  })
+                  .catch(() => onCloseRef.current());
+              } else {
+                onCloseRef.current();
+              }
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="p-4 min-h-[320px] flex flex-col items-center justify-center relative">
@@ -256,6 +241,25 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
             </>
           )}
         </div>
+
+        {state === "active" && cameras.length >= 2 && (
+          <div className="flex items-center justify-between border-t px-3 py-2">
+            <span className="text-xs text-muted-foreground">
+              {friendlyLabel(cameras[cameraIdx], cameraIdx)} ({cameraIdx + 1}/{cameras.length})
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleSwitchCamera}
+              aria-label="Switch camera"
+            >
+              <SwitchCamera className="h-4 w-4" />
+              Next camera
+            </Button>
+          </div>
+        )}
 
         {state === "active" && (
           <p className="px-4 pb-3 text-xs text-muted-foreground text-center border-t pt-2">

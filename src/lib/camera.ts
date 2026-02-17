@@ -72,6 +72,18 @@ export async function getToggleCameras(): Promise<CameraDevice[]> {
 }
 
 /**
+ * Returns a short user-friendly label for a camera device.
+ * e.g. "camera2 0, facing back" → "Back camera"
+ *      "camera2 1, facing front" → "Front camera"
+ *      Unknown → "Camera 3"
+ */
+export function friendlyLabel(cam: CameraDevice, index: number): string {
+  if (FRONT_LABEL_PATTERNS.test(cam.label)) return "Front camera";
+  if (BACK_LABEL_PATTERNS.test(cam.label)) return "Back camera";
+  return `Camera ${index + 1}`;
+}
+
+/**
  * Get MediaTrackConstraints for the preferred back camera or a specific device.
  * Use for getUserMedia({ video: getVideoConstraints(...) }).
  */
