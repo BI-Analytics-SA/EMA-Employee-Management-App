@@ -17,9 +17,25 @@ Write commit messages so the release bot can choose the bump type:
 | `feat:` or `feat(scope):` | **MINOR** (0.1.1 → 0.2.0) | `feat: display app version in header` |
 | `BREAKING CHANGE:` in body, or `feat!:` / `fix!:` | **MAJOR** (0.2.0 → 1.0.0) | `feat!: require org slug on signup` |
 
+### CRITICAL — case-sensitive, exact format required
+
+- Prefixes **MUST be lowercase**: `fix:` not `Fix:`, `feat:` not `Feat:` or `Feature:`.
+- There **MUST be a colon** immediately after the type (or scope): `feat: add X` not `feat add X`.
 - Use present tense, lowercase after the colon: `fix: resolve overlap` not `Fixed overlap`.
 - Optional scope in parentheses: `feat(contracts): add template picker`.
-- Other prefixes (e.g. `chore:`, `docs:`, `style:`) do not trigger a release by default; only `fix:` and `feat:` (and breaking) do. Use them for clarity.
+
+### Common mistakes that **will not** trigger a release
+
+| Wrong | Why it fails | Correct |
+|-------|-------------|---------|
+| `Fix: resolve overlap` | Capital `F` | `fix: resolve overlap` |
+| `Feature: add templates` | `Feature` is not a type | `feat: add templates` |
+| `Implement new dashboard` | No prefix at all | `feat: implement new dashboard` |
+| `Refactor camera logic` | `Refactor` is not a prefix | `refactor: simplify camera logic` (no release) |
+
+### Non-release prefixes (for clarity only)
+
+Other prefixes (`chore:`, `docs:`, `refactor:`, `style:`, `test:`, `ci:`) do **not** trigger a release by default. Only `fix:` and `feat:` (and breaking changes) produce a version bump. Use the non-release prefixes for clarity — they still must be lowercase.
 
 ## When the version changes
 
