@@ -5,6 +5,10 @@
   command = "npm run build"
   # Output directory (Vite default)
   publish = "dist"
+  # Skip auto-build on push to main so the release workflow can run first;
+  # production deploys are triggered by the workflow via build hook (see .github/workflows/release.yml).
+  # Build-hook builds are not affected by this ignore (Netlify still runs them).
+  ignore = "test \"$BRANCH\" = main && exit 0 || exit 1"
 
 # Environment variables (set these in Netlify dashboard, not here)
 # VITE_CONVEX_URL = your-convex-deployment-url

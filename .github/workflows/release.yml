@@ -1,7 +1,9 @@
 # Automated semantic versioning from conventional commits.
 # On push to main, semantic-release analyzes commits since the last tag,
 # bumps package.json (fix: → PATCH, feat: → MINOR, BREAKING CHANGE → MAJOR),
-# commits the bump, and creates a git tag (e.g. v0.1.1). Netlify then builds that commit.
+# commits the bump, and creates a git tag (e.g. v0.1.1).
+# We then trigger Netlify via build hook so it deploys the commit that has the
+# version bump (netlify.toml skips auto-build on main to avoid the race).
 name: Release
 
 on:
@@ -29,3 +31,9 @@ jobs:
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger Netlify deploy
+        run: |
+          if [ -n "${{ secrets.NETLIFY_BUILD_HOOK_URL }}" ]; then
+            curl -X POST -d '{}' "${{ secrets.NETLIFY_BUILD_HOOK_URL }}"
+          fi
