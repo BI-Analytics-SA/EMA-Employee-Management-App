@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Loader2, X, CameraOff, SwitchCamera } from "lucide-react";
@@ -6,7 +6,6 @@ import { getVideoDevices, type CameraDevice } from "@/lib/camera";
 
 const READER_ID = "barcode-scanner-reader";
 
-// Prioritise Code 128 (SA ID barcodes) and QR; include other common barcodes
 const FORMATS = [
   Html5QrcodeSupportedFormats.CODE_128,
   Html5QrcodeSupportedFormats.QR_CODE,
@@ -25,44 +24,52 @@ type ScannerState = "idle" | "requesting" | "active" | "denied" | "unavailable";
 
 export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const onDetectedRef = useRef(onDetected);
+  const onCloseRef = useRef(onClose);
   const [state, setState] = useState<ScannerState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
-  const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
-  const [switchTrigger, setSwitchTrigger] = useState(0);
-  const nextDeviceIdRef = useRef<string | null>(null);
+  const [cameraIdx, setCameraIdx] = useState(0);
+  const mountedRef = useRef(false);
+  const switchingRef = useRef(false);
 
-  useEffect(() => {
-    if (!open) {
-      setState("idle");
-      setErrorMessage("");
-      setCameras([]);
-      setCurrentDeviceId(null);
-      return;
+  onDetectedRef.current = onDetected;
+  onCloseRef.current = onClose;
+
+  const stopScanner = useCallback(async () => {
+    const scanner = scannerRef.current;
+    if (scanner) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+      } catch {
+        // ignore stop errors
+      }
+      scannerRef.current = null;
     }
+  }, []);
 
-    let mounted = true;
-    setState("requesting");
-    setErrorMessage("");
+  const startScanner = useCallback(
+    async (deviceId?: string) => {
+      if (!mountedRef.current) return;
+      setState("requesting");
+      setErrorMessage("");
 
-    const cameraIdOrConfig: string | { facingMode: "environment" } =
-      nextDeviceIdRef.current ?? { facingMode: "environment" };
-    nextDeviceIdRef.current = null;
-
-    // Library uses our videoConstraints as-is and does NOT merge cameraIdOrConfig into it,
-    // so we must include camera selection (facingMode or deviceId) here for it to take effect.
-    const baseConstraints = {
-      width: { ideal: 1280, min: 640 },
-      height: { ideal: 720, min: 480 },
-    };
-    const videoConstraints =
-      typeof cameraIdOrConfig === "string"
-        ? { ...baseConstraints, deviceId: { exact: cameraIdOrConfig } }
-        : { ...baseConstraints, facingMode: "environment" };
-
-    const startScanner = async () => {
       const element = document.getElementById(READER_ID);
-      if (!element || !mounted) return;
+      if (!element || !mountedRef.current) return;
+
+      // Build constraints: include camera selection so the library uses the right device
+      const baseConstraints = {
+        width: { ideal: 1280, min: 640 },
+        height: { ideal: 720, min: 480 },
+      };
+      const cameraIdOrConfig: string | { facingMode: "environment" } = deviceId ?? {
+        facingMode: "environment",
+      };
+      const videoConstraints = deviceId
+        ? { ...baseConstraints, deviceId: { exact: deviceId } }
+        : { ...baseConstraints, facingMode: "environment" as const };
 
       try {
         const html5QrCode = new Html5Qrcode(READER_ID, {
@@ -76,41 +83,46 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           cameraIdOrConfig,
           {
             fps: 6,
-            qrbox: (width, height) => ({ width: Math.min(320, width), height: Math.min(140, height * 0.35) }),
+            qrbox: (w, h) => ({
+              width: Math.min(320, w),
+              height: Math.min(140, h * 0.35),
+            }),
             videoConstraints,
           },
           (decodedText) => {
-            if (!mounted) return;
-            onDetected(decodedText);
-            html5QrCode.stop().then(() => {
-              scannerRef.current = null;
-              onClose();
-            });
+            if (!mountedRef.current) return;
+            onDetectedRef.current(decodedText);
+            html5QrCode
+              .stop()
+              .then(() => {
+                scannerRef.current = null;
+                onCloseRef.current();
+              })
+              .catch(() => {});
           },
-          () => {
-            // Ignore scan errors (e.g. no code in frame)
-          }
+          () => {}
         );
 
-        if (!mounted) return;
+        if (!mountedRef.current) return;
         setState("active");
 
-        // Determine which device is running and reconcile with the camera list
-        const trackDeviceId =
-          typeof cameraIdOrConfig === "string"
-            ? cameraIdOrConfig
-            : html5QrCode.getRunningTrackSettings?.()?.deviceId ?? null;
+        // Fetch camera list (labels available after permission granted)
+        const list = await getVideoDevices();
+        if (!mountedRef.current) return;
+        setCameras(list);
 
-        getVideoDevices().then((list) => {
-          if (!mounted) return;
-          setCameras(list);
-          // Match the running track to the list; fall back to cameras[0]
-          // (back camera, sorted first) since we requested "environment".
-          const match = list.find((c) => c.deviceId === trackDeviceId);
-          setCurrentDeviceId(match?.deviceId ?? list[0]?.deviceId ?? null);
-        });
+        // Figure out which index we're on so switch cycles correctly
+        if (deviceId) {
+          const idx = list.findIndex((c) => c.deviceId === deviceId);
+          if (idx >= 0) setCameraIdx(idx);
+        } else {
+          // Started with facingMode "environment"; match running track to list
+          const trackId = html5QrCode.getRunningTrackSettings?.()?.deviceId;
+          const idx = trackId ? list.findIndex((c) => c.deviceId === trackId) : -1;
+          setCameraIdx(idx >= 0 ? idx : 0);
+        }
       } catch (err) {
-        if (!mounted) return;
+        if (!mountedRef.current) return;
         scannerRef.current = null;
         const message = err instanceof Error ? err.message : String(err);
         if (
@@ -132,51 +144,46 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           setErrorMessage(message || "Failed to start camera.");
         }
       }
-    };
+    },
+    [stopScanner]
+  );
 
+  // Open / close lifecycle — only depends on `open`
+  useEffect(() => {
+    if (!open) {
+      mountedRef.current = false;
+      setState("idle");
+      setErrorMessage("");
+      setCameras([]);
+      setCameraIdx(0);
+      stopScanner();
+      return;
+    }
+
+    mountedRef.current = true;
     startScanner();
 
     return () => {
-      mounted = false;
-      const scanner = scannerRef.current;
-      if (scanner?.isScanning) {
-        scanner
-          .stop()
-          .then(() => {
-            scannerRef.current = null;
-          })
-          .catch(() => {});
-      } else {
-        scannerRef.current = null;
-      }
+      mountedRef.current = false;
+      stopScanner();
     };
-  }, [open, switchTrigger, onDetected, onClose]);
+    // startScanner and stopScanner are stable (useCallback with no changing deps)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-  const handleSwitchCamera = () => {
-    if (cameras.length < 2) return;
-    const scanner = scannerRef.current;
-    if (!scanner?.isScanning) return;
-    const idx = cameras.findIndex((c) => c.deviceId === currentDeviceId);
-    const nextIdx = idx >= 0 ? (idx + 1) % cameras.length : 0;
-    const nextId = cameras[nextIdx].deviceId;
-    nextDeviceIdRef.current = nextId;
-    // Library throws "Cannot transition to a new state, already under transition"
-    // if we start a new scanner before this one has fully stopped. So wait for
-    // stop() to complete (and a brief delay for cleanup) before re-running the effect.
-    setState("requesting");
-    scanner
-      .stop()
-      .then(() => {
-        scannerRef.current = null;
-        requestAnimationFrame(() => {
-          setSwitchTrigger((t) => t + 1);
-        });
-      })
-      .catch(() => {
-        scannerRef.current = null;
-        setSwitchTrigger((t) => t + 1);
-      });
-  };
+  const handleSwitchCamera = useCallback(async () => {
+    if (cameras.length < 2 || switchingRef.current) return;
+    switchingRef.current = true;
+    try {
+      const nextIdx = (cameraIdx + 1) % cameras.length;
+      const nextId = cameras[nextIdx].deviceId;
+      setState("requesting");
+      await stopScanner();
+      await startScanner(nextId);
+    } finally {
+      switchingRef.current = false;
+    }
+  }, [cameras, cameraIdx, stopScanner, startScanner]);
 
   if (!open) return null;
 
@@ -205,9 +212,15 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
               onClick={() => {
                 const scanner = scannerRef.current;
                 if (scanner?.isScanning) {
-                  scanner.stop().then(onClose);
+                  scanner
+                    .stop()
+                    .then(() => {
+                      scannerRef.current = null;
+                      onCloseRef.current();
+                    })
+                    .catch(() => onCloseRef.current());
                 } else {
-                  onClose();
+                  onCloseRef.current();
                 }
               }}
             >
@@ -217,7 +230,6 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         </div>
 
         <div className="p-4 min-h-[320px] flex flex-col items-center justify-center relative">
-          {/* Reader div must exist when start() runs; library injects video into it */}
           <div
             id={READER_ID}
             className="w-full rounded overflow-hidden [&>div]:!rounded [& video]:!rounded min-h-[280px]"
@@ -236,7 +248,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center z-20 p-4">
                 <CameraOff className="h-12 w-12 text-destructive" />
                 <p className="text-sm text-muted-foreground">{errorMessage}</p>
-                <Button variant="outline" size="sm" onClick={onClose}>
+                <Button variant="outline" size="sm" onClick={() => onCloseRef.current()}>
                   Close
                 </Button>
               </div>
