@@ -93,13 +93,21 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         );
 
         if (!mounted) return;
-        const settings = html5QrCode.getRunningTrackSettings?.();
-        const deviceId = (typeof cameraIdOrConfig === "string" ? cameraIdOrConfig : settings?.deviceId) ?? null;
-        setCurrentDeviceId(deviceId);
         setState("active");
-        // Fetch camera list for switch button (labels may be filled after permission)
+
+        // Determine which device is running and reconcile with the camera list
+        const trackDeviceId =
+          typeof cameraIdOrConfig === "string"
+            ? cameraIdOrConfig
+            : html5QrCode.getRunningTrackSettings?.()?.deviceId ?? null;
+
         getVideoDevices().then((list) => {
-          if (mounted) setCameras(list);
+          if (!mounted) return;
+          setCameras(list);
+          // Match the running track to the list; fall back to cameras[0]
+          // (back camera, sorted first) since we requested "environment".
+          const match = list.find((c) => c.deviceId === trackDeviceId);
+          setCurrentDeviceId(match?.deviceId ?? list[0]?.deviceId ?? null);
         });
       } catch (err) {
         if (!mounted) return;
