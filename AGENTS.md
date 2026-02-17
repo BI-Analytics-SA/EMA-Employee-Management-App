@@ -16,6 +16,8 @@ When working in this repo, follow the project’s Cursor rules.
   - `fix:` or `fix(scope):` → PATCH bump (e.g. 0.1.0 → 0.1.1).
   - `feat:` or `feat(scope):` → MINOR bump (e.g. 0.1.1 → 0.2.0).
   - `BREAKING CHANGE:` or `feat!:` / `fix!:` → MAJOR bump.
+  - **Prefixes MUST be lowercase** — `fix:` not `Fix:`, `feat:` not `Feat:` or `Feature:`.
+  - **A colon is required** after the type: `feat: add X` not `feat add X`.
   - Version is bumped automatically on push to `main` by semantic-release (GitHub Actions); no manual edits to `package.json` version for releases.
 
 - **Other rules**  

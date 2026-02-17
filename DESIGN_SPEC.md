@@ -4,7 +4,7 @@ This document defines the visual language, design tokens, component patterns, an
 
 ---
 
-## 1. Brand Identity and Color Palette
+## 1. Brand Identity and Color Palette - Important
 
 The palette is derived directly from the **Pepl logo**, which contains three colours:
 
