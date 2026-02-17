@@ -188,9 +188,9 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="relative w-full max-w-lg rounded-lg bg-card shadow-lg overflow-hidden">
-        <div className="flex items-center justify-between border-b bg-muted/70 px-3 py-2">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 p-2 sm:p-4">
+      <div className="relative w-full max-w-lg max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] flex flex-col rounded-lg bg-card shadow-lg overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/70 px-3 py-2 shrink-0">
           <h3 className="text-sm font-semibold">Scan ID Number</h3>
           <Button
             variant="ghost"
@@ -215,10 +215,10 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           </Button>
         </div>
 
-        <div className="p-4 min-h-[320px] flex flex-col items-center justify-center relative">
+        <div className="flex-1 min-h-0 p-4 flex flex-col items-center justify-center relative overflow-hidden">
           <div
             id={READER_ID}
-            className="w-full rounded overflow-hidden [&>div]:!rounded [& video]:!rounded min-h-[280px]"
+            className="w-full rounded overflow-hidden [&>div]:!rounded [& video]:!rounded min-h-[200px]"
           />
 
           {state === "requesting" && (
@@ -243,7 +243,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         </div>
 
         {state === "active" && cameras.length >= 2 && (
-          <div className="flex items-center justify-between border-t px-3 py-2">
+          <div className="flex items-center justify-between border-t px-3 py-2 shrink-0">
             <span className="text-xs text-muted-foreground">
               {friendlyLabel(cameras[cameraIdx], cameraIdx)} ({cameraIdx + 1}/{cameras.length})
             </span>
@@ -262,7 +262,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         )}
 
         {state === "active" && (
-          <p className="px-4 pb-3 text-xs text-muted-foreground text-center border-t pt-2">
+          <p className="px-4 pb-3 text-xs text-muted-foreground text-center border-t pt-2 shrink-0">
             For ID barcodes: hold the document close to the camera and keep it steady, or move it slowly into the frame. Good lighting helps.
           </p>
         )}
