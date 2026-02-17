@@ -242,29 +242,30 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
           )}
         </div>
 
-        {state === "active" && cameras.length >= 2 && (
-          <div className="flex items-center justify-between border-t px-3 py-2 shrink-0">
-            <span className="text-xs text-muted-foreground">
-              {friendlyLabel(cameras[cameraIdx], cameraIdx)} ({cameraIdx + 1}/{cameras.length})
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={handleSwitchCamera}
-              aria-label="Switch camera"
-            >
-              <SwitchCamera className="h-4 w-4" />
-              Next camera
-            </Button>
-          </div>
-        )}
-
         {state === "active" && (
-          <p className="px-4 pb-3 text-xs text-muted-foreground text-center border-t pt-2 shrink-0">
-            For ID barcodes: hold the document close to the camera and keep it steady, or move it slowly into the frame. Good lighting helps.
-          </p>
+          <div className="border-t px-3 py-2 shrink-0 space-y-1.5">
+            {cameras.length >= 2 && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  {friendlyLabel(cameras[cameraIdx], cameraIdx)} ({cameraIdx + 1}/{cameras.length})
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleSwitchCamera}
+                  aria-label="Switch camera"
+                >
+                  <SwitchCamera className="h-4 w-4" />
+                  Next camera
+                </Button>
+              </div>
+            )}
+            <p className="text-[11px] text-muted-foreground text-center">
+              Hold the ID barcode close and steady. Good lighting helps.
+            </p>
+          </div>
         )}
       </div>
     </div>
