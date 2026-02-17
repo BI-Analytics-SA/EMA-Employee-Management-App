@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, X, CameraOff } from "lucide-react";
+import { Camera, Upload, X, CameraOff, SwitchCamera } from "lucide-react";
+import { getVideoDevices, getVideoConstraints, friendlyLabel, type CameraDevice } from "@/lib/camera";
 
 const DEFAULT_MAX_SIZE_KB = 500;
 const MAX_DIMENSION = 1024;
@@ -93,6 +94,8 @@ export function ImageCapture({
   );
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [cameras, setCameras] = useState<CameraDevice[]>([]);
+  const [cameraIdx, setCameraIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const stopCamera = useCallback(() => {
@@ -106,37 +109,59 @@ export function ImageCapture({
     return () => stopCamera();
   }, [stopCamera]);
 
+  const startCamera = useCallback(
+    async (deviceId?: string | null) => {
+      setState("camera");
+      setErrorMessage("");
+      stopCamera();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: getVideoConstraints(deviceId),
+          audio: false,
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        getVideoDevices().then((list) => {
+          setCameras(list);
+          if (deviceId) {
+            const idx = list.findIndex((c) => c.deviceId === deviceId);
+            if (idx >= 0) setCameraIdx(idx);
+          } else {
+            const track = stream.getVideoTracks()[0];
+            const trackId = track?.getSettings?.()?.deviceId;
+            const idx = trackId ? list.findIndex((c) => c.deviceId === trackId) : -1;
+            setCameraIdx(idx >= 0 ? idx : 0);
+          }
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("NotAllowedError") || msg.includes("Permission")) {
+          setErrorMessage("Camera access was denied.");
+        } else if (msg.includes("NotFoundError") || msg.includes("not found")) {
+          setErrorMessage("No camera found.");
+        } else {
+          setErrorMessage(msg || "Failed to start camera.");
+        }
+        setState("error");
+      }
+    },
+    [stopCamera]
+  );
+
+  const handleSwitchCamera = useCallback(() => {
+    if (cameras.length < 2) return;
+    const nextIdx = (cameraIdx + 1) % cameras.length;
+    const nextId = cameras[nextIdx].deviceId;
+    startCamera(nextId);
+  }, [cameras, cameraIdx, startCamera]);
+
   useEffect(() => {
     if (cameraOnly && state === "camera") {
       startCamera();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- startCamera is stable enough
-  }, [cameraOnly, state]);
-
-  const startCamera = async () => {
-    setState("camera");
-    setErrorMessage("");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("NotAllowedError") || msg.includes("Permission")) {
-        setErrorMessage("Camera access was denied.");
-      } else if (msg.includes("NotFoundError") || msg.includes("not found")) {
-        setErrorMessage("No camera found.");
-      } else {
-        setErrorMessage(msg || "Failed to start camera.");
-      }
-      setState("error");
-    }
-  };
+  }, [cameraOnly, state, startCamera]);
 
   const handleCapture = async () => {
     const video = videoRef.current;
@@ -230,6 +255,23 @@ export function ImageCapture({
             muted
             className="w-full h-full object-cover"
           />
+          {cameras.length >= 2 && (
+            <div className="absolute top-2 right-2 flex items-center gap-1.5">
+              <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
+                {friendlyLabel(cameras[cameraIdx], cameraIdx)} ({cameraIdx + 1}/{cameras.length})
+              </span>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-9 w-9 rounded-full shadow-md"
+                onClick={handleSwitchCamera}
+                aria-label="Switch camera"
+              >
+                <SwitchCamera className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="button" onClick={handleCapture}>
@@ -280,7 +322,7 @@ export function ImageCapture({
     return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={startCamera}>
+          <Button type="button" onClick={() => startCamera()}>
             <Camera className="h-4 w-4 mr-2" />
             Use camera
           </Button>

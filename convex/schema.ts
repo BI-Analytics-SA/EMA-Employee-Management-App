@@ -45,6 +45,21 @@ export default defineSchema({
             employerSignatureUrl: v.optional(v.string()),
           })
         ),
+        contractTemplates: v.optional(
+          v.array(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+              isDefault: v.boolean(),
+              companyName: v.optional(v.string()),
+              contractHeading: v.optional(v.string()),
+              contractCategory: v.optional(v.string()),
+              defaultTermsAndConditions: v.optional(v.string()),
+              employerSignatureStorageId: v.optional(v.id("_storage")),
+              employerSignatureUrl: v.optional(v.string()),
+            })
+          )
+        ),
         exportConfig: v.optional(
           v.object({
             columns: v.array(
@@ -198,6 +213,12 @@ export default defineSchema({
     // Signature (Convex file storage)
     signatureStorageId: v.optional(v.id("_storage")),
     signatureUrl: v.optional(v.string()),
+
+    // Template reference and snapshot (Option B: document uses snapshot at view/PDF)
+    templateId: v.optional(v.string()),
+    companyName: v.optional(v.string()),
+    employerSignatureStorageId: v.optional(v.id("_storage")),
+    employerSignatureUrl: v.optional(v.string()),
 
     // Rich text content (HTML from TipTap)
     termsAndConditionsHtml: v.optional(v.string()),

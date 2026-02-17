@@ -1,0 +1,33 @@
+---
+description: Versioning is automated from conventional commits; write commit messages so the bot can bump PATCH/MINOR/MAJOR
+alwaysApply: true
+---
+
+# Versioning and Conventional Commits
+
+App version is **automated**: [semantic-release](https://github.com/semantic-release/semantic-release) runs on push to `main`, reads commit messages since the last tag, and bumps `package.json` version (no npm publish). The front end shows this version (see EMA-10). Netlify builds the commit that contains the bump, so production always has a clear version.
+
+## Commit message format (Conventional Commits)
+
+Write commit messages so the release bot can choose the bump type:
+
+| Prefix / content | Bump type | Example |
+|------------------|-----------|---------|
+| `fix:` or `fix(scope):` | **PATCH** (0.1.0 → 0.1.1) | `fix: date picker overlap on mobile` |
+| `feat:` or `feat(scope):` | **MINOR** (0.1.1 → 0.2.0) | `feat: display app version in header` |
+| `BREAKING CHANGE:` in body, or `feat!:` / `fix!:` | **MAJOR** (0.2.0 → 1.0.0) | `feat!: require org slug on signup` |
+
+- Use present tense, lowercase after the colon: `fix: resolve overlap` not `Fixed overlap`.
+- Optional scope in parentheses: `feat(contracts): add template picker`.
+- Other prefixes (e.g. `chore:`, `docs:`, `style:`) do not trigger a release by default; only `fix:` and `feat:` (and breaking) do. Use them for clarity.
+
+## When the version changes
+
+- **When:** On **push to `main`**. If there are releasable commits (at least one `fix:` or `feat:` since last tag), the GitHub Action runs semantic-release, which updates `package.json`, commits, and creates a git tag (e.g. `v0.1.1`). Netlify then builds that commit, so the deployed app shows the new version.
+- **No releasable commits:** semantic-release does nothing; no new tag or commit. So not every merge to main produces a new version—only when there are fix/feat commits.
+
+## References
+
+- Conventional Commits: https://www.conventionalcommits.org/
+- semantic-release: https://github.com/semantic-release/semantic-release
+- Project plan: `docs/plans/EMA-10-display-version-frontend.md`

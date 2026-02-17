@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { getEffectiveTemplates } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, FileText, Plus, FileCheck, Trash2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -25,8 +26,15 @@ export function ContractListPage() {
     api.contracts.queries.listByEmployee,
     employeeId ? { employeeId } : "skip"
   );
+  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
+  const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
   const removeContract = useMutation(api.contracts.mutations.remove);
   const [deletingId, setDeletingId] = useState<Id<"contracts"> | null>(null);
+
+  function getTemplateName(templateId: string | undefined): string {
+    if (!templateId) return "Default";
+    return templates.find((t) => t.id === templateId)?.name ?? "Default";
+  }
 
   if (userLoading || !employeeId) {
     return (
@@ -118,6 +126,9 @@ export function ContractListPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Start: {timestampToDateString(c.startDate)}
+                        <span className="ml-1.5">
+                          · Template: {getTemplateName(c.templateId)}
+                        </span>
                       </p>
                     </div>
                     {c.pdfUrl ? (

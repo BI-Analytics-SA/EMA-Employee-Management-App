@@ -8,6 +8,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/theme-provider";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { APP_VERSION } from "@/lib/version";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -131,6 +132,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                 {organization?.name && (
                   <p className="text-xs text-muted-foreground truncate">{organization.name}</p>
                 )}
+                <p className="text-xs text-muted-foreground mt-1" title="App version">
+                  App version {APP_VERSION}
+                </p>
               </div>
               {/* Actions */}
               <button

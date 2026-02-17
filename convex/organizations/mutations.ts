@@ -108,6 +108,7 @@ export const updateSettings = mutation({
         documentTypes: s?.documentTypes,
         enabledModules: s?.enabledModules,
         contractTemplate: s?.contractTemplate,
+        contractTemplates: s?.contractTemplates,
         exportConfig: s?.exportConfig,
       },
     });
@@ -124,6 +125,7 @@ const documentTypeValidator = v.object({
 });
 
 type OrgSettings = Doc<"organizations">["settings"];
+type ContractTemplatesArray = NonNullable<NonNullable<OrgSettings>["contractTemplates"]>;
 
 /** Build full settings object so required arrays are never undefined when patching. */
 function mergeSettings(
@@ -141,6 +143,7 @@ function mergeSettings(
     documentTypes: override.documentTypes,
     enabledModules: existing?.enabledModules,
     contractTemplate: existing?.contractTemplate,
+    contractTemplates: existing?.contractTemplates,
     exportConfig: existing?.exportConfig,
   };
 }
@@ -307,6 +310,7 @@ function mergeSettingsWithModules(
     documentTypes: existing?.documentTypes,
     enabledModules,
     contractTemplate: existing?.contractTemplate,
+    contractTemplates: existing?.contractTemplates,
     exportConfig: existing?.exportConfig,
   };
 }
@@ -473,6 +477,7 @@ export const updateExportConfig = mutation({
       documentTypes: s?.documentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: s?.contractTemplate,
+      contractTemplates: s?.contractTemplates,
       exportConfig: { columns: args.columns },
     };
     await ctx.db.patch(args.organizationId, {
@@ -480,6 +485,100 @@ export const updateExportConfig = mutation({
     });
 
     return { success: true };
+  },
+});
+
+/**
+ * One-time migration: move settings.contractTemplate to settings.contractTemplates (single Default template)
+ * and backfill contract snapshot (companyName, employerSignatureUrl) on existing contracts from org default.
+ * Safe to run multiple times (idempotent for orgs already migrated).
+ */
+export const migrateContractTemplates = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile || profile.role !== "admin") {
+      throw new Error("Only organization admins can run migration");
+    }
+    const org = await ctx.db.get(profile.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const s = org.settings;
+    const existingTemplates = s?.contractTemplates ?? [];
+    const legacy = s?.contractTemplate;
+    if (existingTemplates.length > 0 && !legacy) {
+      return { migrated: false, message: "Already using contractTemplates" };
+    }
+    let templates: ContractTemplatesArray = [];
+    if (existingTemplates.length > 0) {
+      templates = existingTemplates;
+    } else if (legacy) {
+      const t = legacy as {
+        companyName?: string;
+        contractHeading?: string;
+        contractCategory?: string;
+        defaultTermsAndConditions?: string;
+        employerSignatureStorageId?: Id<"_storage">;
+        employerSignatureUrl?: string;
+      };
+      templates = [
+        {
+          id: "default",
+          name: "Default",
+          isDefault: true,
+          companyName: t.companyName,
+          contractHeading: t.contractHeading,
+          contractCategory: t.contractCategory,
+          defaultTermsAndConditions: t.defaultTermsAndConditions,
+          employerSignatureStorageId: t.employerSignatureStorageId,
+          employerSignatureUrl: t.employerSignatureUrl,
+        },
+      ];
+    } else {
+      templates = [{ id: "default", name: "Default", isDefault: true }];
+    }
+    type OrgSettings = NonNullable<Doc<"organizations">["settings"]>;
+    const newSettings: OrgSettings = {
+      departments: s?.departments ?? [],
+      deptGroups: s?.deptGroups ?? [],
+      shifts: s?.shifts ?? [],
+      shiftAllocations: s?.shiftAllocations ?? [],
+      suburbs: s?.suburbs ?? [],
+      cities: s?.cities ?? [],
+      postCodes: s?.postCodes ?? [],
+      documentTypes: s?.documentTypes,
+      enabledModules: s?.enabledModules,
+      contractTemplates: templates,
+      exportConfig: s?.exportConfig,
+    };
+    await ctx.db.patch(profile.organizationId, { settings: newSettings });
+
+    const defaultTemplate = templates.find((x) => x.isDefault) ?? templates[0];
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_organization", (q) => q.eq("organizationId", profile.organizationId))
+      .collect();
+    let backfilled = 0;
+    for (const c of contracts) {
+      if (c.companyName !== undefined && c.employerSignatureUrl !== undefined) continue;
+      const patch: { companyName?: string; employerSignatureUrl?: string; employerSignatureStorageId?: Id<"_storage">; templateId?: string } = {};
+      if (c.companyName === undefined && defaultTemplate?.companyName !== undefined)
+        patch.companyName = defaultTemplate.companyName;
+      if (c.employerSignatureUrl === undefined && defaultTemplate?.employerSignatureUrl !== undefined)
+        patch.employerSignatureUrl = defaultTemplate.employerSignatureUrl;
+      if (c.employerSignatureStorageId === undefined && defaultTemplate?.employerSignatureStorageId !== undefined)
+        patch.employerSignatureStorageId = defaultTemplate.employerSignatureStorageId;
+      if (c.templateId === undefined) patch.templateId = defaultTemplate?.id ?? "default";
+      if (Object.keys(patch).length > 0) {
+        await ctx.db.patch(c._id, patch);
+        backfilled += 1;
+      }
+    }
+    return { migrated: true, backfilled };
   },
 });
 
@@ -541,6 +640,7 @@ export const saveEmployerSignature = mutation({
       documentTypes: s?.documentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
+      contractTemplates: s?.contractTemplates,
       exportConfig: s?.exportConfig,
     };
     type OrgSettings = NonNullable<Doc<"organizations">["settings"]>;
@@ -608,10 +708,250 @@ export const deleteEmployerSignature = mutation({
       documentTypes: s?.documentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
+      contractTemplates: s?.contractTemplates,
       exportConfig: s?.exportConfig,
     };
     await ctx.db.patch(args.organizationId, {
       settings: newSettings as unknown as OrgSettingsDel,
+    });
+    return { success: true };
+  },
+});
+
+// --- Multiple contract templates (EMA-5) ---
+
+function buildFullSettings(
+  s: OrgSettings | undefined,
+  override: { contractTemplates: NonNullable<OrgSettings>["contractTemplates"] }
+): OrgSettings {
+  return {
+    departments: s?.departments ?? [],
+    deptGroups: s?.deptGroups ?? [],
+    shifts: s?.shifts ?? [],
+    shiftAllocations: s?.shiftAllocations ?? [],
+    suburbs: s?.suburbs ?? [],
+    cities: s?.cities ?? [],
+    postCodes: s?.postCodes ?? [],
+    documentTypes: s?.documentTypes,
+    enabledModules: s?.enabledModules,
+    contractTemplate: s?.contractTemplate,
+    contractTemplates: override.contractTemplates,
+    exportConfig: s?.exportConfig,
+  };
+}
+
+export const addContractTemplate = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    name: v.string(),
+    setAsDefault: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = org.settings?.contractTemplates ?? [];
+    const id = crypto.randomUUID();
+    let next = [
+      ...templates.map((t) => ({ ...t, isDefault: args.setAsDefault ? t.id === id : t.isDefault })),
+      {
+        id,
+        name: args.name.trim() || "New template",
+        isDefault: args.setAsDefault ?? (templates.length === 0),
+        companyName: undefined,
+        contractHeading: undefined,
+        contractCategory: undefined,
+        defaultTermsAndConditions: undefined,
+        employerSignatureStorageId: undefined,
+        employerSignatureUrl: undefined,
+      },
+    ];
+    if (args.setAsDefault) {
+      next = next.map((t) => ({ ...t, isDefault: t.id === id }));
+    } else if (templates.length === 0) {
+      next = next.map((t) => ({ ...t, isDefault: t.id === id }));
+    }
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: next }),
+    });
+    return id;
+  },
+});
+
+export const updateContractTemplateById = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    templateId: v.string(),
+    name: v.optional(v.string()),
+    companyName: v.optional(v.string()),
+    contractHeading: v.optional(v.string()),
+    contractCategory: v.optional(v.string()),
+    defaultTermsAndConditions: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = [...(org.settings?.contractTemplates ?? [])];
+    const i = templates.findIndex((t) => t.id === args.templateId);
+    if (i === -1) throw new Error("Template not found");
+    const t = templates[i];
+    if (args.name !== undefined) t.name = args.name.trim() || t.name;
+    if (args.companyName !== undefined) t.companyName = args.companyName;
+    if (args.contractHeading !== undefined) t.contractHeading = args.contractHeading;
+    if (args.contractCategory !== undefined) t.contractCategory = args.contractCategory;
+    if (args.defaultTermsAndConditions !== undefined) t.defaultTermsAndConditions = args.defaultTermsAndConditions;
+    templates[i] = t;
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: templates }),
+    });
+    return { success: true };
+  },
+});
+
+export const removeContractTemplate = mutation({
+  args: { organizationId: v.id("organizations"), templateId: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = org.settings?.contractTemplates ?? [];
+    const t = templates.find((x) => x.id === args.templateId);
+    if (!t) throw new Error("Template not found");
+    if (t.isDefault) throw new Error("Cannot delete the default template");
+    const next = templates.filter((x) => x.id !== args.templateId);
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: next }),
+    });
+    return { success: true };
+  },
+});
+
+export const setDefaultContractTemplate = mutation({
+  args: { organizationId: v.id("organizations"), templateId: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = (org.settings?.contractTemplates ?? []).map((t) => ({
+      ...t,
+      isDefault: t.id === args.templateId,
+    }));
+    const found = templates.some((t) => t.id === args.templateId);
+    if (!found) throw new Error("Template not found");
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: templates }),
+    });
+    return { success: true };
+  },
+});
+
+export const saveEmployerSignatureForTemplate = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    templateId: v.string(),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can update employer signature");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = [...(org.settings?.contractTemplates ?? [])];
+    const i = templates.findIndex((t) => t.id === args.templateId);
+    if (i === -1) throw new Error("Template not found");
+    const existingId = templates[i].employerSignatureStorageId;
+    if (existingId) {
+      try {
+        await ctx.storage.delete(existingId);
+      } catch {
+        // ignore
+      }
+    }
+    const url = await ctx.storage.getUrl(args.storageId);
+    templates[i] = {
+      ...templates[i],
+      employerSignatureStorageId: args.storageId,
+      employerSignatureUrl: url ?? undefined,
+    };
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: templates }),
+    });
+    return { success: true };
+  },
+});
+
+export const deleteEmployerSignatureForTemplate = mutation({
+  args: { organizationId: v.id("organizations"), templateId: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can delete employer signature");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+    const templates = [...(org.settings?.contractTemplates ?? [])];
+    const i = templates.findIndex((t) => t.id === args.templateId);
+    if (i === -1) throw new Error("Template not found");
+    const storageId = templates[i].employerSignatureStorageId;
+    if (storageId) {
+      try {
+        await ctx.storage.delete(storageId);
+      } catch {
+        // ignore
+      }
+    }
+    templates[i] = {
+      ...templates[i],
+      employerSignatureStorageId: undefined,
+      employerSignatureUrl: undefined,
+    };
+    await ctx.db.patch(args.organizationId, {
+      settings: buildFullSettings(org.settings, { contractTemplates: templates }),
     });
     return { success: true };
   },

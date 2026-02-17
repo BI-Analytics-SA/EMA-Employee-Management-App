@@ -39,6 +39,8 @@ type Props = {
   employerSignatureUrl?: string | null;
   /** Form id for external submit buttons (e.g. form="contract-form"). */
   formId?: string;
+  /** Called when PDF generation starts or finishes so the parent can show a spinner on another button. */
+  onGeneratingPdfChange?: (generating: boolean) => void;
 };
 
 export type ContractFormHandle = {
@@ -63,6 +65,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
   signatureUrl = null,
   employerSignatureUrl = null,
   formId = "contract-form",
+  onGeneratingPdfChange,
 }, ref) {
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [termsAndConditionsHtml, setTermsAndConditionsHtml] = useState(
@@ -104,6 +107,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
   const handleGeneratePdf = async () => {
     if (!contractId || !pdfContainerRef.current) return;
     setGeneratingPdf(true);
+    onGeneratingPdfChange?.(true);
 
     // html2pdf.js cannot capture elements that aren't in the normal document flow.
     // Instead we use html2canvas + jsPDF directly: briefly append the template
@@ -137,6 +141,14 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
     const contentWrapper = document.createElement("div");
     contentWrapper.innerHTML = pdfContainerRef.current.innerHTML;
     tmpDiv.appendChild(contentWrapper);
+
+    // Mark every block in the terms body as keep-together so we never cut through
+    // a paragraph, heading, or list item (avoids mid-sentence page breaks).
+    const body = contentWrapper.querySelector(".contract-pdf-body");
+    if (body) {
+      const blocks = body.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li");
+      blocks.forEach((el) => el.classList.add("pdf-keep-together"));
+    }
 
     document.body.appendChild(tmpDiv);
 
@@ -188,8 +200,9 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
       const margin = 10;
+      const footerHeight = 10; // Reserved for "Page X of Y"
       const usableW = pageW - margin * 2;
-      const usableH = pageH - margin * 2;
+      const usableH = pageH - margin * 2 - footerHeight; // Content area only; footer below
 
       // Ratio: canvas pixels per DOM pixel
       const canvasScale = canvas.height / domHeight;
@@ -215,8 +228,12 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
         // Check if this cut would split any keep-together block
         for (const range of keepRanges) {
           if (range.top < idealCut && range.bottom > idealCut) {
-            // The cut falls inside this block — move the cut to just before the block
+            // Move the cut to just before the block so the block stays on the next page
             idealCut = Math.max(cursor + 1, range.top);
+            // If that didn't advance (block taller than a page), move cut past the block to avoid infinite loop
+            if (idealCut <= cursor) {
+              idealCut = range.bottom;
+            }
             console.log(`[PDF] Adjusted cut from ${cursor + pageCanvasPx} to ${idealCut} to avoid splitting block (top=${range.top}, bottom=${range.bottom})`);
             break;
           }
@@ -249,7 +266,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
         pdf.addImage(sliceImgData, "JPEG", margin, margin, imgW, sliceImgH);
       }
 
-      // Stamp dynamic "Page X of Y" on every page
+      // Stamp "Page X of Y" in the footer of every page (right-aligned)
       const totalPageCount = pdf.getNumberOfPages();
       for (let i = 1; i <= totalPageCount; i++) {
         pdf.setPage(i);
@@ -257,7 +274,8 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
         pdf.setTextColor(100);
         const pageText = `Page ${i} of ${totalPageCount}`;
         const textWidth = pdf.getTextWidth(pageText);
-        pdf.text(pageText, pageW - margin - textWidth, margin + 4);
+        const footerY = pageH - margin - 4;
+        pdf.text(pageText, pageW - margin - textWidth, footerY);
       }
 
       const blob = pdf.output("blob");
@@ -277,6 +295,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
     } finally {
       document.body.removeChild(tmpDiv);
       setGeneratingPdf(false);
+      onGeneratingPdfChange?.(false);
     }
   };
 
