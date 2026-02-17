@@ -85,7 +85,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
             fps: 6,
             qrbox: (w, h) => ({
               width: Math.min(320, w * 0.85),
-              height: Math.min(140, Math.max(100, h * 0.35)),
+              height: Math.min(280, Math.max(200, h * 0.5)),
             }),
             videoConstraints,
           },
