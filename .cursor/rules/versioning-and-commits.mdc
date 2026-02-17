@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Versioning and Conventional Commits
 
-App version is **automated**: [semantic-release](https://github.com/semantic-release/semantic-release) runs on push to `main`, reads commit messages since the last tag, and bumps `package.json` version (no npm publish). The front end shows this version (see EMA-10). Netlify builds the commit that contains the bump, so production always has a clear version.
+App version is **automated**: [semantic-release](https://github.com/semantic-release/semantic-release) runs on push to `main`, reads commit messages since the last tag, and bumps `package.json` version (no npm publish). The front end shows this version (see EMA-10). Netlify is triggered **after** the release workflow (via build hook) so it always builds the commit that contains the bump.
 
 ## Commit message format (Conventional Commits)
 
@@ -39,8 +39,16 @@ Other prefixes (`chore:`, `docs:`, `refactor:`, `style:`, `test:`, `ci:`) do **n
 
 ## When the version changes
 
-- **When:** On **push to `main`**. If there are releasable commits (at least one `fix:` or `feat:` since last tag), the GitHub Action runs semantic-release, which updates `package.json`, commits, and creates a git tag (e.g. `v0.1.1`). Netlify then builds that commit, so the deployed app shows the new version.
+- **When:** On **push to `main`**. If there are releasable commits (at least one `fix:` or `feat:` since last tag), the GitHub Action runs semantic-release, which updates `package.json`, commits, and creates a git tag (e.g. `v0.1.1`). The workflow then triggers a Netlify build via build hook, so the deployed app is built from the commit that has the version bump.
 - **No releasable commits:** semantic-release does nothing; no new tag or commit. So not every merge to main produces a new version—only when there are fix/feat commits.
+
+## Netlify deploy order (no race with semantic-release)
+
+To avoid Netlify deploying before the release workflow has pushed the version-bump commit:
+
+1. **netlify.toml** skips automatic builds when the branch is `main` (build-hook builds still run).
+2. **Release workflow** (`.github/workflows/release.yml`) runs semantic-release, then triggers Netlify via a build hook.
+3. **Setup:** In Netlify go to **Build & deploy → Build hooks**, add a hook (e.g. "Release workflow"), choose branch **main**, and copy the URL. In the repo go to **Settings → Secrets and variables → Actions**, add a secret **`NETLIFY_BUILD_HOOK_URL`** with that URL. If the secret is not set, the workflow still succeeds; production just won’t be deployed from the workflow (you’d need another way to deploy main).
 
 ## References
 
