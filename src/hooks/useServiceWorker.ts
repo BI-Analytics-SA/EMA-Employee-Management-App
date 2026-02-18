@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const SW_UPDATE_CHECK_INTERVAL_MS = 10 * 1000; // 10 seconds (increase to ~5 min once confirmed working)
+const SW_UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Registers the service worker and detects when a new version is waiting.
