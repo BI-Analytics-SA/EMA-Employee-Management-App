@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { Button } from "@/components/ui/button";
 
@@ -7,10 +7,12 @@ const RELOAD_FALLBACK_MS = 1500;
 /**
  * Shows a banner only when the service worker has a waiting update (new deploy detected).
  * Single layer: service worker prompt mode.
+ * We only show when there is actually a waiting worker (guard against plugin needRefresh staying true).
  */
 export function UpdateNotification() {
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hasWaitingWorker, setHasWaitingWorker] = useState(false);
 
   const {
     needRefresh,
@@ -20,6 +22,21 @@ export function UpdateNotification() {
       registrationRef.current = registration ?? null;
     },
   });
+
+  // Only show banner when there is actually a waiting worker (plugin's needRefresh can get stuck).
+  useEffect(() => {
+    if (!("serviceWorker" in navigator) || !needRefresh) {
+      setHasWaitingWorker(false);
+      return;
+    }
+    let cancelled = false;
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (!cancelled) setHasWaitingWorker(!!reg?.waiting);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needRefresh]);
 
   // When user returns to the tab, ask the browser to check for a new service worker.
   useEffect(() => {
@@ -50,8 +67,8 @@ export function UpdateNotification() {
     };
   }, []);
 
-  // Only show when the SW has a waiting update (new build detected). Dev excluded.
-  const showBanner = !import.meta.env.DEV && needRefresh;
+  // Only show when there is actually a waiting worker. Dev excluded.
+  const showBanner = !import.meta.env.DEV && needRefresh && hasWaitingWorker;
 
   const handleRefresh = () => {
     if (needRefresh && typeof updateServiceWorker === "function") {
