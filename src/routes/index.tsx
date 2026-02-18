@@ -31,6 +31,7 @@ import { NewContractPage } from "@/features/employees/pages/NewContractPage";
 import { ContractDetailPage } from "@/features/employees/pages/ContractDetailPage";
 import { ContractTemplatePage } from "@/features/settings/ContractTemplatePage";
 import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
+import { EmployeeReportPage } from "@/features/reports/pages/EmployeeReportPage";
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="p-4">
@@ -99,6 +100,10 @@ export const router = createBrowserRouter([
           {
             path: "documents/expiring",
             element: <ExpiringDocumentsPage />,
+          },
+          {
+            path: "reports/employees",
+            element: <EmployeeReportPage />,
           },
           {
             path: "employees",

@@ -7,6 +7,7 @@ import {
   Layers,
   FileText,
   FileDown,
+  BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -21,6 +22,7 @@ export interface NavItem {
 export const mainNavItems: NavItem[] = [
   { label: "Home", href: "/", icon: Home },
   { label: "Employees", href: "/employees", icon: Users },
+  { label: "Employee Report", href: "/reports/employees", icon: BarChart3 },
   { label: "Expiring Documents", href: "/documents/expiring", icon: AlertTriangle, requiredModule: "documents" },
 ];
 
