@@ -3,6 +3,8 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 import { Button } from "@/components/ui/button";
 
 const RELOAD_FALLBACK_MS = 1500;
+/** Delay before reload after new SW takes control so it can finish activating and serve new assets. */
+const RELOAD_AFTER_CONTROLLER_CHANGE_MS = 1000;
 
 /**
  * Shows a banner only when the service worker has a waiting update (new deploy detected).
@@ -49,21 +51,26 @@ export function UpdateNotification() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  // When the new service worker takes control, reload so the page uses the new build.
-  // Clear any pending fallback timeout so we don't double-reload.
+  // When the new service worker takes control, wait briefly then reload so the new SW
+  // can finish activating and serve the new build (avoids unstyled/broken load).
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    let delayId: ReturnType<typeof setTimeout> | null = null;
     const onControllerChange = () => {
       if (reloadTimeoutRef.current) {
         clearTimeout(reloadTimeoutRef.current);
         reloadTimeoutRef.current = null;
       }
-      window.location.reload();
+      delayId = setTimeout(() => {
+        delayId = null;
+        window.location.reload();
+      }, RELOAD_AFTER_CONTROLLER_CHANGE_MS);
     };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
     return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
       if (reloadTimeoutRef.current) clearTimeout(reloadTimeoutRef.current);
+      if (delayId) clearTimeout(delayId);
     };
   }, []);
 
