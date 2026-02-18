@@ -4,6 +4,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { Toaster } from "sonner";
 import { router } from "./routes";
 import { UpdateNotification } from "./components/UpdateNotification";
+import { APP_VERSION } from "@/lib/version";
 
 // Initialize Convex client
 const convexUrl = import.meta.env.VITE_CONVEX_URL as string;
@@ -16,6 +17,11 @@ function App() {
   if (!convex) {
     return (
       <>
+        {!import.meta.env.DEV && (
+          <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
+            New version — {APP_VERSION}
+          </div>
+        )}
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="max-w-md text-center space-y-4">
             <h1 className="text-2xl font-bold">Setup Required</h1>
@@ -38,6 +44,11 @@ function App() {
 
   return (
     <ConvexAuthProvider client={convex}>
+      {!import.meta.env.DEV && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
+          New version — {APP_VERSION}
+        </div>
+      )}
       <RouterProvider router={router} />
       <UpdateNotification />
       <Toaster />
