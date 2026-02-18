@@ -1,7 +1,6 @@
 import { RouterProvider } from "react-router-dom";
 import { ConvexReactClient } from "convex/react";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { Toaster } from "sonner";
 import { router } from "./routes";
 import { UpdateNotification } from "./components/UpdateNotification";
 
@@ -31,7 +30,6 @@ function App() {
           </div>
         </div>
         <UpdateNotification />
-        <Toaster />
       </>
     );
   }
@@ -40,7 +38,6 @@ function App() {
     <ConvexAuthProvider client={convex}>
       <RouterProvider router={router} />
       <UpdateNotification />
-      <Toaster />
     </ConvexAuthProvider>
   );
 }
