@@ -1,16 +1,14 @@
 import { useEffect, useRef } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { Button } from "@/components/ui/button";
 
 const RELOAD_FALLBACK_MS = 1500;
 
 /**
- * Shows a banner when a new app version is available (Layer 2: SW prompt, or Layer 3: version.json).
- * Renders nothing until an update is detected.
+ * Shows a banner only when the service worker has a waiting update (new deploy detected).
+ * Single layer: service worker prompt mode.
  */
 export function UpdateNotification() {
-  const { updateAvailable } = useVersionCheck();
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -52,9 +50,8 @@ export function UpdateNotification() {
     };
   }, []);
 
-  // Only show in production: in dev there is no deployed "new version" and SW state can be stale.
-  const showBanner =
-    !import.meta.env.DEV && (needRefresh || updateAvailable);
+  // Only show when the SW has a waiting update (new build detected). Dev excluded.
+  const showBanner = !import.meta.env.DEV && needRefresh;
 
   const handleRefresh = () => {
     if (needRefresh && typeof updateServiceWorker === "function") {

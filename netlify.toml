@@ -14,12 +14,6 @@
 # VITE_CONVEX_URL = your-convex-deployment-url
 # VITE_CONVEX_SITE_URL = your-convex-site-url
 
-# Serve version.json as static file (must come before SPA catch-all)
-[[redirects]]
-  from = "/version.json"
-  to = "/version.json"
-  status = 200
-
 # SPA redirect - all routes go to index.html for client-side routing
 [[redirects]]
   from = "/*"
@@ -51,9 +45,3 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
-
-# Version manifest -- never cache so version check always gets current value
-[[headers]]
-  for = "/version.json"
-  [headers.values]
-    Cache-Control = "no-store"
