@@ -32,3 +32,6 @@ dist-ssr
 
 # Cursor MCP config (may contain secrets - use locally only)
 .cursor/mcp.json
+
+# Playwright auth state (session data, do not commit)
+e2e/.auth/

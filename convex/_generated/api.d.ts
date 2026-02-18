@@ -29,6 +29,8 @@ import type * as migrations_stripContractFields from "../migrations/stripContrac
 import type * as migrations_stripEmployeeFields from "../migrations/stripEmployeeFields.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
 import type * as organizations_queries from "../organizations/queries.js";
+import type * as reportPreferences_mutations from "../reportPreferences/mutations.js";
+import type * as reportPreferences_queries from "../reportPreferences/queries.js";
 import type * as userProfiles_mutations from "../userProfiles/mutations.js";
 import type * as userProfiles_queries from "../userProfiles/queries.js";
 import type * as users_queries from "../users/queries.js";
@@ -61,6 +63,8 @@ declare const fullApi: ApiFromModules<{
   "migrations/stripEmployeeFields": typeof migrations_stripEmployeeFields;
   "organizations/mutations": typeof organizations_mutations;
   "organizations/queries": typeof organizations_queries;
+  "reportPreferences/mutations": typeof reportPreferences_mutations;
+  "reportPreferences/queries": typeof reportPreferences_queries;
   "userProfiles/mutations": typeof userProfiles_mutations;
   "userProfiles/queries": typeof userProfiles_queries;
   "users/queries": typeof users_queries;
