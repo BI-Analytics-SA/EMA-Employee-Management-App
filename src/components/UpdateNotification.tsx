@@ -31,7 +31,9 @@ export function UpdateNotification() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  const showBanner = needRefresh || updateAvailable;
+  // Only show in production: in dev there is no deployed "new version" and SW state can be stale.
+  const showBanner =
+    !import.meta.env.DEV && (needRefresh || updateAvailable);
 
   const handleRefresh = () => {
     if (needRefresh && typeof updateServiceWorker === "function") {
