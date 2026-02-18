@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -8,9 +8,20 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
+/** Allow only same-origin paths (no protocol, no //). Exported for tests. */
+export function getSafeReturnTo(searchParams: URLSearchParams): string | null {
+  const returnTo = searchParams.get("returnTo");
+  if (!returnTo || typeof returnTo !== "string") return null;
+  const trimmed = returnTo.trim();
+  if (trimmed === "" || !trimmed.startsWith("/") || trimmed.includes("//")) return null;
+  return trimmed;
+}
+
 export function EditEmployeePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = getSafeReturnTo(searchParams);
   const { organizationId, isLoading: userLoading } = useCurrentUser();
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(
@@ -48,7 +59,7 @@ export function EditEmployeePage() {
         taxNumber: values.taxNumber || undefined,
         certificate: values.certificate || undefined,
       });
-      navigate(`/employees/${employeeId}`);
+      navigate(returnTo ?? `/employees/${employeeId}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +96,7 @@ export function EditEmployeePage() {
         organizationId={organizationId}
         employee={employee}
         onSubmit={handleSubmit}
-        onCancel={() => navigate(`/employees/${employeeId}`)}
+        onCancel={() => navigate(returnTo ?? `/employees/${employeeId}`)}
         isSubmitting={isSubmitting}
         submitLabel="Save changes"
       />

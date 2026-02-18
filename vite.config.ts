@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -10,6 +11,11 @@ const pkg = JSON.parse(readFileSync(path.resolve(__dirname, 'package.json'), 'ut
 export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
   plugins: [
     react(),

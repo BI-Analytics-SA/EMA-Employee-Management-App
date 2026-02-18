@@ -261,6 +261,15 @@ export default defineSchema({
     .index("by_organization_employee", ["organizationId", "employeeId"])
     .index("by_organization_expiry", ["organizationId", "expiryDate"]),
 
+  // Report column preferences (per user, per report type)
+  reportColumnPreferences: defineTable({
+    userId: v.id("users"),
+    reportId: v.string(),
+    columnIds: v.array(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_user_report", ["userId", "reportId"]),
+
   // Medical Questionnaires
   medicalQuestionnaires: defineTable({
     organizationId: v.id("organizations"),
