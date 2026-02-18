@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
+const SW_UPDATE_CHECK_INTERVAL_MS = 10 * 1000; // 10 seconds (increase to ~5 min once confirmed working)
+
 /**
  * Registers the service worker and detects when a new version is waiting.
  * Based on the standard SW lifecycle: updatefound → statechange → waiting.
- * Includes a visibilitychange trigger so returning users get prompted quickly.
+ * Includes a visibilitychange trigger and periodic polling so standalone PWA
+ * and long-running sessions detect updates without user interaction.
  */
 export function useServiceWorker() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -75,8 +78,16 @@ export function useServiceWorker() {
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
 
+    // Periodic check covers standalone PWA (no tab switching) and long sessions.
+    const intervalId = setInterval(() => {
+      if (registrationRef.current) {
+        registrationRef.current.update();
+      }
+    }, SW_UPDATE_CHECK_INTERVAL_MS);
+
     return () => {
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      clearInterval(intervalId);
     };
   }, []);
 
