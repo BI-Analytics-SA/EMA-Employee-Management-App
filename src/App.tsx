@@ -18,7 +18,7 @@ function App() {
       <>
         {!import.meta.env.DEV && (
           <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
-            New version — 0.2.0
+            New version — 0.3.0
           </div>
         )}
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -45,7 +45,7 @@ function App() {
     <ConvexAuthProvider client={convex}>
       {!import.meta.env.DEV && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
-          New version — 0.2.0
+          New version — 0.3.0
         </div>
       )}
       <RouterProvider router={router} />
