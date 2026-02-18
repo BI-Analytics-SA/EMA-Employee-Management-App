@@ -16,11 +16,6 @@ function App() {
   if (!convex) {
     return (
       <>
-        {!import.meta.env.DEV && (
-          <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
-            New version — 0.3.0
-          </div>
-        )}
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="max-w-md text-center space-y-4">
             <h1 className="text-2xl font-bold">Setup Required</h1>
@@ -43,11 +38,6 @@ function App() {
 
   return (
     <ConvexAuthProvider client={convex}>
-      {!import.meta.env.DEV && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 px-2 font-medium">
-          New version — 0.3.0
-        </div>
-      )}
       <RouterProvider router={router} />
       <UpdateNotification />
       <Toaster />
