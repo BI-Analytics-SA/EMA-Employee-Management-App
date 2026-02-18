@@ -3,6 +3,8 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { Button } from "@/components/ui/button";
 
+const RELOAD_FALLBACK_MS = 1500;
+
 /**
  * Shows a banner when a new app version is available (Layer 2: SW prompt, or Layer 3: version.json).
  * Renders nothing until an update is detected.
@@ -10,6 +12,7 @@ import { Button } from "@/components/ui/button";
 export function UpdateNotification() {
   const { updateAvailable } = useVersionCheck();
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     needRefresh,
@@ -32,12 +35,21 @@ export function UpdateNotification() {
   }, []);
 
   // When the new service worker takes control, reload so the page uses the new build.
+  // Clear any pending fallback timeout so we don't double-reload.
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    const onControllerChange = () => window.location.reload();
+    const onControllerChange = () => {
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
+        reloadTimeoutRef.current = null;
+      }
+      window.location.reload();
+    };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
-    return () =>
+    return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      if (reloadTimeoutRef.current) clearTimeout(reloadTimeoutRef.current);
+    };
   }, []);
 
   // Only show in production: in dev there is no deployed "new version" and SW state can be stale.
@@ -47,7 +59,11 @@ export function UpdateNotification() {
   const handleRefresh = () => {
     if (needRefresh && typeof updateServiceWorker === "function") {
       updateServiceWorker(true);
-      // controllerchange listener above will reload when the new SW takes control.
+      // If no waiting worker, controllerchange never fires; reload after a short delay.
+      reloadTimeoutRef.current = setTimeout(() => {
+        reloadTimeoutRef.current = null;
+        window.location.reload();
+      }, RELOAD_FALLBACK_MS);
     } else {
       window.location.reload();
     }

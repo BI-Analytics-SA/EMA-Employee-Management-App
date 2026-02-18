@@ -20,8 +20,8 @@ export function useVersionCheck(): { updateAvailable: boolean } {
       const res = await fetch("/version.json", { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as VersionResponse;
-      if (data.version && data.version !== APP_VERSION) {
-        setUpdateAvailable(true);
+      if (data.version) {
+        setUpdateAvailable(data.version !== APP_VERSION);
       }
     } catch {
       // Ignore network errors (e.g. dev without version.json)
