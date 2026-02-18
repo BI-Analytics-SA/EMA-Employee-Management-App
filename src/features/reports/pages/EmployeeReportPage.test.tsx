@@ -85,7 +85,7 @@ describe("EmployeeReportPage", () => {
       isAdmin: false,
       profile: null,
     } as ReturnType<typeof useCurrentUser>);
-    useQuery.mockImplementation((queryRef: unknown, args: unknown) => {
+    useQuery.mockImplementation((_query: unknown, args?: unknown) => {
       if (args && typeof args === "object" && "organizationId" in args) {
         return mockEmployees;
       }
