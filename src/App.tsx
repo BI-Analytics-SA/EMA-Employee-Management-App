@@ -37,7 +37,7 @@ function App() {
   return (
     <ConvexAuthProvider client={convex}>
       <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground text-center text-xs py-1 font-medium">
-        Version 0.3.0
+        Version 0.4.0
       </div>
       <RouterProvider router={router} />
       <UpdateNotification />
