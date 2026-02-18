@@ -31,6 +31,15 @@ export function UpdateNotification() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
+  // When the new service worker takes control, reload so the page uses the new build.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const onControllerChange = () => window.location.reload();
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+    return () =>
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+  }, []);
+
   // Only show in production: in dev there is no deployed "new version" and SW state can be stale.
   const showBanner =
     !import.meta.env.DEV && (needRefresh || updateAvailable);
@@ -38,6 +47,7 @@ export function UpdateNotification() {
   const handleRefresh = () => {
     if (needRefresh && typeof updateServiceWorker === "function") {
       updateServiceWorker(true);
+      // controllerchange listener above will reload when the new SW takes control.
     } else {
       window.location.reload();
     }
