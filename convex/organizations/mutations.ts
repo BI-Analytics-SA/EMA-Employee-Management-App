@@ -297,7 +297,7 @@ export const removeDocumentType = mutation({
 /** Build full settings object with required arrays and updated enabledModules. */
 function mergeSettingsWithModules(
   existing: OrgSettings | undefined,
-  enabledModules: { contracts?: boolean; medical?: boolean; documents?: boolean; exporting?: boolean }
+  enabledModules: { contracts?: boolean; documents?: boolean; exporting?: boolean }
 ) {
   return {
     departments: existing?.departments ?? [],
@@ -320,7 +320,7 @@ function mergeSettingsWithModules(
  */
 export const toggleModule = mutation({
   args: {
-    moduleName: v.union(v.literal("contracts"), v.literal("medical"), v.literal("documents"), v.literal("exporting")),
+    moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {

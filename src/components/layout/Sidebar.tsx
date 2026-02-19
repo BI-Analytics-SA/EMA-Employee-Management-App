@@ -17,13 +17,11 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideToggle }: SidebarProps) {
   const { isAdmin } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
-  const medicalEnabled = useModuleEnabled("medical");
   const documentsEnabled = useModuleEnabled("documents");
   const exportingEnabled = useModuleEnabled("exporting");
 
   const enabledModules: Record<string, boolean> = {
     contracts: contractsEnabled,
-    medical: medicalEnabled,
     documents: documentsEnabled,
     exporting: exportingEnabled,
   };

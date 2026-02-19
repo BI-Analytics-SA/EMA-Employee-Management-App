@@ -327,8 +327,12 @@ export function DocumentUploadPage() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <div className="flex gap-2">
-          <Button onClick={handleUpload} disabled={isUploading || !file}>
+        <div className="flex flex-wrap gap-2 w-full">
+          <Button
+            onClick={handleUpload}
+            disabled={isUploading || !file}
+            className="flex-1 min-w-[120px]"
+          >
             {isUploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -338,8 +342,8 @@ export function DocumentUploadPage() {
               "Upload"
             )}
           </Button>
-          <Link to={`/employees/${employeeId}/documents`}>
-            <Button type="button" variant="outline">
+          <Link to={`/employees/${employeeId}/documents`} className="flex-1 min-w-[120px]">
+            <Button type="button" variant="outline" className="w-full">
               Cancel
             </Button>
           </Link>

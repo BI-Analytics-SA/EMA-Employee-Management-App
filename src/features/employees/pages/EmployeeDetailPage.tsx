@@ -4,7 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, FileText, Stethoscope, Trash2, User, FileStack } from "lucide-react";
+import { Loader2, Pencil, Camera, FileText, Trash2, User, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { timestampToDateString } from "@/lib/validations/employee";
@@ -53,7 +53,6 @@ export function EmployeeDetailPage() {
   );
   const removeMutation = useMutation(api.employees.mutations.remove);
   const contractsEnabled = useModuleEnabled("contracts");
-  const medicalEnabled = useModuleEnabled("medical");
   const documentsEnabled = useModuleEnabled("documents");
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -102,7 +101,7 @@ export function EmployeeDetailPage() {
     <div className="space-y-6 p-4 md:p-6">
       {/* Profile header card */}
       <div className="rounded-xl border bg-card p-6 shadow-card">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+        <div className="flex flex-wrap items-center gap-5">
           {/* Avatar */}
           <div className="shrink-0 flex justify-center sm:justify-start">
             {employee.imageUrl ? (
@@ -118,18 +117,18 @@ export function EmployeeDetailPage() {
             )}
           </div>
 
-          {/* Name + subtitle */}
-          <div className="flex-1 min-w-0 text-center sm:text-left">
-            <h1 className="text-2xl font-bold truncate">
+          {/* Name + subtitle - min-width so name stays on one line and buttons wrap when tight */}
+          <div className="flex-1 min-w-[260px] text-center sm:text-left">
+            <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis">
               {TITLES[employee.title] ?? employee.title} {employee.firstName} {employee.lastName}
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Known as: {employee.knownAs}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              ID: {employee.idNumber}
-              {employee.employeeNo && ` · Emp #${employee.employeeNo}`}
-            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span className="whitespace-nowrap">Known as: {employee.knownAs}</span>
+              <span className="whitespace-nowrap">
+                ID: {employee.idNumber}
+                {employee.employeeNo && ` · Emp #${employee.employeeNo}`}
+              </span>
+            </div>
           </div>
 
           {/* Action buttons */}
@@ -151,14 +150,6 @@ export function EmployeeDetailPage() {
                 <Button variant="outline" size="sm">
                   <FileText className="h-4 w-4" />
                   Contracts
-                </Button>
-              </Link>
-            )}
-            {medicalEnabled && (
-              <Link to={`/employees/${employee._id}/medical`}>
-                <Button variant="outline" size="sm">
-                  <Stethoscope className="h-4 w-4" />
-                  Medical
                 </Button>
               </Link>
             )}
@@ -187,7 +178,7 @@ export function EmployeeDetailPage() {
       {/* Info Cards Grid */}
       <div className="flex flex-wrap gap-4">
         {/* Personal */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[300px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[300px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
@@ -200,7 +191,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Contact */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[240px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[240px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Contact</h3>
           </div>
@@ -210,7 +201,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Address */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[300px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[300px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Address</h3>
           </div>
@@ -221,7 +212,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Dates */}
-        <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Dates</h3>
           </div>
@@ -233,7 +224,7 @@ export function EmployeeDetailPage() {
 
         {/* Documents */}
         {documentsEnabled && (
-          <section className={`${sectionClass} w-full sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+          <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
             <div className={sectionHeaderClass}>
               <h3 className={sectionTitleClass}>Documents</h3>
             </div>

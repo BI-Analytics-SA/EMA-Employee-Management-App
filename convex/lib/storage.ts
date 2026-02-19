@@ -5,7 +5,7 @@ import { getAuthenticatedUserProfile } from "./permissions";
 /**
  * Generate a signed upload URL for file uploads (e.g. signatures, images).
  * Caller must be authenticated. Use for signature capture, contract signatures,
- * medical questionnaire signatures, etc.
+ * document/contract signatures, etc.
  */
 export const generateUploadUrl = mutation({
   args: {},

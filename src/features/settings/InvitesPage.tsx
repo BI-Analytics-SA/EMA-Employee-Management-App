@@ -357,9 +357,9 @@ export function InvitesPage() {
                 return (
                   <div
                     key={invite._id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-lg min-w-0"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
                       <div className="font-mono text-lg font-semibold tracking-wider">
                         {invite.code}
                       </div>

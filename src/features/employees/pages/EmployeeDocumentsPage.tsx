@@ -77,18 +77,18 @@ export function EmployeeDocumentsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Link to={`/employees/${employeeId}`}>
+      <div className="flex flex-col gap-3 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Link to={`/employees/${employeeId}`} className="shrink-0">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold truncate">{displayName}</h1>
+          <h1 className="text-2xl font-bold truncate min-w-0">{displayName}</h1>
         </div>
-        <Link to={`/employees/${employeeId}/documents/upload`}>
-          <Button size="sm">
+        <Link to={`/employees/${employeeId}/documents/upload`} className="w-full">
+          <Button size="sm" className="w-full">
             <Plus className="h-4 w-4 mr-1" />
             Upload document
           </Button>

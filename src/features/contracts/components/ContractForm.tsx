@@ -18,7 +18,7 @@ import { ContractPdfTemplate } from "./ContractPdfTemplate";
 import { cn } from "@/lib/utils";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import { Loader2 } from "lucide-react";
+import { Loader2, Maximize2, Minimize2 } from "lucide-react";
 
 export type ContractFormHtmlFields = {
   termsAndConditionsHtml: string;
@@ -51,8 +51,8 @@ const sectionClass = "rounded-lg border bg-card overflow-hidden";
 const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
-const fieldClass = "space-y-1 min-w-[100px] flex-1";
-const dateFieldClass = "space-y-1 min-w-[160px] flex-1";
+const fieldClass = "space-y-1 w-full min-w-0 sm:min-w-[100px] sm:flex-1";
+const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1";
 
 export const ContractForm = forwardRef<ContractFormHandle, Props>(function ContractForm({
   defaultValues,
@@ -71,6 +71,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
   const [termsAndConditionsHtml, setTermsAndConditionsHtml] = useState(
     defaultValues?.termsAndConditionsHtml ?? ""
   );
+  const [termsFullScreen, setTermsFullScreen] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
 
@@ -384,7 +385,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     {...form.register("dateEngaged")}
                   />
                 </div>
-                <div className={cn(fieldClass, "min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
                   <Label htmlFor="contractHeading" className="text-xs">Contract Heading</Label>
                   <Input
                     id="contractHeading"
@@ -392,7 +393,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     placeholder="e.g. Co-Employment"
                   />
                 </div>
-                <div className={cn(fieldClass, "min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
                   <Label htmlFor="contractCategory" className="text-xs">Contract Category</Label>
                   <Input
                     id="contractCategory"
@@ -400,7 +401,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     placeholder="e.g. Limited Duration Contract Form"
                   />
                 </div>
-                <div className={cn(fieldClass, "min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
                   <Label htmlFor="placeOfSignature" className="text-xs">Place of Signature</Label>
                   <Input
                     id="placeOfSignature"
@@ -411,36 +412,83 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
               </div>
             </div>
           </section>
-
-          <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[320px] sm:flex-1")}>
-            <div className={sectionHeaderClass}>
-              <h3 className={sectionTitleClass}>Employee signature</h3>
-            </div>
-            <div className={sectionContentClass}>
-              <SignatureCapture
-                existingSignatureUrl={signatureUrl ?? undefined}
-                onSave={(file) => setSignatureFile(file)}
-                label="Sign below"
-              />
-            </div>
-          </section>
         </div>
 
         <section className={cn(sectionClass, "w-full mt-3")}>
-          <div className={sectionHeaderClass}>
+          <div className={cn(sectionHeaderClass, "flex items-center justify-between gap-2")}>
             <h3 className={sectionTitleClass}>Terms and Conditions</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setTermsFullScreen(true)}
+              aria-label="Expand Terms and Conditions to full screen"
+            >
+              <Maximize2 className="h-4 w-4 mr-1" />
+              Full screen
+            </Button>
+          </div>
+          {!termsFullScreen && (
+            <div className={sectionContentClass}>
+              <RichTextEditor
+                content={termsAndConditionsHtml}
+                onChange={setTermsAndConditionsHtml}
+                placeholder="Terms and conditions content…"
+              />
+            </div>
+          )}
+        </section>
+
+        {/* Full-screen overlay for Terms and Conditions */}
+        {termsFullScreen && (
+          <div
+            className="fixed inset-0 z-50 flex flex-col bg-background"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Terms and Conditions (full screen)"
+          >
+            <div className="flex items-center justify-between gap-4 shrink-0 border-b bg-muted/70 px-4 py-3 shadow-sm">
+              <h3 className="text-base font-semibold text-foreground">Terms and Conditions</h3>
+              <Button
+                type="button"
+                variant="default"
+                size="lg"
+                className="shrink-0 font-medium shadow-md"
+                onClick={() => setTermsFullScreen(false)}
+                aria-label="Exit full screen and return to contract"
+              >
+                <Minimize2 className="h-5 w-5 mr-2" />
+                Return to contract
+              </Button>
+            </div>
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <RichTextEditor
+                content={termsAndConditionsHtml}
+                onChange={setTermsAndConditionsHtml}
+                placeholder="Terms and conditions content…"
+                fillHeight
+                className="h-full min-h-0"
+              />
+            </div>
+          </div>
+        )}
+
+        <section className={cn(sectionClass, "w-full mt-3")}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Employee signature</h3>
           </div>
           <div className={sectionContentClass}>
-            <RichTextEditor
-              content={termsAndConditionsHtml}
-              onChange={setTermsAndConditionsHtml}
-              placeholder="Terms and conditions content…"
+            <SignatureCapture
+              existingSignatureUrl={signatureUrl ?? undefined}
+              onSave={(file) => setSignatureFile(file)}
+              label="Sign below"
             />
           </div>
         </section>
 
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Button type="submit" disabled={!canSubmit}>
+        <div className="flex flex-wrap gap-2 mt-4 w-full">
+          <Button type="submit" disabled={!canSubmit} className="flex-1 min-w-[120px]">
             {submitLabel}
           </Button>
           {contractId && (
@@ -449,6 +497,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
               variant="outline"
               onClick={handleGeneratePdf}
               disabled={generatingPdf}
+              className="flex-1 min-w-[120px]"
             >
               {generatingPdf ? (
                 <>
@@ -461,7 +510,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
             </Button>
           )}
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1 min-w-[120px]">
               Cancel
             </Button>
           )}

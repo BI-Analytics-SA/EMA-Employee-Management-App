@@ -4,7 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileText, ExternalLink } from "lucide-react";
+import { Loader2, FileText, ExternalLink, Eye } from "lucide-react";
 import { ExpiryBadge, formatExpiryDate } from "@/components/shared/ExpiryBadge";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { useState } from "react";
@@ -57,15 +57,16 @@ export function ExpiringDocumentsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">Expiring documents</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-3 min-w-0">
+        <h1 className="text-2xl font-bold min-w-0">Expiring documents</h1>
+        <div className="flex flex-wrap gap-2 w-full">
           {([30, 60, 90] as const).map((d) => (
             <Button
               key={d}
               variant={daysFilter === d ? "default" : "outline"}
               size="sm"
               onClick={() => setDaysFilter(d)}
+              className="flex-1 min-w-[80px]"
             >
               {d} days
             </Button>
@@ -97,11 +98,11 @@ export function ExpiringDocumentsPage() {
                 return (
                   <li
                     key={doc._id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3"
+                    className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 min-w-0"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <FileText className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                      <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">
                           {doc.title || doc.fileName}
                         </p>
@@ -117,17 +118,18 @@ export function ExpiringDocumentsPage() {
                         className="shrink-0"
                       />
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Link to={`/employees/${doc.employeeId}/documents`}>
-                        <Button variant="ghost" size="sm" className="gap-1">
-                          <ExternalLink className="h-4 w-4" />
-                          {employeeName}
+                    <div className="flex flex-wrap gap-2 w-full border-t border-border/50 pt-2">
+                      <Link to={`/employees/${doc.employeeId}/documents`} className="flex-1 min-w-[100px]">
+                        <Button variant="ghost" size="sm" className="gap-1 w-full truncate max-w-full">
+                          <ExternalLink className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{employeeName}</span>
                         </Button>
                       </Link>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
+                        className="flex-1 min-w-[100px]"
                         onClick={() =>
                           setViewingDoc({
                             url: doc.fileUrl,
@@ -136,6 +138,7 @@ export function ExpiringDocumentsPage() {
                           })
                         }
                       >
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
                     </div>
