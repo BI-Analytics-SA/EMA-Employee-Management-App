@@ -30,7 +30,6 @@ export default defineSchema({
         enabledModules: v.optional(
           v.object({
             contracts: v.optional(v.boolean()),
-            medical: v.optional(v.boolean()),
             documents: v.optional(v.boolean()),
             exporting: v.optional(v.boolean()),
           })
@@ -270,39 +269,4 @@ export default defineSchema({
   })
     .index("by_user_report", ["userId", "reportId"]),
 
-  // Medical Questionnaires
-  medicalQuestionnaires: defineTable({
-    organizationId: v.id("organizations"),
-    employeeId: v.id("employees"),
-
-    // Health Questions (Yes/No stored as boolean)
-    illnessLastTwoYears: v.boolean(),
-    illnessLastTwoYearsDetail: v.optional(v.string()),
-    treatedTB: v.boolean(),
-    treatedTBDetail: v.optional(v.string()),
-    onTreatmentNow: v.boolean(),
-    hepatitusA: v.boolean(),
-    hepatitusB: v.boolean(),
-    bloodPressure: v.boolean(),
-    diabetes: v.boolean(),
-    longTerm: v.boolean(),
-    longTermDetail: v.optional(v.string()),
-    reasonCantComplete: v.string(),
-    notes: v.optional(v.string()),
-
-    // Employee Signature
-    emplSignatureStorageId: v.optional(v.id("_storage")),
-    emplSignatureUrl: v.optional(v.string()),
-
-    // Nurse Signature
-    nurseSignatureStorageId: v.optional(v.id("_storage")),
-    nurseSignatureUrl: v.optional(v.string()),
-
-    createdAt: v.number(),
-    updatedAt: v.number(),
-    createdBy: v.optional(v.id("userProfiles")),
-  })
-    .index("by_organization", ["organizationId"])
-    .index("by_employee", ["employeeId"])
-    .index("by_organization_employee", ["organizationId", "employeeId"]),
 });

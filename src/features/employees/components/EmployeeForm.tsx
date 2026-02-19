@@ -101,11 +101,11 @@ export function EmployeeForm({
   const sectionTitleClass = "text-sm font-semibold text-foreground";
   const sectionContentClass = "p-4";
 
-  // Field wrapper classes - use flex with min-widths so fields wrap properly
-  const fieldClass = "space-y-1 min-w-[100px] flex-1";
-  const dateFieldClass = "space-y-1 min-w-[160px] flex-1"; // Wider for date picker icon
-  const wideFieldClass = "space-y-1 min-w-[140px] flex-1";
-  const narrowFieldClass = "space-y-1 min-w-[70px] flex-1 max-w-[100px]"; // For small fields like Title, Initials
+  // Field wrapper classes - full width on mobile, wrap with min-widths from sm up (see ui-layout-patterns.mdc)
+  const fieldClass = "space-y-1 w-full min-w-0 sm:min-w-[100px] sm:flex-1";
+  const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1"; // Wider for date picker icon
+  const wideFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1";
+  const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Title, Initials
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -152,7 +152,7 @@ export function EmployeeForm({
                   <p className="text-xs text-destructive">{form.formState.errors.resStreetNo.message}</p>
                 )}
               </div>
-              <div className="space-y-1 min-w-[180px] flex-[2]">
+              <div className="space-y-1 w-full min-w-0 sm:min-w-[180px] sm:flex-[2]">
                 <Label htmlFor="resStreetName" className="text-xs">Street Name</Label>
                 <Input id="resStreetName" {...form.register("resStreetName")} />
                 {form.formState.errors.resStreetName && (
@@ -305,13 +305,17 @@ export function EmployeeForm({
       </div>
 
       <div className="flex flex-wrap gap-3 pt-4">
-        <Button type="submit" disabled={isSubmitting} size="sm">
-          {isSubmitting ? "Saving…" : submitLabel}
-        </Button>
-        {onCancel && (
-          <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-            Cancel
+        <div className="flex-1 min-w-0 sm:min-w-[120px]">
+          <Button type="submit" disabled={isSubmitting} size="sm" className="w-full">
+            {isSubmitting ? "Saving…" : submitLabel}
           </Button>
+        </div>
+        {onCancel && (
+          <div className="flex-1 min-w-0 sm:min-w-[120px]">
+            <Button type="button" variant="outline" size="sm" onClick={onCancel} className="w-full">
+              Cancel
+            </Button>
+          </div>
         )}
       </div>
     </form>

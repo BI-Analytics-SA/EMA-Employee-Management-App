@@ -98,7 +98,7 @@ export function EmployeeReportPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Employee Report</h1>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
+          <div className="relative w-full min-w-0 sm:flex-1 sm:min-w-[240px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               type="search"

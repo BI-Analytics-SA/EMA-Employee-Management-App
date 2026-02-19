@@ -2,6 +2,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { FileDown, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import * as XLSX from "xlsx";
@@ -39,7 +40,9 @@ function cellValue(
   return String(raw);
 }
 
-export function ExportButton() {
+type ExportButtonProps = { className?: string };
+
+export function ExportButton({ className }: ExportButtonProps) {
   const { organizationId, isLoading: userLoading } = useCurrentUser();
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const employees = useQuery(
@@ -85,6 +88,7 @@ export function ExportButton() {
       size="sm"
       onClick={handleExport}
       disabled={!canExport || exporting}
+      className={cn(className)}
     >
       {exporting ? (
         <Loader2 className="h-4 w-4 animate-spin mr-1" />

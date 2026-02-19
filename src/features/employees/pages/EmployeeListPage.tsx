@@ -52,10 +52,12 @@ export function EmployeeListPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Employees</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          {exportingEnabled && <ExportButton />}
-          <Link to="/employees/new">
-            <Button>
+        <div className="flex w-full gap-2 sm:w-auto">
+          {exportingEnabled && (
+            <ExportButton className="flex-1 min-w-0 sm:flex-initial" />
+          )}
+          <Link to="/employees/new" className="flex-1 min-w-0 sm:flex-initial block">
+            <Button className="w-full">
               <UserPlus className="h-4 w-4" />
               Add Employee
             </Button>
@@ -80,7 +82,7 @@ export function EmployeeListPage() {
 
       {/* Search + filter bar */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
+        <div className="relative w-full min-w-0 sm:flex-1 sm:min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by ID number (13 digits)"
@@ -91,19 +93,23 @@ export function EmployeeListPage() {
             className="pl-9"
           />
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setScannerOpen(true)}
-          title="Scan for ID number"
-        >
-          <QrCode className="h-4 w-4" />
-          Scan
-        </Button>
-        <Button
-          onClick={() => setSearchQuery(searchId)}
-        >
-          Search
-        </Button>
+        <div className="flex w-full min-w-0 gap-2 sm:w-auto sm:flex-1">
+          <Button
+            variant="outline"
+            onClick={() => setScannerOpen(true)}
+            title="Scan for ID number"
+            className="flex-1 min-w-0"
+          >
+            <QrCode className="h-4 w-4" />
+            Scan
+          </Button>
+          <Button
+            onClick={() => setSearchQuery(searchId)}
+            className="flex-1 min-w-0"
+          >
+            Search
+          </Button>
+        </div>
         {searchQuery && (
           <button
             onClick={() => {

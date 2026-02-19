@@ -233,7 +233,7 @@ export function ContractTemplatePage() {
             {templates.map((t) => (
               <div
                 key={t.id}
-                className={`flex items-center gap-2 rounded-md border px-3 py-2 ${
+                className={`flex w-full min-w-0 sm:w-auto sm:min-w-0 items-center gap-2 rounded-md border px-3 py-2 ${
                   selectedId === t.id ? "border-primary bg-muted/50" : "border-border"
                 }`}
               >

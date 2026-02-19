@@ -40,13 +40,30 @@ const sectionContentClass = "p-3";
 </div>
 ```
 
-## Form Field Sizing
+## Form Field Sizing (mobile-first)
+
+Below `sm`, each field is full width so they don't squash on mobile. From `sm` up, fields wrap with min-widths and take full width when alone on a line.
 
 ```tsx
-const fieldClass = "space-y-1 min-w-[100px] flex-1";      // Standard
-const dateFieldClass = "space-y-1 min-w-[160px] flex-1"; // Date pickers
-const wideFieldClass = "space-y-1 min-w-[140px] flex-1"; // Wider fields
-const narrowFieldClass = "space-y-1 min-w-[70px] flex-1 max-w-[100px]"; // Constrained
+const fieldClass = "space-y-1 w-full min-w-0 sm:min-w-[100px] sm:flex-1";           // Standard
+const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1";        // Date pickers
+const wideFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1";       // Wider fields
+const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Constrained (max-w from sm only)
+```
+
+## Action button groups
+
+For groups of action buttons (e.g. Quick Actions), use full width on mobile and auto width from `sm` so they align and flow nicely:
+
+```tsx
+<div className="flex flex-wrap gap-2">
+  <div className="w-full min-w-0 sm:w-auto">
+    <Link to="..." className="block">
+      <Button variant="outline" className="w-full sm:w-auto">Label</Button>
+    </Link>
+  </div>
+  {/* more actions */}
+</div>
 ```
 
 ## Detail Pages

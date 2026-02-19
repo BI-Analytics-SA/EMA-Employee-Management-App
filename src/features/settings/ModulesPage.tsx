@@ -14,14 +14,13 @@ const sectionContentClass = "p-4";
 export function ModulesPage() {
   const { isAdmin, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
-  const medicalEnabled = useModuleEnabled("medical");
   const documentsEnabled = useModuleEnabled("documents");
   const exportingEnabled = useModuleEnabled("exporting");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const toggleModule = useMutation(api.organizations.mutations.toggleModule);
   const [toggling, setToggling] = useState<string | null>(null);
 
-  const handleToggle = async (moduleName: "contracts" | "medical" | "documents" | "exporting", enabled: boolean) => {
+  const handleToggle = async (moduleName: "contracts" | "documents" | "exporting", enabled: boolean) => {
     setToggling(moduleName);
     try {
       await toggleModule({ moduleName, enabled });
@@ -72,25 +71,6 @@ export function ModulesPage() {
                 checked={contractsEnabled}
                 disabled={toggling === "contracts"}
                 onChange={(e) => handleToggle("contracts", e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-muted-foreground/20 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50" />
-            </label>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <Label htmlFor="module-medical" className="text-base font-medium">Medical questionnaire</Label>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Health questionnaires with employee and nurse signatures.
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                id="module-medical"
-                type="checkbox"
-                checked={medicalEnabled}
-                disabled={toggling === "medical"}
-                onChange={(e) => handleToggle("medical", e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-muted-foreground/20 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50" />

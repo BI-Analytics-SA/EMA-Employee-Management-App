@@ -382,7 +382,7 @@ export function TeamPage() {
                   return (
                     <div
                       key={member._id}
-                      className={`flex flex-wrap items-center justify-between gap-4 p-4 border rounded-lg ${
+                      className={`flex flex-wrap items-center justify-between gap-4 p-4 border rounded-lg min-w-0 ${
                         isCurrentUser ? "bg-primary/5 border-primary/20" : ""
                       } ${isDeactivated ? "opacity-60" : ""}`}
                     >

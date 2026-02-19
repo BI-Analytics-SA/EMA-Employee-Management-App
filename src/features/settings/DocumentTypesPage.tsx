@@ -172,25 +172,25 @@ export function DocumentTypesPage() {
         <div className="p-4 space-y-3">
           {isAdding && (
             <div className="flex flex-wrap gap-3 items-end p-3 rounded-lg border bg-muted/30">
-              <div className="space-y-1">
+              <div className="space-y-1 w-full min-w-0 sm:w-auto">
                 <Label>ID (e.g. id_book)</Label>
                 <Input
                   value={newId}
                   onChange={(e) => setNewId(e.target.value)}
                   placeholder="id_book"
-                  className="h-9 w-40"
+                  className="h-9 w-full sm:w-40"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 w-full min-w-0 sm:w-auto">
                 <Label>Name</Label>
                 <Input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="ID Book"
-                  className="h-9 w-40"
+                  className="h-9 w-full sm:w-40"
                 />
               </div>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex w-full min-w-0 sm:w-auto items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={newRequiresExpiry}
@@ -225,14 +225,14 @@ export function DocumentTypesPage() {
               {documentTypes.map((row) => (
                 <li
                   key={row.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 min-w-0"
                 >
                   {editingId === row.id ? (
-                    <div className="flex flex-wrap gap-2 items-center flex-1">
+                    <div className="flex flex-wrap gap-2 items-center flex-1 min-w-0">
                       <Input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="h-9 w-40"
+                        className="h-9 w-full min-w-0 sm:w-40"
                       />
                       <label className="flex items-center gap-2 cursor-pointer text-sm">
                         <input

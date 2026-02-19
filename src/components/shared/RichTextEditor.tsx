@@ -21,6 +21,8 @@ type Props = {
   label?: string;
   placeholder?: string;
   className?: string;
+  /** When true, editor container and content area fill all available height (e.g. full-screen). */
+  fillHeight?: boolean;
 };
 
 function Toolbar({ editor }: { editor: Editor | null }) {
@@ -98,20 +100,25 @@ function Toolbar({ editor }: { editor: Editor | null }) {
   );
 }
 
+const defaultEditorClass =
+  "min-h-[120px] max-h-[320px] overflow-y-auto px-3 py-2 text-sm focus:outline-none prose prose-sm dark:prose-invert max-w-none";
+const fillHeightEditorClass =
+  "min-h-0 flex-1 overflow-y-auto px-3 py-2 text-sm focus:outline-none prose prose-sm dark:prose-invert max-w-none";
+
 export function RichTextEditor({
   content,
   onChange,
   label,
   placeholder = "Write here…",
   className,
+  fillHeight = false,
 }: Props) {
   const editor = useEditor({
     extensions: [StarterKit, Underline],
     content: content || "",
     editorProps: {
       attributes: {
-        class:
-          "min-h-[120px] max-h-[320px] overflow-y-auto px-3 py-2 text-sm focus:outline-none prose prose-sm dark:prose-invert max-w-none",
+        class: fillHeight ? fillHeightEditorClass : defaultEditorClass,
         "data-placeholder": placeholder,
       },
       handleDOMEvents: {},
@@ -135,13 +142,29 @@ export function RichTextEditor({
   }, [editor, onChange]);
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div
+      className={cn(
+        "space-y-1",
+        fillHeight && "flex flex-col h-full min-h-0",
+        className
+      )}
+    >
       {label && (
         <Label className="text-xs">{label}</Label>
       )}
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div
+        className={cn(
+          "rounded-lg border bg-card overflow-hidden",
+          fillHeight && "flex flex-col flex-1 min-h-0"
+        )}
+      >
         <Toolbar editor={editor} />
-        <EditorContent editor={editor} />
+        <div
+          className={cn(fillHeight && "flex flex-col flex-1 min-h-0 overflow-hidden")}
+          {...(fillHeight && { "data-fill-height": true })}
+        >
+          <EditorContent editor={editor} />
+        </div>
       </div>
       <style>{`
         .ProseMirror p.is-editor-empty:first-child::before {
@@ -150,6 +173,16 @@ export function RichTextEditor({
           color: hsl(var(--muted-foreground));
           pointer-events: none;
           height: 0;
+        }
+        [data-fill-height] > div {
+          display: flex;
+          flex-direction: column;
+          flex: 1 1 0;
+          min-height: 0;
+        }
+        [data-fill-height] .ProseMirror {
+          flex: 1 1 0;
+          min-height: 0;
         }
       `}</style>
     </div>
