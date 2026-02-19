@@ -378,13 +378,14 @@ export function SignatureCapture({
           onMouseLeave={stopDrawing}
         />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 w-full">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={clearCanvas}
           disabled={!hasDrawn}
+          className="flex-1 min-w-[100px]"
         >
           <Trash2 className="h-4 w-4 mr-1" />
           Clear
@@ -394,12 +395,13 @@ export function SignatureCapture({
           size="sm"
           onClick={handleSave}
           disabled={!hasDrawn}
+          className="flex-1 min-w-[100px]"
         >
           <Check className="h-4 w-4 mr-1" />
           Save
         </Button>
         {onCancel && (
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="flex-1 min-w-[100px]">
             <X className="h-4 w-4 mr-1" />
             Cancel
           </Button>

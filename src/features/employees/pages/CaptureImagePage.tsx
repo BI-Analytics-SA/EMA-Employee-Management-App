@@ -91,15 +91,14 @@ export function CaptureImagePage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex items-center justify-between gap-2">
-        <Link to={`/employees/${employeeId}`}>
+      <div className="flex items-center gap-2 min-w-0">
+        <Link to={`/employees/${employeeId}`} className="shrink-0">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold truncate">{displayName}</h1>
-        <div className="w-16" />
+        <h1 className="text-2xl font-bold break-words min-w-0 flex-1">{displayName}</h1>
       </div>
 
       {employee.imageUrl && (

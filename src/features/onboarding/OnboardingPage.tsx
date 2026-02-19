@@ -361,8 +361,8 @@ export function OnboardingPage() {
 
             <div className="space-y-2">
               <Label htmlFor="slug">Organization URL</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">app/</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm text-muted-foreground shrink-0">app/</span>
                 <Input
                   id="slug"
                   type="text"
@@ -371,7 +371,7 @@ export function OnboardingPage() {
                   disabled={isLoading}
                   value={slug}
                   onChange={(e) => handleSlugChange(e.target.value)}
-                  className="flex-1"
+                  className="min-w-0 flex-1"
                 />
               </div>
               {slug.length >= 3 && (

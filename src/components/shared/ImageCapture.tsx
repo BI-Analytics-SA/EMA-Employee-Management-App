@@ -322,18 +322,23 @@ export function ImageCapture({
     return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={() => startCamera()}>
-            <Camera className="h-4 w-4 mr-2" />
-            Use camera
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Choose file
-          </Button>
+          <div className="w-full min-w-0 sm:flex-1">
+            <Button type="button" onClick={() => startCamera()} className="w-full">
+              <Camera className="h-4 w-4 mr-2" />
+              Use camera
+            </Button>
+          </div>
+          <div className="w-full min-w-0 sm:flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Choose file
+            </Button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -342,10 +347,12 @@ export function ImageCapture({
             onChange={handleFileSelect}
           />
           {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
+            <div className="w-full min-w-0 sm:flex-1">
+              <Button type="button" variant="ghost" onClick={onCancel} className="w-full">
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
           )}
         </div>
       </div>

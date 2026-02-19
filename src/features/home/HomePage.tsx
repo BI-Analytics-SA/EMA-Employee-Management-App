@@ -124,33 +124,41 @@ export function HomePage() {
           Quick Actions
         </h2>
         <div className="flex flex-wrap gap-2">
-          <Link to="/employees/new">
-            <Button variant="outline">
-              <UserPlus className="h-4 w-4" />
-              Add Employee
-            </Button>
-          </Link>
-          <Link to="/employees">
-            <Button variant="outline">
-              <Users className="h-4 w-4" />
-              View Employees
-            </Button>
-          </Link>
-          {exportingEnabled && (
-            <Link to="/employees">
-              <Button variant="outline">
-                <FileDown className="h-4 w-4" />
-                Export to Excel
+          <div className="w-full min-w-0 sm:w-auto">
+            <Link to="/employees/new" className="block">
+              <Button variant="outline" className="w-full sm:w-auto">
+                <UserPlus className="h-4 w-4" />
+                Add Employee
               </Button>
             </Link>
+          </div>
+          <div className="w-full min-w-0 sm:w-auto">
+            <Link to="/employees" className="block">
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Users className="h-4 w-4" />
+                View Employees
+              </Button>
+            </Link>
+          </div>
+          {exportingEnabled && (
+            <div className="w-full min-w-0 sm:w-auto">
+              <Link to="/employees" className="block">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <FileDown className="h-4 w-4" />
+                  Export to Excel
+                </Button>
+              </Link>
+            </div>
           )}
           {documentsEnabled && (
-            <Link to="/documents/expiring">
-              <Button variant="outline">
-                <AlertTriangle className="h-4 w-4" />
-                Expiring Documents
-              </Button>
-            </Link>
+            <div className="w-full min-w-0 sm:w-auto">
+              <Link to="/documents/expiring" className="block">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <AlertTriangle className="h-4 w-4" />
+                  Expiring Documents
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -261,7 +269,7 @@ interface StatCardProps {
 
 function StatCard({ icon, value, label, subtitle }: StatCardProps) {
   return (
-    <div className="rounded-xl border bg-card px-3 py-3 shadow-card">
+    <div className="rounded-xl border bg-card px-3 py-3 shadow-card min-w-0">
       <div className="flex items-start gap-2.5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 mt-0.5">
           {icon}

@@ -32,20 +32,6 @@ import { ContractDetailPage } from "@/features/employees/pages/ContractDetailPag
 import { ContractTemplatePage } from "@/features/settings/ContractTemplatePage";
 import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
 import { EmployeeReportPage } from "@/features/reports/pages/EmployeeReportPage";
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="text-muted-foreground mt-2">Coming soon...</p>
-    </div>
-  );
-}
-
-// Medical Pages
-const MedicalStatusPage = () => <PlaceholderPage title="Medical Questionnaire" />;
-const NewMedicalPage = () => <PlaceholderPage title="New Medical Questionnaire" />;
-const EditMedicalPage = () => <PlaceholderPage title="Edit Medical Questionnaire" />;
-
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -155,23 +141,6 @@ export const router = createBrowserRouter([
                   {
                     path: ":contractId",
                     element: <ContractDetailPage />,
-                  },
-                ],
-              },
-              {
-                path: ":id/medical",
-                children: [
-                  {
-                    index: true,
-                    element: <MedicalStatusPage />,
-                  },
-                  {
-                    path: "new",
-                    element: <NewMedicalPage />,
-                  },
-                  {
-                    path: "edit",
-                    element: <EditMedicalPage />,
                   },
                 ],
               },

@@ -27,6 +27,7 @@ import type * as lib_permissions from "../lib/permissions.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as migrations_stripContractFields from "../migrations/stripContractFields.js";
 import type * as migrations_stripEmployeeFields from "../migrations/stripEmployeeFields.js";
+import type * as migrations_stripMedicalModule from "../migrations/stripMedicalModule.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
 import type * as organizations_queries from "../organizations/queries.js";
 import type * as reportPreferences_mutations from "../reportPreferences/mutations.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "lib/storage": typeof lib_storage;
   "migrations/stripContractFields": typeof migrations_stripContractFields;
   "migrations/stripEmployeeFields": typeof migrations_stripEmployeeFields;
+  "migrations/stripMedicalModule": typeof migrations_stripMedicalModule;
   "organizations/mutations": typeof organizations_mutations;
   "organizations/queries": typeof organizations_queries;
   "reportPreferences/mutations": typeof reportPreferences_mutations;

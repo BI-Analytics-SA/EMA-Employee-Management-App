@@ -110,7 +110,7 @@ function SortableColumnRow({
         />
         <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-muted-foreground/20 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
       </label>
-      <div className="min-w-[140px] flex-1">
+      <div className="w-full min-w-0 sm:min-w-[140px] sm:flex-1">
         <Input
           value={column.label}
           onChange={(e) => onUpdate(column.id, { label: e.target.value })}
@@ -141,7 +141,7 @@ function SortableColumnRow({
             <option value="number">Number</option>
             <option value="date">Date</option>
           </select>
-          <div className="min-w-[120px]">
+          <div className="w-full min-w-0 sm:min-w-[120px]">
             <Input
               value={column.defaultValue ?? ""}
               onChange={(e) => onUpdate(column.id, { defaultValue: e.target.value })}

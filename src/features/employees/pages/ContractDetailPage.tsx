@@ -160,21 +160,26 @@ export function ContractDetailPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
-          <Link to={`/employees/${employeeId}/contracts`}>
+          <Link to={`/employees/${employeeId}/contracts`} className="shrink-0">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold truncate">
-            Contract · {displayName} · {timestampToDateString(contract.signedDate)}
-          </h1>
         </div>
+        <h1 className="text-2xl font-bold break-words min-w-0">
+          Contract · {displayName} · {timestampToDateString(contract.signedDate)}
+        </h1>
         {canManageContracts && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="submit" form="contract-form" disabled={isSubmitting}>
+          <div className="flex flex-wrap gap-2 w-full">
+            <Button
+              type="submit"
+              form="contract-form"
+              disabled={isSubmitting}
+              className="flex-1 min-w-[120px]"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-1" />
@@ -189,6 +194,7 @@ export function ContractDetailPage() {
               variant="outline"
               onClick={() => contractFormRef.current?.generatePdf()}
               disabled={generatingPdf}
+              className="flex-1 min-w-[120px]"
             >
               {generatingPdf ? (
                 <>
@@ -203,16 +209,27 @@ export function ContractDetailPage() {
               type="button"
               variant="outline"
               onClick={() => navigate(`/employees/${employeeId}/contracts`)}
+              className="flex-1 min-w-[120px]"
             >
               Cancel
             </Button>
             {confirmDelete ? (
               <>
-                <span className="text-sm text-muted-foreground">Delete?</span>
-                <Button variant="destructive" size="sm" onClick={handleDeleteContract}>
+                <span className="text-sm text-muted-foreground w-full basis-full">Delete?</span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteContract}
+                  className="flex-1 min-w-[100px]"
+                >
                   Yes, delete
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setConfirmDelete(false)}
+                  className="flex-1 min-w-[100px]"
+                >
                   Cancel
                 </Button>
               </>
@@ -220,7 +237,7 @@ export function ContractDetailPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
                 onClick={() => setConfirmDelete(true)}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -234,8 +251,8 @@ export function ContractDetailPage() {
       <div className="rounded-lg border bg-card overflow-hidden p-3 space-y-2">
         <h2 className="text-sm font-semibold">PDF</h2>
         {hasPdf ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
+          <div className="flex flex-wrap gap-2 w-full">
+            <span className="text-sm text-muted-foreground flex items-center gap-1 w-full basis-full">
               <FileText className="h-4 w-4" />
               PDF generated
             </span>
@@ -243,6 +260,7 @@ export function ContractDetailPage() {
               variant="outline"
               size="sm"
               asChild
+              className="flex-1 min-w-[100px]"
             >
               <a href={contract.pdfUrl!} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 mr-1" />
@@ -253,6 +271,7 @@ export function ContractDetailPage() {
               variant="outline"
               size="sm"
               asChild
+              className="flex-1 min-w-[100px]"
             >
               <a href={contract.pdfUrl!} download={`contract-${contractIdTyped}.pdf`}>
                 <FileDown className="h-4 w-4 mr-1" />
@@ -263,11 +282,11 @@ export function ContractDetailPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
                 onClick={handleDeletePdf}
                 disabled={deletingPdf}
               >
-                {deletingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete PDF"}
+                {deletingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-1" />Delete PDF</>}
               </Button>
             )}
           </div>
@@ -308,12 +327,22 @@ export function ContractDetailPage() {
       {canManageContracts && (
         <div className="pt-4 border-t">
           {confirmDelete ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Delete this contract?</span>
-              <Button variant="destructive" size="sm" onClick={handleDeleteContract}>
+            <div className="flex flex-wrap gap-2 w-full">
+              <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteContract}
+                className="flex-1 min-w-[100px]"
+              >
                 Yes, delete
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 min-w-[100px]"
+              >
                 Cancel
               </Button>
             </div>
@@ -321,7 +350,7 @@ export function ContractDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive w-full"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4 mr-1" />

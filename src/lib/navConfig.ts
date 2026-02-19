@@ -16,7 +16,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   /** If set, this nav item is only shown when the given module is enabled */
-  requiredModule?: "contracts" | "medical" | "documents" | "exporting";
+  requiredModule?: "contracts" | "documents" | "exporting";
 }
 
 export const mainNavItems: NavItem[] = [

@@ -4,11 +4,11 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export type Role = "admin" | "manager" | "user";
 
-export type ModuleName = "contracts" | "medical";
+export type ModuleName = "contracts" | "documents" | "exporting";
 
 /**
  * Require that the given module is enabled for the organization.
- * Call before any contract or medical query/mutation.
+ * Call before any contract or other module query/mutation.
  */
 export async function requireModuleEnabled(
   ctx: QueryCtx | MutationCtx,
