@@ -11,6 +11,7 @@ import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
 
 // Settings Pages
 import { TeamPage } from "@/features/settings/TeamPage";
+import { ProfilePage } from "@/features/settings/ProfilePage";
 
 // Home Page
 import { HomePage } from "@/features/home/HomePage";
@@ -66,6 +67,10 @@ export const router = createBrowserRouter([
           {
             path: "settings/team",
             element: <TeamPage />,
+          },
+          {
+            path: "settings/profile",
+            element: <ProfilePage />,
           },
           {
             path: "settings/document-types",

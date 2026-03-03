@@ -44,6 +44,7 @@ export function OnboardingPage() {
   const [orgName, setOrgName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [createUserName, setCreateUserName] = useState("");
 
   // Join org form state
   const [inviteCode, setInviteCode] = useState(inviteCodeFromUrl || "");
@@ -103,12 +104,18 @@ export function OnboardingPage() {
       return;
     }
 
+    if (createUserName.trim().length < 1) {
+      setError("Please enter your name.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await createOrganization({
         name: orgName.trim(),
         slug: slug,
+        userName: createUserName.trim(),
       });
       navigate("/", { replace: true });
     } catch (err) {
@@ -395,13 +402,34 @@ export function OnboardingPage() {
                 A unique identifier for your organization (lowercase, no spaces)
               </p>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="createUserName">Your Name</Label>
+              <Input
+                id="createUserName"
+                type="text"
+                placeholder="e.g., John Smith"
+                required
+                disabled={isLoading}
+                value={createUserName}
+                onChange={(e) => setCreateUserName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                This is how your name will appear to others in the organization
+              </p>
+            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3">
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || isSlugAvailable === false || slug.length < 3}
+              disabled={
+                isLoading ||
+                isSlugAvailable === false ||
+                slug.length < 3 ||
+                createUserName.trim().length < 1
+              }
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Organization

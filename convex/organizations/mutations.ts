@@ -12,6 +12,7 @@ export const create = mutation({
   args: {
     name: v.string(),
     slug: v.string(),
+    userName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -39,9 +40,10 @@ export const create = mutation({
       throw new Error("An organization with this URL already exists. Please choose a different one.");
     }
 
-    // Get the user's email for the profile name
+    // Resolve display name: from args, or auth user, or fallback
     const user = await ctx.db.get(userId);
-    const userName = user?.name || user?.email || "Admin";
+    const profileName =
+      args.userName?.trim() || user?.name || user?.email || "Admin";
 
     // Create the organization
     const organizationId = await ctx.db.insert("organizations", {
@@ -54,7 +56,7 @@ export const create = mutation({
     const profileId = await ctx.db.insert("userProfiles", {
       userId,
       organizationId,
-      name: userName,
+      name: profileName,
       role: "admin",
       isActive: true,
       createdAt: Date.now(),
@@ -329,11 +331,12 @@ export const toggleModule = mutation({
     if (!org) {
       throw new Error("Organization not found");
     }
-    const currentModules = org.settings?.enabledModules ?? {};
-    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {
-      ...currentModules,
-      [args.moduleName]: args.enabled,
-    };
+    const allowedKeys = ["contracts", "documents", "exporting"] as const;
+    const current = org.settings?.enabledModules ?? {};
+    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {};
+    for (const key of allowedKeys) {
+      newEnabledModules[key] = key === args.moduleName ? args.enabled : current[key];
+    }
     const newSettings = mergeSettingsWithModules(org.settings, newEnabledModules);
     await ctx.db.patch(profile.organizationId, {
       settings: newSettings,

@@ -74,11 +74,35 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
   const [termsFullScreen, setTermsFullScreen] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const termsDialogRef = useRef<HTMLDivElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (defaultValues?.termsAndConditionsHtml !== undefined)
       setTermsAndConditionsHtml(defaultValues.termsAndConditionsHtml);
   }, [defaultValues?.termsAndConditionsHtml]);
+
+  useEffect(() => {
+    if (!termsFullScreen) return;
+    previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setTermsFullScreen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const dialog = termsDialogRef.current;
+    const focusable = dialog?.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable) {
+      requestAnimationFrame(() => focusable.focus());
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previousActiveElementRef.current?.focus();
+    };
+  }, [termsFullScreen]);
 
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
   const saveContractPdf = useMutation(api.contracts.actions.saveContractPdf);
@@ -385,7 +409,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     {...form.register("dateEngaged")}
                   />
                 </div>
-                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[140px]")}>
                   <Label htmlFor="contractHeading" className="text-xs">Contract Heading</Label>
                   <Input
                     id="contractHeading"
@@ -393,7 +417,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     placeholder="e.g. Co-Employment"
                   />
                 </div>
-                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[140px]")}>
                   <Label htmlFor="contractCategory" className="text-xs">Contract Category</Label>
                   <Input
                     id="contractCategory"
@@ -401,7 +425,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                     placeholder="e.g. Limited Duration Contract Form"
                   />
                 </div>
-                <div className={cn(fieldClass, "sm:min-w-[200px]")}>
+                <div className={cn(fieldClass, "sm:min-w-[140px]")}>
                   <Label htmlFor="placeOfSignature" className="text-xs">Place of Signature</Label>
                   <Input
                     id="placeOfSignature"
@@ -443,6 +467,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
         {/* Full-screen overlay for Terms and Conditions */}
         {termsFullScreen && (
           <div
+            ref={termsDialogRef}
             className="fixed inset-0 z-50 flex flex-col bg-background"
             role="dialog"
             aria-modal="true"
@@ -488,31 +513,37 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
         </section>
 
         <div className="flex flex-wrap gap-2 mt-4 w-full">
-          <Button type="submit" disabled={!canSubmit} className="flex-1 min-w-[120px]">
-            {submitLabel}
-          </Button>
-          {contractId && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGeneratePdf}
-              disabled={generatingPdf}
-              className="flex-1 min-w-[120px]"
-            >
-              {generatingPdf ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  Generating…
-                </>
-              ) : (
-                "Generate PDF"
-              )}
+          <div className="w-full min-w-0 sm:w-auto">
+            <Button type="submit" disabled={!canSubmit} className="flex-1 min-w-[120px]">
+              {submitLabel}
             </Button>
+          </div>
+          {contractId && (
+            <div className="w-full min-w-0 sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGeneratePdf}
+                disabled={generatingPdf}
+                className="flex-1 min-w-[120px]"
+              >
+                {generatingPdf ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    Generating…
+                  </>
+                ) : (
+                  "Generate PDF"
+                )}
+              </Button>
+            </div>
           )}
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel} className="flex-1 min-w-[120px]">
-              Cancel
-            </Button>
+            <div className="w-full min-w-0 sm:w-auto">
+              <Button type="button" variant="outline" onClick={onCancel} className="flex-1 min-w-[120px]">
+                Cancel
+              </Button>
+            </div>
           )}
         </div>
       </form>

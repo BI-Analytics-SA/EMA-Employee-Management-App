@@ -42,7 +42,8 @@ export function ContractDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDeleteHeader, setConfirmDeleteHeader] = useState(false);
+  const [confirmDeleteFooter, setConfirmDeleteFooter] = useState(false);
   const contractFormRef = useRef<ContractFormHandle>(null);
 
   const defaultTemplate = contract ? getDefaultTemplate(organization ?? undefined) : null;
@@ -173,7 +174,7 @@ export function ContractDetailPage() {
           Contract · {displayName} · {timestampToDateString(contract.signedDate)}
         </h1>
         {canManageContracts && (
-          <div className="flex flex-wrap gap-2 w-full">
+          <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
             <Button
               type="submit"
               form="contract-form"
@@ -213,7 +214,7 @@ export function ContractDetailPage() {
             >
               Cancel
             </Button>
-            {confirmDelete ? (
+            {confirmDeleteHeader ? (
               <>
                 <span className="text-sm text-muted-foreground w-full basis-full">Delete?</span>
                 <Button
@@ -227,7 +228,7 @@ export function ContractDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setConfirmDelete(false)}
+                  onClick={() => setConfirmDeleteHeader(false)}
                   className="flex-1 min-w-[100px]"
                 >
                   Cancel
@@ -238,7 +239,7 @@ export function ContractDetailPage() {
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
-                onClick={() => setConfirmDelete(true)}
+                onClick={() => setConfirmDeleteHeader(true)}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
                 Delete contract
@@ -249,9 +250,9 @@ export function ContractDetailPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden p-3 space-y-2">
-        <h2 className="text-sm font-semibold">PDF</h2>
+        <h2 className="text-sm font-semibold bg-muted/70 px-3 py-2 border-b">PDF</h2>
         {hasPdf ? (
-          <div className="flex flex-wrap gap-2 w-full">
+          <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
             <span className="text-sm text-muted-foreground flex items-center gap-1 w-full basis-full">
               <FileText className="h-4 w-4" />
               PDF generated
@@ -286,7 +287,14 @@ export function ContractDetailPage() {
                 onClick={handleDeletePdf}
                 disabled={deletingPdf}
               >
-                {deletingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-1" />Delete PDF</>}
+                {deletingPdf ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete PDF
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -326,7 +334,7 @@ export function ContractDetailPage() {
 
       {canManageContracts && (
         <div className="pt-4 border-t">
-          {confirmDelete ? (
+          {confirmDeleteFooter ? (
             <div className="flex flex-wrap gap-2 w-full">
               <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
               <Button
@@ -340,7 +348,7 @@ export function ContractDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setConfirmDelete(false)}
+                onClick={() => setConfirmDeleteFooter(false)}
                 className="flex-1 min-w-[100px]"
               >
                 Cancel
@@ -351,7 +359,7 @@ export function ContractDetailPage() {
               variant="ghost"
               size="sm"
               className="text-destructive hover:text-destructive w-full"
-              onClick={() => setConfirmDelete(true)}
+              onClick={() => setConfirmDeleteFooter(true)}
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Delete contract

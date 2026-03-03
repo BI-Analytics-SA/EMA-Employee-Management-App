@@ -13,17 +13,18 @@ export function useServiceWorker() {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
+  const onWaitingStateChange = useCallback((e: Event) => {
+    if ((e.target as ServiceWorker).state === "activated") {
+      window.location.reload();
+    }
+  }, []);
+
   const updateServiceWorker = useCallback(() => {
     if (!waitingWorker) return;
 
     waitingWorker.postMessage({ type: "SKIP_WAITING" });
-
-    waitingWorker.addEventListener("statechange", (e) => {
-      if ((e.target as ServiceWorker).state === "activated") {
-        window.location.reload();
-      }
-    });
-  }, [waitingWorker]);
+    waitingWorker.addEventListener("statechange", onWaitingStateChange, { once: true });
+  }, [waitingWorker, onWaitingStateChange]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -61,12 +62,13 @@ export function useServiceWorker() {
 
     register();
 
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
+    const onControllerChange = () => {
       if (!refreshing) {
         refreshing = true;
         window.location.reload();
       }
-    });
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
     const onVisibilityChange = () => {
       if (
@@ -86,6 +88,7 @@ export function useServiceWorker() {
     }, SW_UPDATE_CHECK_INTERVAL_MS);
 
     return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       clearInterval(intervalId);
     };

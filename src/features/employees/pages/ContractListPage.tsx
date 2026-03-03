@@ -82,7 +82,7 @@ export function ContractListPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           <Link to={`/employees/${employeeId}`} className="shrink-0">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -92,12 +92,14 @@ export function ContractListPage() {
           <h1 className="text-2xl font-bold break-words min-w-0 flex-1">{displayName}</h1>
         </div>
         {canManageContracts && (
-          <Link to={`/employees/${employeeId}/contracts/new`} className="block w-full">
-            <Button size="sm" className="w-full">
-              <Plus className="h-4 w-4 mr-1" />
-              New contract
+          <div className="w-full min-w-0 sm:w-auto flex flex-wrap gap-2">
+            <Button size="sm" className="w-full sm:w-auto" asChild>
+              <Link to={`/employees/${employeeId}/contracts/new`}>
+                <Plus className="h-4 w-4 mr-1" />
+                New contract
+              </Link>
             </Button>
-          </Link>
+          </div>
         )}
       </div>
 

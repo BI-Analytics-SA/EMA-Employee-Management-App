@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Menu, Bell, Sun, Moon, LogOut, ChevronDown } from "lucide-react";
+import { Menu, Bell, Sun, Moon, LogOut, ChevronDown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/hooks/useAuth";
@@ -137,6 +137,14 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </p>
               </div>
               {/* Actions */}
+              <Link
+                to="/settings/profile"
+                onClick={() => setDropdownOpen(false)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+              >
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"

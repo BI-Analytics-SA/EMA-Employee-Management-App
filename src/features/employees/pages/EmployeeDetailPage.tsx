@@ -178,7 +178,7 @@ export function EmployeeDetailPage() {
       {/* Info Cards Grid */}
       <div className="flex flex-wrap gap-4">
         {/* Personal */}
-        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[300px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
@@ -191,7 +191,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Contact */}
-        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[240px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Contact</h3>
           </div>
@@ -201,7 +201,7 @@ export function EmployeeDetailPage() {
         </section>
 
         {/* Address */}
-        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[300px] sm:flex-1`}>
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Address</h3>
           </div>

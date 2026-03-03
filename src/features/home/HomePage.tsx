@@ -125,39 +125,39 @@ export function HomePage() {
         </h2>
         <div className="flex flex-wrap gap-2">
           <div className="w-full min-w-0 sm:w-auto">
-            <Link to="/employees/new" className="block">
-              <Button variant="outline" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto" asChild>
+              <Link to="/employees/new">
                 <UserPlus className="h-4 w-4" />
                 Add Employee
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           <div className="w-full min-w-0 sm:w-auto">
-            <Link to="/employees" className="block">
-              <Button variant="outline" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto" asChild>
+              <Link to="/employees">
                 <Users className="h-4 w-4" />
                 View Employees
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           {exportingEnabled && (
             <div className="w-full min-w-0 sm:w-auto">
-              <Link to="/employees" className="block">
-                <Button variant="outline" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto" asChild>
+                <Link to="/employees">
                   <FileDown className="h-4 w-4" />
                   Export to Excel
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           )}
           {documentsEnabled && (
             <div className="w-full min-w-0 sm:w-auto">
-              <Link to="/documents/expiring" className="block">
-                <Button variant="outline" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto" asChild>
+                <Link to="/documents/expiring">
                   <AlertTriangle className="h-4 w-4" />
                   Expiring Documents
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           )}
         </div>
