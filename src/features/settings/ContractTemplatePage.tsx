@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -8,9 +9,10 @@ import { SignatureCapture } from "@/components/shared/SignatureCapture";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, Plus, Trash2, Star } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, Star, Maximize2, Minimize2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { cn } from "@/lib/utils";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
 const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
@@ -45,6 +47,7 @@ export function ContractTemplatePage() {
   const [savingSignature, setSavingSignature] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [termsFullScreen, setTermsFullScreen] = useState(false);
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
@@ -287,6 +290,7 @@ export function ContractTemplatePage() {
       </section>
 
       {selected && (
+        <>
         <section className={sectionClass}>
           <div className={sectionHeaderClass}>
             <h2 className={sectionTitleClass}>
@@ -343,12 +347,31 @@ export function ContractTemplatePage() {
               </p>
             </div>
 
-            <RichTextEditor
-              label="Default Terms and Conditions"
-              content={defaultTermsAndConditions}
-              onChange={setDefaultTermsAndConditions}
-              placeholder="Default terms and conditions content…"
-            />
+            <section className={cn(sectionClass, "w-full")}>
+              <div className={cn(sectionHeaderClass, "flex items-center justify-between gap-2")}>
+                <h3 className={sectionTitleClass}>Default Terms and Conditions</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => setTermsFullScreen(true)}
+                  aria-label="Expand Default Terms and Conditions to full screen"
+                >
+                  <Maximize2 className="h-4 w-4 mr-1" />
+                  Full screen
+                </Button>
+              </div>
+              {!termsFullScreen && (
+                <div className={sectionContentClass}>
+                  <RichTextEditor
+                    content={defaultTermsAndConditions}
+                    onChange={setDefaultTermsAndConditions}
+                    placeholder="Default terms and conditions content…"
+                  />
+                </div>
+              )}
+            </section>
 
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">Organization signatory signature</p>
@@ -390,6 +413,43 @@ export function ContractTemplatePage() {
             </div>
           </div>
         </section>
+
+        {/* Full-screen overlay for Default Terms and Conditions (portal so it fills viewport) */}
+        {termsFullScreen &&
+          createPortal(
+            <div
+              className="fixed inset-0 z-50 flex flex-col bg-background"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Default Terms and Conditions (full screen)"
+            >
+              <div className="flex items-center justify-between gap-4 shrink-0 border-b bg-muted/70 px-4 py-3 shadow-sm">
+                <h3 className="text-base font-semibold text-foreground">Default Terms and Conditions</h3>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="lg"
+                  className="shrink-0 font-medium shadow-md"
+                  onClick={() => setTermsFullScreen(false)}
+                  aria-label="Exit full screen and return to template"
+                >
+                  <Minimize2 className="h-5 w-5 mr-2" />
+                  Return to template
+                </Button>
+              </div>
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <RichTextEditor
+                  content={defaultTermsAndConditions}
+                  onChange={setDefaultTermsAndConditions}
+                  placeholder="Default terms and conditions content…"
+                  fillHeight
+                  className="h-full min-h-0"
+                />
+              </div>
+            </div>,
+            document.body
+          )}
+        </>
       )}
 
       {templates.length === 0 && !hasLegacyOnly && (
