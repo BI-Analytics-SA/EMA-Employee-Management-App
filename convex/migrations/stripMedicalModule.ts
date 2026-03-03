@@ -15,7 +15,6 @@ export const stripMedicalModule = mutation({
     const organizations = await ctx.db.query("organizations").collect();
     let updated = 0;
 
-    const emptyArr: string[] = [];
     for (const org of organizations) {
       const modules = org.settings?.enabledModules;
       if (modules && "medical" in modules) {
@@ -24,20 +23,10 @@ export const stripMedicalModule = mutation({
         type EnabledModules = NonNullable<NonNullable<Doc<"organizations">["settings"]>["enabledModules"]>;
         const enabledModules: EnabledModules | undefined =
           Object.keys(rest).length > 0 ? (rest as EnabledModules) : undefined;
-        const newSettings: NonNullable<Doc<"organizations">["settings"]> = {
-          departments: s?.departments ?? emptyArr,
-          deptGroups: s?.deptGroups ?? emptyArr,
-          shifts: s?.shifts ?? emptyArr,
-          shiftAllocations: s?.shiftAllocations ?? emptyArr,
-          suburbs: s?.suburbs ?? emptyArr,
-          cities: s?.cities ?? emptyArr,
-          postCodes: s?.postCodes ?? emptyArr,
-          documentTypes: s?.documentTypes,
+        const newSettings = {
+          ...(s ?? {}),
           enabledModules,
-          contractTemplate: s?.contractTemplate,
-          contractTemplates: s?.contractTemplates,
-          exportConfig: s?.exportConfig,
-        };
+        } as NonNullable<Doc<"organizations">["settings"]>;
         await ctx.db.patch(org._id, { settings: newSettings });
         updated++;
       }

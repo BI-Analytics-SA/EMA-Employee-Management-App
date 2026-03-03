@@ -52,16 +52,18 @@ export function EmployeeListPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Employees</h1>
-        <div className="flex w-full gap-2 sm:w-auto">
+        <div className="flex flex-wrap w-full gap-2 sm:w-auto min-w-0">
           {exportingEnabled && (
-            <ExportButton className="flex-1 min-w-0 sm:flex-initial" />
+            <div className="flex-1 min-w-0 sm:flex-initial">
+              <ExportButton className="w-full sm:w-auto" />
+            </div>
           )}
-          <Link to="/employees/new" className="flex-1 min-w-0 sm:flex-initial block">
-            <Button className="w-full">
+          <Button asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
+            <Link to="/employees/new">
               <UserPlus className="h-4 w-4" />
               Add Employee
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 

@@ -331,11 +331,12 @@ export const toggleModule = mutation({
     if (!org) {
       throw new Error("Organization not found");
     }
-    const currentModules = org.settings?.enabledModules ?? {};
-    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {
-      ...currentModules,
-      [args.moduleName]: args.enabled,
-    };
+    const allowedKeys = ["contracts", "documents", "exporting"] as const;
+    const current = org.settings?.enabledModules ?? {};
+    const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {};
+    for (const key of allowedKeys) {
+      newEnabledModules[key] = key === args.moduleName ? args.enabled : current[key];
+    }
     const newSettings = mergeSettingsWithModules(org.settings, newEnabledModules);
     await ctx.db.patch(profile.organizationId, {
       settings: newSettings,

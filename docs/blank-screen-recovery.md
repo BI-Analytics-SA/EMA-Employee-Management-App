@@ -21,7 +21,7 @@ the browser is receiving the HTML page instead of the JS/CSS assets. That usuall
    - **Mac:** `Cmd + Shift + R`.
 
 3. **If it still fails:** clear site data for this origin  
-   - DevTools → **Application** → **Storage** → **Clear site data** (or clear cookies/storage for `dev--bia-pepl.netlify.app`).
+   - DevTools → **Application** → **Storage** → **Clear site data** (or clear cookies/storage for the current origin).
 
 After that, the next load should fetch the latest `index.html` and the correct asset URLs for the current deploy.
 

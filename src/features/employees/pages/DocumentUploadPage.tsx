@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -327,7 +327,7 @@ export function DocumentUploadPage() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <div className="flex flex-wrap gap-2 w-full">
+        <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
           <Button
             onClick={handleUpload}
             disabled={isUploading || !file}
@@ -342,11 +342,14 @@ export function DocumentUploadPage() {
               "Upload"
             )}
           </Button>
-          <Link to={`/employees/${employeeId}/documents`} className="flex-1 min-w-[120px]">
-            <Button type="button" variant="outline" className="w-full">
-              Cancel
-            </Button>
-          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 min-w-[120px]"
+            onClick={() => navigate(`/employees/${employeeId}/documents`)}
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { useModuleEnabled, type ModuleName } from "@/hooks/useModuleEnabled";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
@@ -18,9 +18,9 @@ export function ModulesPage() {
   const exportingEnabled = useModuleEnabled("exporting");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const toggleModule = useMutation(api.organizations.mutations.toggleModule);
-  const [toggling, setToggling] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<ModuleName | null>(null);
 
-  const handleToggle = async (moduleName: "contracts" | "documents" | "exporting", enabled: boolean) => {
+  const handleToggle = async (moduleName: ModuleName, enabled: boolean) => {
     setToggling(moduleName);
     try {
       await toggleModule({ moduleName, enabled });

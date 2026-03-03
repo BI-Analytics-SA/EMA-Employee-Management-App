@@ -126,7 +126,7 @@ export function NewContractPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex flex-wrap items-center gap-2 min-w-0">
         <Link to={`/employees/${employeeId}/contracts`} className="shrink-0">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -141,7 +141,7 @@ export function NewContractPage() {
           <Label htmlFor="template-select" className="text-xs">Template</Label>
           <select
             id="template-select"
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full min-w-0 sm:min-w-[100px] sm:flex-1 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={selectedTemplateId ?? selectedTemplate?.id ?? ""}
             onChange={(e) => setSelectedTemplateId(e.target.value)}
           >

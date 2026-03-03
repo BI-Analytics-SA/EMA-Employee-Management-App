@@ -48,7 +48,8 @@ export function ProfilePage() {
       setSuccess("Profile updated.");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile.");
+      console.error(err);
+      setError("Unable to update profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -101,7 +102,8 @@ export function ProfilePage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="flex flex-wrap gap-2 space-y-0">
+            <div className="space-y-2 w-full min-w-0">
               <Label htmlFor="displayName">Display name</Label>
               <Input
                 id="displayName"
@@ -117,7 +119,7 @@ export function ProfilePage() {
             </div>
 
             {authUser?.email && (
-              <div className="space-y-2">
+              <div className="space-y-2 w-full min-w-0">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -133,10 +135,13 @@ export function ProfilePage() {
               </div>
             )}
 
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save changes
-            </Button>
+            <div className="w-full min-w-0 sm:w-auto flex flex-wrap gap-2">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save changes
+              </Button>
+            </div>
+            </div>
           </form>
         </CardContent>
       </Card>

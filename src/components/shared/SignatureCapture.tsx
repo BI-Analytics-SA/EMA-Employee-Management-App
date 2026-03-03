@@ -378,7 +378,7 @@ export function SignatureCapture({
           onMouseLeave={stopDrawing}
         />
       </div>
-      <div className="flex flex-wrap gap-2 w-full">
+      <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
         <Button
           type="button"
           variant="outline"

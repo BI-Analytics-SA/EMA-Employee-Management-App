@@ -15,7 +15,7 @@ import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { cn } from "@/lib/utils";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
+const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
@@ -76,6 +76,15 @@ export function ContractTemplatePage() {
   useEffect(() => {
     if (templates.length > 0 && !selectedId) setSelectedId(templates[0].id);
   }, [templates, selectedId]);
+
+  useEffect(() => {
+    if (!termsFullScreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTermsFullScreen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [termsFullScreen]);
 
   const handleSave = async () => {
     const orgId = organization?._id;
@@ -236,7 +245,7 @@ export function ContractTemplatePage() {
             {templates.map((t) => (
               <div
                 key={t.id}
-                className={`flex w-full min-w-0 sm:w-auto sm:min-w-0 items-center gap-2 rounded-md border px-3 py-2 ${
+                className={`flex w-full sm:w-auto sm:min-w-[280px] sm:flex-1 items-center gap-2 rounded-md border px-3 py-2 ${
                   selectedId === t.id ? "border-primary bg-muted/50" : "border-border"
                 }`}
               >
