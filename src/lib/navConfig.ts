@@ -3,6 +3,7 @@ import {
   Users,
   AlertTriangle,
   UserPlus,
+  User,
   FileStack,
   Layers,
   FileText,
@@ -27,6 +28,7 @@ export const mainNavItems: NavItem[] = [
 ];
 
 export const settingsNavItems: NavItem[] = [
+  { label: "Profile", href: "/settings/profile", icon: User },
   { label: "Team", href: "/settings/team", icon: UserPlus },
   { label: "Doc Types", href: "/settings/document-types", icon: FileStack, requiredModule: "documents" },
   { label: "Modules", href: "/settings/modules", icon: Layers },
