@@ -176,10 +176,13 @@ export const update = mutation({
   },
 });
 
+const BACKFILL_BATCH_SIZE = 100;
+
 /**
  * Backfill bank detail defaults for existing employees in an organization.
  * Sets payMethod="03", bankAccType="S", accRelationship="O" only where currently null/undefined.
  * Run once per organization after deploying bank details; leaves existing values unchanged.
+ * Uses paginated reads and batched patches to avoid OOM/timeout for large orgs.
  */
 export const backfillBankDefaults = mutation({
   args: { organizationId: v.id("organizations") },
@@ -192,23 +195,35 @@ export const backfillBankDefaults = mutation({
     if (!canManageEmployees(profile.role)) {
       throw new Error("Access denied: You cannot run this action");
     }
-    const employees = await ctx.db
-      .query("employees")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
-      .collect();
     const now = Date.now();
+    let total = 0;
     let updated = 0;
-    for (const emp of employees) {
-      const patch: Record<string, unknown> = { updatedAt: now };
-      if (emp.payMethod === undefined) patch.payMethod = "03";
-      if (emp.bankAccType === undefined) patch.bankAccType = "S";
-      if (emp.accRelationship === undefined) patch.accRelationship = "O";
-      if (Object.keys(patch).length > 1) {
-        await ctx.db.patch(emp._id, patch as Record<string, never>);
-        updated++;
+    let cursor: string | null = null;
+
+    while (true) {
+      const result = await ctx.db
+        .query("employees")
+        .withIndex("by_organization_createdAt", (q) =>
+          q.eq("organizationId", args.organizationId)
+        )
+        .order("desc")
+        .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+
+      for (const emp of result.page) {
+        const patch: Record<string, unknown> = { updatedAt: now };
+        if (emp.payMethod === undefined) patch.payMethod = "03";
+        if (emp.bankAccType === undefined) patch.bankAccType = "S";
+        if (emp.accRelationship === undefined) patch.accRelationship = "O";
+        if (Object.keys(patch).length > 1) {
+          await ctx.db.patch(emp._id, patch as Record<string, never>);
+          updated++;
+        }
       }
+      total += result.page.length;
+      if (result.isDone) break;
+      cursor = result.continueCursor;
     }
-    return { updated, total: employees.length };
+    return { updated, total };
   },
 });
 

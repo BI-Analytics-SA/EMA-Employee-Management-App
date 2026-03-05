@@ -90,4 +90,4 @@ Use this checklist before and after pushing to production (merge/push to `main`)
 
 ---
 
-*Last updated: 2025. Adjust items to match your team’s process (e.g. PR review, staging deploy, rollback steps).*
+*Last updated: 2026. Adjust items to match your team's process (e.g. PR review, staging deploy, rollback steps).*

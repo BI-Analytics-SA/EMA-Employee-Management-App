@@ -67,17 +67,20 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "accRelationship", source: "database", dbField: "accRelationship", label: "Account Relationship", dataType: "text", enabled: false },
 ];
 
-/** Merge saved export columns with defaults so new default columns (e.g. bank details) always appear; saved overrides (label, enabled) apply when present. */
+/** Merge saved export columns with defaults so new default columns (e.g. bank details) always appear; saved overrides (label, enabled) apply when present. Preserves saved column order; appends any defaults not in saved. */
 export function mergeExportColumns(
   defaultCols: ExportColumn[],
   saved: ExportColumn[] | undefined
 ): ExportColumn[] {
   if (!saved?.length) return defaultCols;
-  const savedById = new Map(saved.map((c) => [c.id, c]));
-  const merged = defaultCols.map((d) => savedById.get(d.id) ?? d);
-  const defaultIds = new Set(defaultCols.map((c) => c.id));
-  const customOnly = saved.filter((c) => !defaultIds.has(c.id));
-  return [...merged, ...customOnly];
+  const defaultById = new Map(defaultCols.map((c) => [c.id, c]));
+  const savedIds = new Set(saved.map((c) => c.id));
+  const mergedFromSaved = saved.map((s) => {
+    const defaultCol = defaultById.get(s.id);
+    return defaultCol ? { ...defaultCol, ...s } : s;
+  });
+  const remainingDefaults = defaultCols.filter((d) => !savedIds.has(d.id));
+  return [...mergedFromSaved, ...remainingDefaults];
 }
 
 function SortableColumnRow({
@@ -196,6 +199,7 @@ export function ExportConfigPage() {
   const [saving, setSaving] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
+  const [backfillError, setBackfillError] = useState<string | null>(null);
 
   const savedColumns = organization?.settings?.exportConfig?.columns as
     | ExportColumn[]
@@ -266,9 +270,13 @@ export function ExportConfigPage() {
     if (!orgId) return;
     setBackfilling(true);
     setBackfillResult(null);
+    setBackfillError(null);
     try {
       const result = await backfillBankDefaults({ organizationId: orgId });
       setBackfillResult(result);
+    } catch (e) {
+      setBackfillResult(null);
+      setBackfillError(e instanceof Error ? e.message : String(e));
     } finally {
       setBackfilling(false);
     }
@@ -383,7 +391,12 @@ export function ExportConfigPage() {
             "Set default bank fields for all employees"
           )}
         </Button>
-        {backfillResult !== null && (
+        {backfillError && (
+          <p className="text-sm text-destructive">
+            {backfillError}
+          </p>
+        )}
+        {backfillResult !== null && !backfillError && (
           <p className="text-sm text-muted-foreground">
             Updated {backfillResult.updated} of {backfillResult.total} employees.
           </p>
