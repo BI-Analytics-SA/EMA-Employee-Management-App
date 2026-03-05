@@ -9,6 +9,9 @@ const idNumberSchema = z
 export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS"]);
 export const genderEnum = z.enum(["M", "F"]);
 export const ethnicGroupEnum = z.enum(["A", "C", "W", "I", "B"]);
+export const payMethodEnum = z.enum(["02", "03"]);
+export const bankAccTypeEnum = z.enum(["S", "C"]);
+export const accRelationshipEnum = z.enum(["O", "T"]);
 
 export const employeeFormSchema = z.object({
   idNumber: idNumberSchema,
@@ -41,6 +44,22 @@ export const employeeFormSchema = z.object({
     .transform((s) => (s ? new Date(s).getTime() : undefined)),
   taxNumber: z.string().optional(),
   certificate: z.string().optional(),
+  payMethod: z
+    .union([payMethodEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  bankAccType: z
+    .union([bankAccTypeEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  bankAccNo: z.string().optional(),
+  bankName: z.string().optional(),
+  branchCode: z.string().optional(),
+  accHolder: z.string().optional(),
+  accRelationship: z
+    .union([accRelationshipEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
 });
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>;

@@ -58,7 +58,30 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "dateEngaged", source: "database", dbField: "dateEngaged", label: "Date Engaged", dataType: "date", enabled: true },
   { id: "taxNumber", source: "database", dbField: "taxNumber", label: "Tax Number", dataType: "text", enabled: true },
   { id: "certificate", source: "database", dbField: "certificate", label: "Certificate", dataType: "text", enabled: true },
+  { id: "payMethod", source: "database", dbField: "payMethod", label: "Pay Method", dataType: "text", enabled: false },
+  { id: "bankAccType", source: "database", dbField: "bankAccType", label: "Bank Account Type", dataType: "text", enabled: false },
+  { id: "bankAccNo", source: "database", dbField: "bankAccNo", label: "Bank Account No", dataType: "text", enabled: false },
+  { id: "bankName", source: "database", dbField: "bankName", label: "Bank Name", dataType: "text", enabled: false },
+  { id: "branchCode", source: "database", dbField: "branchCode", label: "Branch Code", dataType: "text", enabled: false },
+  { id: "accHolder", source: "database", dbField: "accHolder", label: "Account Holder", dataType: "text", enabled: false },
+  { id: "accRelationship", source: "database", dbField: "accRelationship", label: "Account Relationship", dataType: "text", enabled: false },
 ];
+
+/** Merge saved export columns with defaults so new default columns (e.g. bank details) always appear; saved overrides (label, enabled) apply when present. Preserves saved column order; appends any defaults not in saved. */
+export function mergeExportColumns(
+  defaultCols: ExportColumn[],
+  saved: ExportColumn[] | undefined
+): ExportColumn[] {
+  if (!saved?.length) return defaultCols;
+  const defaultById = new Map(defaultCols.map((c) => [c.id, c]));
+  const savedIds = new Set(saved.map((c) => c.id));
+  const mergedFromSaved = saved.map((s) => {
+    const defaultCol = defaultById.get(s.id);
+    return defaultCol ? { ...defaultCol, ...s } : s;
+  });
+  const remainingDefaults = defaultCols.filter((d) => !savedIds.has(d.id));
+  return [...mergedFromSaved, ...remainingDefaults];
+}
 
 function SortableColumnRow({
   column,
@@ -170,16 +193,20 @@ export function ExportConfigPage() {
   const exportingEnabled = useModuleEnabled("exporting");
   const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
+  const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
 
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
+  const [backfillError, setBackfillError] = useState<string | null>(null);
 
-  const savedColumns = organization?.settings?.exportConfig?.columns;
+  const savedColumns = organization?.settings?.exportConfig?.columns as
+    | ExportColumn[]
+    | undefined;
 
   useEffect(() => {
-    if (savedColumns && savedColumns.length > 0) {
-      setColumns(savedColumns as ExportColumn[]);
-    }
+    setColumns(mergeExportColumns(DEFAULT_DATABASE_COLUMNS, savedColumns));
   }, [savedColumns]);
 
   const sensors = useSensors(
@@ -235,6 +262,23 @@ export function ExportConfigPage() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleBackfillBankDefaults = async () => {
+    const orgId = organization?._id;
+    if (!orgId) return;
+    setBackfilling(true);
+    setBackfillResult(null);
+    setBackfillError(null);
+    try {
+      const result = await backfillBankDefaults({ organizationId: orgId });
+      setBackfillResult(result);
+    } catch (e) {
+      setBackfillResult(null);
+      setBackfillError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBackfilling(false);
     }
   };
 
@@ -323,6 +367,40 @@ export function ExportConfigPage() {
             "Save configuration"
           )}
         </Button>
+      </div>
+
+      <div className="rounded-lg border bg-card p-4 space-y-2">
+        <h2 className="text-sm font-semibold">Bank details defaults</h2>
+        <p className="text-sm text-muted-foreground">
+          Set Pay Method to Electronic Payment, Account Type to Savings, and Relationship to Own for all employees
+          who currently have these fields empty. Existing values are left unchanged.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleBackfillBankDefaults}
+          disabled={backfilling || !organization?._id}
+        >
+          {backfilling ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Updating…
+            </>
+          ) : (
+            "Set default bank fields for all employees"
+          )}
+        </Button>
+        {backfillError && (
+          <p className="text-sm text-destructive">
+            {backfillError}
+          </p>
+        )}
+        {backfillResult !== null && !backfillError && (
+          <p className="text-sm text-muted-foreground">
+            Updated {backfillResult.updated} of {backfillResult.total} employees.
+          </p>
+        )}
       </div>
     </div>
   );
