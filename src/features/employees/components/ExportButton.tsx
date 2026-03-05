@@ -7,7 +7,10 @@ import { FileDown, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import * as XLSX from "xlsx";
 import type { ExportColumn } from "@/features/settings/ExportConfigPage";
-import { DEFAULT_DATABASE_COLUMNS } from "@/features/settings/ExportConfigPage";
+import {
+  DEFAULT_DATABASE_COLUMNS,
+  mergeExportColumns,
+} from "@/features/settings/ExportConfigPage";
 
 function formatDate(ts: number | undefined): string {
   if (ts == null || ts === 0) return "";
@@ -54,10 +57,8 @@ export function ExportButton({ className }: ExportButtonProps) {
   const configColumns = organization?.settings?.exportConfig?.columns as
     | ExportColumn[]
     | undefined;
-  const columns: ExportColumn[] =
-    configColumns && configColumns.length > 0
-      ? configColumns.filter((c) => c.enabled)
-      : DEFAULT_DATABASE_COLUMNS.filter((c) => c.enabled);
+  const resolvedColumns = mergeExportColumns(DEFAULT_DATABASE_COLUMNS, configColumns);
+  const columns: ExportColumn[] = resolvedColumns.filter((c) => c.enabled);
 
   const handleExport = useCallback(() => {
     if (!employees || employees.length === 0) return;

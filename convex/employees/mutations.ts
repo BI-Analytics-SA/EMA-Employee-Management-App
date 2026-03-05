@@ -19,6 +19,9 @@ const ethnicGroupValidator = v.union(
   v.literal("I"),
   v.literal("B")
 );
+const payMethodValidator = v.union(v.literal("02"), v.literal("03"));
+const bankAccTypeValidator = v.union(v.literal("S"), v.literal("C"));
+const accRelationshipValidator = v.union(v.literal("O"), v.literal("T"));
 
 const createArgs = {
   organizationId: v.id("organizations"),
@@ -43,6 +46,13 @@ const createArgs = {
   dateEngaged: v.optional(v.number()),
   taxNumber: v.optional(v.string()),
   certificate: v.optional(v.string()),
+  payMethod: v.optional(payMethodValidator),
+  bankAccType: v.optional(bankAccTypeValidator),
+  bankAccNo: v.optional(v.string()),
+  bankName: v.optional(v.string()),
+  branchCode: v.optional(v.string()),
+  accHolder: v.optional(v.string()),
+  accRelationship: v.optional(accRelationshipValidator),
 };
 
 /**
@@ -109,6 +119,13 @@ export const update = mutation({
     dateEngaged: v.optional(v.number()),
     taxNumber: v.optional(v.string()),
     certificate: v.optional(v.string()),
+    payMethod: v.optional(payMethodValidator),
+    bankAccType: v.optional(bankAccTypeValidator),
+    bankAccNo: v.optional(v.string()),
+    bankName: v.optional(v.string()),
+    branchCode: v.optional(v.string()),
+    accHolder: v.optional(v.string()),
+    accRelationship: v.optional(accRelationshipValidator),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
@@ -147,6 +164,7 @@ export const update = mutation({
       "cellNumber", "resStreetNo", "resStreetName",
       "resSuburb", "resCity", "resPostCode", "dateRegistered", "dateEngaged",
       "taxNumber", "certificate",
+      "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode", "accHolder", "accRelationship",
     ];
     for (const key of allowedKeys) {
       if (key in updates && (updates as Record<string, unknown>)[key] !== undefined) {
@@ -155,6 +173,57 @@ export const update = mutation({
     }
     await ctx.db.patch(id, patch as Record<string, never>);
     return id;
+  },
+});
+
+const BACKFILL_BATCH_SIZE = 100;
+
+/**
+ * Backfill bank detail defaults for existing employees in an organization.
+ * Sets payMethod="03", bankAccType="S", accRelationship="O" only where currently null/undefined.
+ * Run once per organization after deploying bank details; leaves existing values unchanged.
+ * Uses paginated reads and batched patches to avoid OOM/timeout for large orgs.
+ */
+export const backfillBankDefaults = mutation({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const profile = await requireRoleInOrganization(
+      ctx,
+      args.organizationId,
+      "user"
+    );
+    if (!canManageEmployees(profile.role)) {
+      throw new Error("Access denied: You cannot run this action");
+    }
+    const now = Date.now();
+    let total = 0;
+    let updated = 0;
+    let cursor: string | null = null;
+
+    while (true) {
+      const result = await ctx.db
+        .query("employees")
+        .withIndex("by_organization_createdAt", (q) =>
+          q.eq("organizationId", args.organizationId)
+        )
+        .order("desc")
+        .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+
+      for (const emp of result.page) {
+        const patch: Record<string, unknown> = { updatedAt: now };
+        if (emp.payMethod === undefined) patch.payMethod = "03";
+        if (emp.bankAccType === undefined) patch.bankAccType = "S";
+        if (emp.accRelationship === undefined) patch.accRelationship = "O";
+        if (Object.keys(patch).length > 1) {
+          await ctx.db.patch(emp._id, patch as Record<string, never>);
+          updated++;
+        }
+      }
+      total += result.page.length;
+      if (result.isDone) break;
+      cursor = result.continueCursor;
+    }
+    return { updated, total };
   },
 });
 

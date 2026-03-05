@@ -58,6 +58,13 @@ export function EditEmployeePage() {
         dateEngaged: values.dateEngaged,
         taxNumber: values.taxNumber || undefined,
         certificate: values.certificate || undefined,
+        payMethod: values.payMethod,
+        bankAccType: values.bankAccType,
+        bankAccNo: values.bankAccNo || undefined,
+        bankName: values.bankName || undefined,
+        branchCode: values.branchCode || undefined,
+        accHolder: values.accHolder || undefined,
+        accRelationship: values.accRelationship,
       });
       navigate(returnTo ?? `/employees/${employeeId}`);
     } finally {

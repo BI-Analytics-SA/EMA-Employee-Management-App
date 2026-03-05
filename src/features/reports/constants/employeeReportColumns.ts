@@ -1,6 +1,14 @@
 import type { Doc } from "../../../../convex/_generated/dataModel";
+import {
+  PAY_METHODS,
+  BANK_ACC_TYPES,
+  ACC_RELATIONSHIPS,
+} from "@/lib/constants/bankDetails";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
+const payMethodLabels: Record<string, string> = Object.fromEntries(PAY_METHODS.map((p) => [p.value, p.label]));
+const bankAccTypeLabels: Record<string, string> = Object.fromEntries(BANK_ACC_TYPES.map((b) => [b.value, b.label]));
+const accRelationshipLabels: Record<string, string> = Object.fromEntries(ACC_RELATIONSHIPS.map((a) => [a.value, a.label]));
 
 function formatDate(ts: number | undefined): string {
   if (ts == null) return "—";
@@ -62,6 +70,49 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     id: "knownAs",
     label: "Known As",
     getValue: (emp) => emp.knownAs,
+    defaultVisible: false,
+  },
+  // Bank details – off by default; add new employee fields here with defaultVisible: false
+  {
+    id: "payMethod",
+    label: "Pay Method",
+    getValue: (emp) => (emp.payMethod ? payMethodLabels[emp.payMethod] ?? emp.payMethod : undefined),
+    defaultVisible: false,
+  },
+  {
+    id: "bankName",
+    label: "Bank Name",
+    getValue: (emp) => emp.bankName ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "branchCode",
+    label: "Branch Code",
+    getValue: (emp) => emp.branchCode ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "bankAccType",
+    label: "Bank Account Type",
+    getValue: (emp) => (emp.bankAccType ? bankAccTypeLabels[emp.bankAccType] ?? emp.bankAccType : undefined),
+    defaultVisible: false,
+  },
+  {
+    id: "bankAccNo",
+    label: "Bank Account No",
+    getValue: (emp) => emp.bankAccNo ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "accHolder",
+    label: "Account Holder",
+    getValue: (emp) => emp.accHolder ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "accRelationship",
+    label: "Account Relationship",
+    getValue: (emp) => (emp.accRelationship ? accRelationshipLabels[emp.accRelationship] ?? emp.accRelationship : undefined),
     defaultVisible: false,
   },
 ];
