@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,13 @@ import {
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import {
+  PAY_METHODS,
+  BANK_ACC_TYPES,
+  BANK_NAMES,
+  BRANCH_CODES,
+  ACC_RELATIONSHIPS,
+} from "@/lib/constants/bankDetails";
 
 const TITLES = [
   { value: "MR", label: "Mr" },
@@ -66,6 +74,13 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     dateEngaged: timestampToDateString(emp.dateEngaged),
     taxNumber: emp.taxNumber ?? "",
     certificate: emp.certificate ?? "",
+    payMethod: emp.payMethod ?? "03",
+    bankAccType: emp.bankAccType ?? "S",
+    bankAccNo: emp.bankAccNo ?? "",
+    bankName: emp.bankName ?? "",
+    branchCode: emp.branchCode ?? "",
+    accHolder: emp.accHolder ?? "",
+    accRelationship: emp.accRelationship ?? "O",
   };
 }
 
@@ -84,12 +99,21 @@ export function EmployeeForm({
         title: "MR" as const,
         gender: "M" as const,
         ethnicGroup: "A" as const,
+        payMethod: "03" as const,
+        bankAccType: "S" as const,
+        accRelationship: "O" as const,
       };
 
   const form = useForm<EmployeeFormInput, unknown, EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: { ...initial, ...defaultValues },
   });
+
+  const bankName = form.watch("bankName");
+  useEffect(() => {
+    const code = bankName ? BRANCH_CODES[bankName] ?? "" : "";
+    form.setValue("branchCode", code);
+  }, [bankName, form]);
 
   const selectClass = cn(
     "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -298,6 +322,70 @@ export function EmployeeForm({
               <div className={fieldClass}>
                 <Label htmlFor="certificate" className="text-xs">Certificate</Label>
                 <Input id="certificate" {...form.register("certificate")} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Banking Details */}
+        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[520px] sm:flex-[2]")}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Banking Details</h3>
+          </div>
+          <div className={sectionContentClass}>
+            <div className="flex flex-wrap gap-2">
+              <div className={fieldClass}>
+                <Label htmlFor="payMethod" className="text-xs">Pay Method</Label>
+                <select id="payMethod" className={selectClass} {...form.register("payMethod")}>
+                  <option value="">— Select —</option>
+                  {PAY_METHODS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="bankName" className="text-xs">Bank Name</Label>
+                <select id="bankName" className={selectClass} {...form.register("bankName")}>
+                  <option value="">— Select —</option>
+                  {BANK_NAMES.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="bankAccType" className="text-xs">Account Type</Label>
+                <select id="bankAccType" className={selectClass} {...form.register("bankAccType")}>
+                  <option value="">— Select —</option>
+                  {BANK_ACC_TYPES.map((b) => (
+                    <option key={b.value} value={b.value}>{b.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="branchCode" className="text-xs">Branch Code</Label>
+                <Input
+                  id="branchCode"
+                  readOnly
+                  className="bg-muted"
+                  {...form.register("branchCode")}
+                />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="bankAccNo" className="text-xs">Account Number</Label>
+                <Input id="bankAccNo" {...form.register("bankAccNo")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="accHolder" className="text-xs">Account Holder</Label>
+                <Input id="accHolder" {...form.register("accHolder")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="accRelationship" className="text-xs">Relationship</Label>
+                <select id="accRelationship" className={selectClass} {...form.register("accRelationship")}>
+                  <option value="">— Select —</option>
+                  {ACC_RELATIONSHIPS.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

@@ -8,6 +8,12 @@ import { Loader2, Pencil, Camera, FileText, Trash2, User, FileStack } from "luci
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { timestampToDateString } from "@/lib/validations/employee";
+import {
+  PAY_METHODS,
+  BANK_ACC_TYPES,
+  BRANCH_CODES,
+  ACC_RELATIONSHIPS,
+} from "@/lib/constants/bankDetails";
 import { useState } from "react";
 import { useMutation } from "convex/react";
 
@@ -20,6 +26,14 @@ const ETHNIC: Record<string, string> = {
   I: "Indian",
   B: "Black",
 };
+
+const payMethodLabels: Record<string, string> = Object.fromEntries(PAY_METHODS.map((p) => [p.value, p.label]));
+const bankAccTypeLabels: Record<string, string> = Object.fromEntries(BANK_ACC_TYPES.map((b) => [b.value, b.label]));
+const accRelationshipLabels: Record<string, string> = Object.fromEntries(ACC_RELATIONSHIPS.map((a) => [a.value, a.label]));
+function branchCodeForBank(bankName: string | undefined): string {
+  if (!bankName) return "";
+  return BRANCH_CODES[bankName] ?? "";
+}
 
 // Section card styling
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
@@ -219,6 +233,22 @@ export function EmployeeDetailPage() {
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Date registered" value={timestampToDateString(employee.dateRegistered)} />
             <InfoRow label="Date engaged" value={timestampToDateString(employee.dateEngaged)} />
+          </div>
+        </section>
+
+        {/* Banking Details */}
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Banking Details</h3>
+          </div>
+          <div className={`${sectionContentClass} space-y-1`}>
+            <InfoRow label="Pay method" value={payMethodLabels[employee.payMethod ?? "03"]} />
+            <InfoRow label="Bank name" value={employee.bankName} />
+            <InfoRow label="Branch code" value={employee.branchCode ?? branchCodeForBank(employee.bankName)} />
+            <InfoRow label="Account type" value={bankAccTypeLabels[employee.bankAccType ?? "S"]} />
+            <InfoRow label="Account number" value={employee.bankAccNo} />
+            <InfoRow label="Account holder" value={employee.accHolder} />
+            <InfoRow label="Relationship" value={accRelationshipLabels[employee.accRelationship ?? "O"]} />
           </div>
         </section>
 

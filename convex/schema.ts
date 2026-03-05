@@ -176,6 +176,15 @@ export default defineSchema({
     taxNumber: v.optional(v.string()),
     certificate: v.optional(v.string()),
 
+    // Banking Details
+    payMethod: v.optional(v.union(v.literal("02"), v.literal("03"))),
+    bankAccType: v.optional(v.union(v.literal("S"), v.literal("C"))),
+    bankAccNo: v.optional(v.string()),
+    bankName: v.optional(v.string()),
+    branchCode: v.optional(v.string()),
+    accHolder: v.optional(v.string()),
+    accRelationship: v.optional(v.union(v.literal("O"), v.literal("T"))),
+
     // Image (Convex file storage)
     imageStorageId: v.optional(v.id("_storage")),
     imageUrl: v.optional(v.string()),
