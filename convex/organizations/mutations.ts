@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { requireRole } from "../lib/permissions";
+import { requireRoleInOrganization } from "../lib/permissions";
 
 /**
  * Create a new organization
@@ -18,16 +18,6 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    // Check if user already has a profile (already belongs to an org)
-    const existingProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
-
-    if (existingProfile) {
-      throw new Error("You already belong to an organization");
     }
 
     // Check if slug is already taken
@@ -322,12 +312,13 @@ function mergeSettingsWithModules(
  */
 export const toggleModule = mutation({
   args: {
+    organizationId: v.id("organizations"),
     moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const profile = await requireRole(ctx, "admin");
-    const org = await ctx.db.get(profile.organizationId);
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
     if (!org) {
       throw new Error("Organization not found");
     }
@@ -338,7 +329,7 @@ export const toggleModule = mutation({
       newEnabledModules[key] = key === args.moduleName ? args.enabled : current[key];
     }
     const newSettings = mergeSettingsWithModules(org.settings, newEnabledModules);
-    await ctx.db.patch(profile.organizationId, {
+    await ctx.db.patch(args.organizationId, {
       settings: newSettings,
     });
     return { success: true };

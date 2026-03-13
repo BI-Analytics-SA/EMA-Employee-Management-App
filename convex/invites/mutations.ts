@@ -137,16 +137,6 @@ export const useInvite = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Check if user already has a profile
-    const existingProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
-
-    if (existingProfile) {
-      throw new Error("You already belong to an organization");
-    }
-
     // Find the invite
     const invite = await ctx.db
       .query("invites")
@@ -159,6 +149,18 @@ export const useInvite = mutation({
 
     if (invite.status !== "pending") {
       throw new Error("This invite is no longer valid");
+    }
+
+    // Check if user is already a member of this organization
+    const existingMembership = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", invite.organizationId)
+      )
+      .first();
+
+    if (existingMembership) {
+      throw new Error("You are already a member of this organization");
     }
 
     if (invite.expiresAt && invite.expiresAt < Date.now()) {

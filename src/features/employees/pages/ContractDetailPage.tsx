@@ -17,7 +17,7 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 export function ContractDetailPage() {
   const { id, contractId } = useParams<{ id: string; contractId: string }>();
   const navigate = useNavigate();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const canManageContracts = useHasRole("manager");
   const employeeId = id as Id<"employees"> | undefined;
@@ -31,7 +31,6 @@ export function ContractDetailPage() {
     api.contracts.queries.getById,
     contractIdTyped ? { id: contractIdTyped } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
 
   const updateContract = useMutation(api.contracts.mutations.update);
   const saveContractSignature = useMutation(api.contracts.actions.saveContractSignature);

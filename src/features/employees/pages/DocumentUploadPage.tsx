@@ -40,13 +40,12 @@ function addDurationToNow(
 export function DocumentUploadPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { isLoading: userLoading, organization } = useCurrentUser();
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(
     api.employees.queries.getById,
     employeeId ? { id: employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization);
   const generateUploadUrl = useMutation(api.documents.actions.generateDocumentUploadUrl);
   const createDocument = useMutation(api.documents.mutations.create);
 
