@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
@@ -189,9 +189,8 @@ function SortableColumnRow({
 }
 
 export function ExportConfigPage() {
-  const { isAdmin, isLoading: userLoading } = useCurrentUser();
+  const { organization, isAdmin, isLoading: userLoading } = useCurrentUser();
   const exportingEnabled = useModuleEnabled("exporting");
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
   const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
 

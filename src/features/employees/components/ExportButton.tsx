@@ -46,8 +46,7 @@ function cellValue(
 type ExportButtonProps = { className?: string };
 
 export function ExportButton({ className }: ExportButtonProps) {
-  const { organizationId, isLoading: userLoading } = useCurrentUser();
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
+  const { organizationId, organization, isLoading: userLoading } = useCurrentUser();
   const employees = useQuery(
     api.employees.queries.listAll,
     organizationId ? { organizationId } : "skip"

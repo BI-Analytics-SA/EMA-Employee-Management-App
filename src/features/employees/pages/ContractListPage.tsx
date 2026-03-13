@@ -14,7 +14,7 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 
 export function ContractListPage() {
   const { id } = useParams<{ id: string }>();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const canManageContracts = useHasRole("manager");
   const employeeId = id as Id<"employees"> | undefined;
@@ -26,7 +26,6 @@ export function ContractListPage() {
     api.contracts.queries.listByEmployee,
     employeeId ? { employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
   const removeContract = useMutation(api.contracts.mutations.remove);
   const [deletingId, setDeletingId] = useState<Id<"contracts"> | null>(null);

@@ -1,0 +1,401 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, AlertCircle, Building2, CheckCircle2, UserPlus } from "lucide-react";
+import { useOrganizationContext } from "@/contexts/OrganizationContext";
+
+/**
+ * Generate a URL-safe slug from text
+ */
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+type AddOrgMode = "choose" | "create" | "join";
+
+export function AddOrganizationPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const modeParam = searchParams.get("mode");
+  const inviteCodeFromUrl = searchParams.get("invite");
+  const { setActiveOrganization } = useOrganizationContext();
+
+  const createOrganization = useMutation(api.organizations.mutations.create);
+  const useInvite = useMutation(api.invites.mutations.useInvite);
+
+  const [mode, setMode] = useState<AddOrgMode>(
+    modeParam === "join" || inviteCodeFromUrl ? "join" : "choose"
+  );
+
+  const [orgName, setOrgName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [createUserName, setCreateUserName] = useState("");
+  const [inviteCode, setInviteCode] = useState(inviteCodeFromUrl || "");
+  const [userName, setUserName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isSlugAvailable = useQuery(
+    api.organizations.queries.isSlugAvailable,
+    slug.length >= 3 ? { slug } : "skip"
+  );
+  const inviteDetails = useQuery(
+    api.invites.queries.getByCode,
+    inviteCode.length >= 4 ? { code: inviteCode.toUpperCase() } : "skip"
+  );
+
+  useEffect(() => {
+    if (!slugManuallyEdited && orgName) {
+      setSlug(generateSlug(orgName));
+    }
+  }, [orgName, slugManuallyEdited]);
+
+  const handleSlugChange = (value: string) => {
+    setSlugManuallyEdited(true);
+    setSlug(generateSlug(value));
+  };
+
+  const handleCreateOrg = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    if (orgName.trim().length < 2) {
+      setError("Organization name must be at least 2 characters.");
+      return;
+    }
+    if (slug.length < 3) {
+      setError("Organization URL must be at least 3 characters.");
+      return;
+    }
+    if (isSlugAvailable === false) {
+      setError("This organization URL is already taken. Please choose another.");
+      return;
+    }
+    if (createUserName.trim().length < 1) {
+      setError("Please enter your name.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { organizationId } = await createOrganization({
+        name: orgName.trim(),
+        slug,
+        userName: createUserName.trim(),
+      });
+      setActiveOrganization(organizationId);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create organization. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleJoinOrg = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    if (!inviteCode.trim()) {
+      setError("Please enter an invite code.");
+      return;
+    }
+    if (!userName.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
+    if (!inviteDetails) {
+      setError("Invalid or expired invite code. Please check and try again.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { organizationId } = await useInvite({
+        code: inviteCode.toUpperCase(),
+        userName: userName.trim(),
+      });
+      setActiveOrganization(organizationId);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to join organization. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (mode === "choose") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Add Organization</CardTitle>
+            <CardDescription>
+              Create a new organization or join one with an invite code
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setMode("create")}
+            >
+              <Building2 className="h-8 w-8 text-accent" />
+              <div className="text-center">
+                <div className="font-semibold">Create an Organization</div>
+                <div className="text-sm text-muted-foreground">
+                  Set up a new organization for your team
+                </div>
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setMode("join")}
+            >
+              <UserPlus className="h-8 w-8 text-accent" />
+              <div className="text-center">
+                <div className="font-semibold">Join an Organization</div>
+                <div className="text-sm text-muted-foreground">
+                  I have an invite code from my organization
+                </div>
+              </div>
+            </Button>
+          </CardContent>
+          <CardFooter>
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+              ← Back to app
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  if (mode === "join") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+              <UserPlus className="h-6 w-6 text-accent" />
+            </div>
+            <CardTitle className="text-2xl">Join Organization</CardTitle>
+            <CardDescription>
+              Enter your invite code to join an existing organization
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleJoinOrg}>
+            <CardContent className="space-y-4">
+              {error && (
+                <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <span className="text-destructive">{error}</span>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="add-org-inviteCode">Invite Code</Label>
+                <Input
+                  id="add-org-inviteCode"
+                  type="text"
+                  placeholder="e.g., ABC12345"
+                  required
+                  disabled={isLoading}
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  autoFocus
+                  className="uppercase tracking-wider"
+                />
+                {inviteCode.length >= 4 && (
+                  <div className="flex items-center gap-2 text-xs">
+                    {inviteDetails === undefined ? (
+                      <span className="text-muted-foreground">Checking invite code...</span>
+                    ) : inviteDetails ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                        <span className="text-success">
+                          Valid invite to join <strong>{inviteDetails.organizationName}</strong> as {inviteDetails.role}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                        <span className="text-destructive">Invalid or expired invite code</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-org-userName">Your Name</Label>
+                <Input
+                  id="add-org-userName"
+                  type="text"
+                  placeholder="e.g., John Smith"
+                  required
+                  disabled={isLoading}
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This is how your name will appear to others in the organization
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-3">
+              <Button type="submit" className="w-full" disabled={isLoading || !inviteDetails}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Join Organization
+              </Button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                  onClick={() => setMode("choose")}
+                >
+                  ← Back to options
+                </button>
+                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+                  Back to app
+                </Link>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+            <Building2 className="h-6 w-6 text-accent" />
+          </div>
+          <CardTitle className="text-2xl">Create Your Organization</CardTitle>
+          <CardDescription>
+            Set up your organization to start managing employees
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleCreateOrg}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="flex items-start gap-3 p-3 text-sm bg-destructive/10 border border-destructive/30 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-destructive">{error}</span>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="add-org-name">Organization Name</Label>
+              <Input
+                id="add-org-name"
+                type="text"
+                placeholder="e.g., Acme Corporation"
+                required
+                disabled={isLoading}
+                value={orgName}
+                onChange={(e) => setOrgName(e.target.value)}
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                The name of your company or organization
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-org-slug">Organization URL</Label>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm text-muted-foreground shrink-0">app/</span>
+                <Input
+                  id="add-org-slug"
+                  type="text"
+                  placeholder="acme-corp"
+                  required
+                  disabled={isLoading}
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  className="min-w-0 flex-1"
+                />
+              </div>
+              {slug.length >= 3 && (
+                <div className="flex items-center gap-2 text-xs">
+                  {isSlugAvailable === undefined ? (
+                    <span className="text-muted-foreground">Checking availability...</span>
+                  ) : isSlugAvailable ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                      <span className="text-success">This URL is available</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                      <span className="text-destructive">This URL is already taken</span>
+                    </>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                A unique identifier for your organization (lowercase, no spaces)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-org-createUserName">Your Name</Label>
+              <Input
+                id="add-org-createUserName"
+                type="text"
+                placeholder="e.g., John Smith"
+                required
+                disabled={isLoading}
+                value={createUserName}
+                onChange={(e) => setCreateUserName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                This is how your name will appear to others in the organization
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                isLoading ||
+                isSlugAvailable === false ||
+                slug.length < 3 ||
+                createUserName.trim().length < 1
+              }
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Organization
+            </Button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => setMode("choose")}
+              >
+                ← Back to options
+              </button>
+              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+                Back to app
+              </Link>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  );
+}

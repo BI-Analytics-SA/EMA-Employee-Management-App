@@ -17,14 +17,13 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 export function NewContractPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { organizationId, isLoading: userLoading } = useCurrentUser();
+  const { organizationId, organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(
     api.employees.queries.getById,
     employeeId ? { id: employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const createContract = useMutation(api.contracts.mutations.create);
   const saveContractSignature = useMutation(api.contracts.actions.saveContractSignature);
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);

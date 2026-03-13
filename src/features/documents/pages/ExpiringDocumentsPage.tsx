@@ -12,9 +12,8 @@ import { useState } from "react";
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
 export function ExpiringDocumentsPage() {
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const documentsEnabled = useModuleEnabled("documents");
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization);
   const [daysFilter, setDaysFilter] = useState<30 | 60 | 90>(90);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
