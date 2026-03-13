@@ -20,12 +20,29 @@ import {
   BRANCH_CODES,
   ACC_RELATIONSHIPS,
 } from "@/lib/constants/bankDetails";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const TITLES = [
   { value: "MR", label: "Mr" },
   { value: "MISS", label: "Miss" },
   { value: "MRS", label: "Mrs" },
   { value: "MS", label: "Ms" },
+  { value: "DR", label: "Dr" },
+  { value: "PROF", label: "Prof" },
+  { value: "REV", label: "Rev" },
+] as const;
+
+const MARITAL_STATUSES = [
+  { value: "SINGLE", label: "Single" },
+  { value: "MARRIED", label: "Married" },
+  { value: "DIVORCED", label: "Divorced" },
+  { value: "WIDOWED", label: "Widowed" },
+  { value: "SEPARATED", label: "Separated" },
+] as const;
+
+const TRAINING_OPTIONS = [
+  { value: "true", label: "Yes" },
+  { value: "false", label: "No" },
 ] as const;
 
 const GENDERS = [
@@ -79,11 +96,19 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     dateRegistered: timestampToDateString(emp.dateRegistered),
     dateEngaged: timestampToDateString(emp.dateEngaged),
     lastDateWorked: timestampToDateString(empAny.lastDateWorked as number | undefined),
+    uifEndDate: timestampToDateString(empAny.uifEndDate as number | undefined),
     taxNumber: emp.taxNumber ?? "",
     certificate: emp.certificate ?? "",
     hrsPerPeriod: (empAny.hrsPerPeriod as number | undefined) ?? "",
     hoursPerDay: (empAny.hoursPerDay as number | undefined) ?? "",
     workAddressCode: (empAny.workAddressCode as number | undefined) ?? "",
+    training: ((empAny.training as boolean | undefined) != null ? String(empAny.training) : "") as "" | "true" | "false",
+    shift: (empAny.shift as string | undefined) ?? "",
+    shiftAllocation: (empAny.shiftAllocation as string | undefined) ?? "",
+    deptGroup: (empAny.deptGroup as string | undefined) ?? "",
+    departmentWorked: (empAny.departmentWorked as string | undefined) ?? "",
+    department: (empAny.department as string | undefined) ?? "",
+    maritalStatus: ((empAny.maritalStatus as string | undefined) ?? "") as "" | "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED",
     illnessCondition: (empAny.illnessCondition as string | undefined) ?? "",
     payMethod: emp.payMethod ?? "03",
     bankAccType: emp.bankAccType ?? "S",
@@ -104,6 +129,12 @@ export function EmployeeForm({
   isSubmitting = false,
   submitLabel = "Save",
 }: Props) {
+  const { organization } = useCurrentUser();
+  const departments = organization?.settings?.departments ?? [];
+  const deptGroups = organization?.settings?.deptGroups ?? [];
+  const shifts = organization?.settings?.shifts ?? [];
+  const shiftAllocations = organization?.settings?.shiftAllocations ?? [];
+
   const initial = employee
     ? employeeToFormValues(employee)
     : {
@@ -331,6 +362,15 @@ export function EmployeeForm({
                 <Label htmlFor="illnessCondition" className="text-xs">Illness Condition</Label>
                 <Input id="illnessCondition" {...form.register("illnessCondition")} placeholder="e.g. ASTHMA" />
               </div>
+              <div className={fieldClass}>
+                <Label htmlFor="maritalStatus" className="text-xs">Marital Status</Label>
+                <select id="maritalStatus" className={selectClass} {...form.register("maritalStatus")}>
+                  <option value="">— Select —</option>
+                  {MARITAL_STATUSES.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </section>
@@ -358,6 +398,10 @@ export function EmployeeForm({
                 <Label htmlFor="lastDateWorked" className="text-xs">Last Date Worked</Label>
                 <Input id="lastDateWorked" type="date" {...form.register("lastDateWorked")} />
               </div>
+              <div className={dateFieldClass}>
+                <Label htmlFor="uifEndDate" className="text-xs">UIF End Date</Label>
+                <Input id="uifEndDate" type="date" {...form.register("uifEndDate")} />
+              </div>
               <div className={fieldClass}>
                 <Label htmlFor="certificate" className="text-xs">Certificate</Label>
                 <Input id="certificate" {...form.register("certificate")} />
@@ -384,6 +428,60 @@ export function EmployeeForm({
               <div className={wideFieldClass}>
                 <Label htmlFor="workAddressCode" className="text-xs">Work Address Code</Label>
                 <Input id="workAddressCode" type="number" {...form.register("workAddressCode")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="training" className="text-xs">Training</Label>
+                <select id="training" className={selectClass} {...form.register("training")}>
+                  <option value="">— Select —</option>
+                  {TRAINING_OPTIONS.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="shift" className="text-xs">Shift</Label>
+                <select id="shift" className={selectClass} {...form.register("shift")}>
+                  <option value="">— Select —</option>
+                  {shifts.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="shiftAllocation" className="text-xs">Shift Allocation</Label>
+                <select id="shiftAllocation" className={selectClass} {...form.register("shiftAllocation")}>
+                  <option value="">— Select —</option>
+                  {shiftAllocations.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="deptGroup" className="text-xs">Department Group</Label>
+                <select id="deptGroup" className={selectClass} {...form.register("deptGroup")}>
+                  <option value="">— Select —</option>
+                  {deptGroups.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="departmentWorked" className="text-xs">Department Worked</Label>
+                <select id="departmentWorked" className={selectClass} {...form.register("departmentWorked")}>
+                  <option value="">— Select —</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="department" className="text-xs">Department</Label>
+                <select id="department" className={selectClass} {...form.register("department")}>
+                  <option value="">— Select —</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

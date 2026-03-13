@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useQuery, useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,8 @@ export function ExportButton({ className }: ExportButtonProps) {
     organizationId ? { organizationId } : "skip"
   );
   const [exporting, setExporting] = useState(false);
+  const convex = useConvex();
+  const recalcDerivedFields = useMutation(api.employees.mutations.recalcDerivedFields);
 
   const configColumns = organization?.settings?.exportConfig?.columns as
     | ExportColumn[]
@@ -59,12 +61,16 @@ export function ExportButton({ className }: ExportButtonProps) {
   const resolvedColumns = mergeExportColumns(DEFAULT_DATABASE_COLUMNS, configColumns);
   const columns: ExportColumn[] = resolvedColumns.filter((c) => c.enabled);
 
-  const handleExport = useCallback(() => {
-    if (!employees || employees.length === 0) return;
+  const handleExport = useCallback(async () => {
+    if (!organizationId || !employees || employees.length === 0) return;
     setExporting(true);
     try {
+      await recalcDerivedFields({ organizationId });
+      const freshEmployees = await convex.query(api.employees.queries.listAll, {
+        organizationId,
+      });
       const headers = columns.map((c) => c.label);
-      const rows = employees.map((emp) =>
+      const rows = freshEmployees.map((emp) =>
         columns.map((col) => cellValue(emp as Record<string, unknown>, col))
       );
       const data = [headers, ...rows];
@@ -75,7 +81,7 @@ export function ExportButton({ className }: ExportButtonProps) {
     } finally {
       setExporting(false);
     }
-  }, [employees, columns]);
+  }, [organizationId, employees, columns, convex, recalcDerivedFields]);
 
   if (userLoading || !organization) return null;
 

@@ -6,12 +6,13 @@ const idNumberSchema = z
   .length(13, "ID number must be exactly 13 digits")
   .regex(/^\d+$/, "ID number must contain only digits");
 
-export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS"]);
+export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS", "DR", "PROF", "REV"]);
 export const genderEnum = z.enum(["M", "F"]);
 export const ethnicGroupEnum = z.enum(["A", "C", "W", "I", "B"]);
 export const payMethodEnum = z.enum(["02", "03"]);
 export const bankAccTypeEnum = z.enum(["S", "C"]);
 export const accRelationshipEnum = z.enum(["O", "T"]);
+export const maritalStatusEnum = z.enum(["SINGLE", "MARRIED", "DIVORCED", "WIDOWED", "SEPARATED"]);
 
 export const employeeFormSchema = z.object({
   idNumber: idNumberSchema,
@@ -51,6 +52,10 @@ export const employeeFormSchema = z.object({
     .string()
     .optional()
     .transform((s) => (s ? new Date(s).getTime() : undefined)),
+  uifEndDate: z
+    .string()
+    .optional()
+    .transform((s) => (s ? new Date(s).getTime() : undefined)),
   taxNumber: z.string().optional(),
   certificate: z.string().optional(),
   hrsPerPeriod: z
@@ -77,6 +82,23 @@ export const employeeFormSchema = z.object({
       const n = typeof s === "number" ? s : Number(s);
       return Number.isNaN(n) ? undefined : n;
     }),
+  training: z
+    .union([z.boolean(), z.enum(["true", "false"]), z.literal("")])
+    .optional()
+    .transform((v) => {
+      if (v === undefined || v === "") return undefined;
+      if (typeof v === "boolean") return v;
+      return v === "true";
+    }),
+  shift: z.string().optional(),
+  shiftAllocation: z.string().optional(),
+  deptGroup: z.string().optional(),
+  departmentWorked: z.string().optional(),
+  department: z.string().optional(),
+  maritalStatus: z
+    .union([maritalStatusEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
   illnessCondition: z.string().optional(),
   payMethod: z
     .union([payMethodEnum, z.literal("")])

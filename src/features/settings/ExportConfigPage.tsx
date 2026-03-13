@@ -59,6 +59,7 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "taxNumber", source: "database", dbField: "taxNumber", label: "Tax Number", dataType: "text", enabled: true },
   { id: "certificate", source: "database", dbField: "certificate", label: "Certificate", dataType: "text", enabled: true },
   { id: "lastDateWorked", source: "database", dbField: "lastDateWorked", label: "Last Date Worked", dataType: "date", enabled: false },
+  { id: "uifEndDate", source: "database", dbField: "uifEndDate", label: "UIF End Date", dataType: "date", enabled: false },
   { id: "language", source: "database", dbField: "language", label: "Language", dataType: "text", enabled: false },
   { id: "alternativeNumber", source: "database", dbField: "alternativeNumber", label: "Alternative Number", dataType: "text", enabled: false },
   { id: "hrsPerPeriod", source: "database", dbField: "hrsPerPeriod", label: "Hours per Period", dataType: "number", enabled: false },
@@ -75,6 +76,20 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "branchCode", source: "database", dbField: "branchCode", label: "Branch Code", dataType: "text", enabled: false },
   { id: "accHolder", source: "database", dbField: "accHolder", label: "Account Holder", dataType: "text", enabled: false },
   { id: "accRelationship", source: "database", dbField: "accRelationship", label: "Account Relationship", dataType: "text", enabled: false },
+  { id: "training", source: "database", dbField: "training", label: "Training", dataType: "text", enabled: false },
+  { id: "shift", source: "database", dbField: "shift", label: "Shift", dataType: "text", enabled: false },
+  { id: "shiftAllocation", source: "database", dbField: "shiftAllocation", label: "Shift Allocation", dataType: "text", enabled: false },
+  { id: "deptGroup", source: "database", dbField: "deptGroup", label: "Department Group", dataType: "text", enabled: false },
+  { id: "departmentWorked", source: "database", dbField: "departmentWorked", label: "Department Worked", dataType: "text", enabled: false },
+  { id: "department", source: "database", dbField: "department", label: "Department", dataType: "text", enabled: false },
+  { id: "maritalStatus", source: "database", dbField: "maritalStatus", label: "Marital Status", dataType: "text", enabled: false },
+  { id: "taxYearStart", source: "database", dbField: "taxYearStart", label: "Tax Year Start", dataType: "date", enabled: false },
+  { id: "newUifStartDate", source: "database", dbField: "newUifStartDate", label: "New UIF Start Date", dataType: "date", enabled: false },
+  { id: "repAddr1", source: "database", dbField: "repAddr1", label: "Rep Address 1", dataType: "text", enabled: false },
+  { id: "repAddr2", source: "database", dbField: "repAddr2", label: "Rep Address 2", dataType: "text", enabled: false },
+  { id: "repAddr3", source: "database", dbField: "repAddr3", label: "Rep Address 3", dataType: "text", enabled: false },
+  { id: "repPostCode", source: "database", dbField: "repPostCode", label: "Rep Post Code", dataType: "text", enabled: false },
+  { id: "fullNames", source: "database", dbField: "fullNames", label: "Full Names", dataType: "text", enabled: false },
 ];
 
 /** Merge saved export columns with defaults so new default columns (e.g. bank details) always appear; saved overrides (label, enabled) apply when present. Preserves saved column order; appends any defaults not in saved. */

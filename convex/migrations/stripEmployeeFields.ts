@@ -5,13 +5,8 @@
  */
 import { mutation } from "../_generated/server";
 
-const FIELDS_TO_STRIP = [
-  "departmentWorked",
-  "deptGroup",
-  "shift",
-  "shiftAlloc",
-  "training",
-] as const;
+// Re-added fields (departmentWorked, deptGroup, shift, shiftAllocation, training) no longer stripped.
+const FIELDS_TO_STRIP = [] as const;
 
 export const stripEmployeeFields = mutation({
   args: {},
