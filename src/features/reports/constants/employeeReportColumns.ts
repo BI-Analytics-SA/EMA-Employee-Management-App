@@ -72,6 +72,66 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     getValue: (emp) => emp.knownAs,
     defaultVisible: false,
   },
+  {
+    id: "lastDateWorked",
+    label: "Last Date Worked",
+    getValue: (emp) => formatDate((emp as Record<string, unknown>).lastDateWorked as number | undefined),
+    defaultVisible: false,
+  },
+  {
+    id: "language",
+    label: "Language",
+    getValue: (emp) => (emp as Record<string, unknown>).language as string | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "alternativeNumber",
+    label: "Alternative Number",
+    getValue: (emp) => (emp as Record<string, unknown>).alternativeNumber as string | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "hrsPerPeriod",
+    label: "Hours per Period",
+    getValue: (emp) => (emp as Record<string, unknown>).hrsPerPeriod as number | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "hoursPerDay",
+    label: "Hours per Day",
+    getValue: (emp) => (emp as Record<string, unknown>).hoursPerDay as number | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "workAddressCode",
+    label: "Work Address Code",
+    getValue: (emp) => (emp as Record<string, unknown>).workAddressCode as number | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "resUnit",
+    label: "Res Unit",
+    getValue: (emp) => (emp as Record<string, unknown>).resUnit as string | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "resComplex",
+    label: "Res Complex",
+    getValue: (emp) => (emp as Record<string, unknown>).resComplex as string | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "residentialCountry",
+    label: "Residential Country",
+    getValue: (emp) => (emp as Record<string, unknown>).residentialCountry as string | undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "illnessCondition",
+    label: "Illness Condition",
+    getValue: (emp) => (emp as Record<string, unknown>).illnessCondition as string | undefined,
+    defaultVisible: false,
+  },
   // Bank details – off by default; add new employee fields here with defaultVisible: false
   {
     id: "payMethod",

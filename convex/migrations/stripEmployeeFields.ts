@@ -6,13 +6,11 @@
 import { mutation } from "../_generated/server";
 
 const FIELDS_TO_STRIP = [
-  "alternativeNumber",
   "departmentWorked",
   "deptGroup",
   "shift",
   "shiftAlloc",
   "training",
-  "lastDateWorked",
 ] as const;
 
 export const stripEmployeeFields = mutation({

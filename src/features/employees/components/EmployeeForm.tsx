@@ -52,6 +52,7 @@ type Props = {
 };
 
 function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput> {
+  const empAny = emp as Record<string, unknown>;
   return {
     idNumber: emp.idNumber,
     employeeNo: emp.employeeNo ?? "",
@@ -64,16 +65,26 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     dateOfBirth: timestampToDateString(emp.dateOfBirth),
     gender: emp.gender,
     ethnicGroup: emp.ethnicGroup,
+    language: (empAny.language as string | undefined) ?? "",
     cellNumber: emp.cellNumber,
+    alternativeNumber: (empAny.alternativeNumber as string | undefined) ?? "",
+    resUnit: (empAny.resUnit as string | undefined) ?? "",
+    resComplex: (empAny.resComplex as string | undefined) ?? "",
     resStreetNo: emp.resStreetNo,
     resStreetName: emp.resStreetName,
     resSuburb: emp.resSuburb,
     resCity: emp.resCity,
     resPostCode: emp.resPostCode,
+    residentialCountry: (empAny.residentialCountry as string | undefined) ?? "",
     dateRegistered: timestampToDateString(emp.dateRegistered),
     dateEngaged: timestampToDateString(emp.dateEngaged),
+    lastDateWorked: timestampToDateString(empAny.lastDateWorked as number | undefined),
     taxNumber: emp.taxNumber ?? "",
     certificate: emp.certificate ?? "",
+    hrsPerPeriod: (empAny.hrsPerPeriod as number | undefined) ?? "",
+    hoursPerDay: (empAny.hoursPerDay as number | undefined) ?? "",
+    workAddressCode: (empAny.workAddressCode as number | undefined) ?? "",
+    illnessCondition: (empAny.illnessCondition as string | undefined) ?? "",
     payMethod: emp.payMethod ?? "03",
     bankAccType: emp.bankAccType ?? "S",
     bankAccNo: emp.bankAccNo ?? "",
@@ -169,6 +180,14 @@ export function EmployeeForm({
           </div>
           <div className={sectionContentClass}>
             <div className="flex flex-wrap gap-2">
+              <div className={fieldClass}>
+                <Label htmlFor="resUnit" className="text-xs">Unit</Label>
+                <Input id="resUnit" {...form.register("resUnit")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="resComplex" className="text-xs">Complex</Label>
+                <Input id="resComplex" {...form.register("resComplex")} />
+              </div>
               <div className={narrowFieldClass}>
                 <Label htmlFor="resStreetNo" className="text-xs">Street No</Label>
                 <Input id="resStreetNo" {...form.register("resStreetNo")} />
@@ -204,6 +223,10 @@ export function EmployeeForm({
                   <p className="text-xs text-destructive">{form.formState.errors.resPostCode.message}</p>
                 )}
               </div>
+              <div className={fieldClass}>
+                <Label htmlFor="residentialCountry" className="text-xs">Country</Label>
+                <Input id="residentialCountry" {...form.register("residentialCountry")} placeholder="e.g. ZA" />
+              </div>
             </div>
           </div>
         </section>
@@ -221,6 +244,10 @@ export function EmployeeForm({
                 {form.formState.errors.cellNumber && (
                   <p className="text-xs text-destructive">{form.formState.errors.cellNumber.message}</p>
                 )}
+              </div>
+              <div className={wideFieldClass}>
+                <Label htmlFor="alternativeNumber" className="text-xs">Alternative Number</Label>
+                <Input id="alternativeNumber" {...form.register("alternativeNumber")} />
               </div>
             </div>
           </div>
@@ -296,6 +323,14 @@ export function EmployeeForm({
                   ))}
                 </select>
               </div>
+              <div className={fieldClass}>
+                <Label htmlFor="language" className="text-xs">Language</Label>
+                <Input id="language" {...form.register("language")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="illnessCondition" className="text-xs">Illness Condition</Label>
+                <Input id="illnessCondition" {...form.register("illnessCondition")} placeholder="e.g. ASTHMA" />
+              </div>
             </div>
           </div>
         </section>
@@ -319,9 +354,36 @@ export function EmployeeForm({
                 <Label htmlFor="dateEngaged" className="text-xs">Date Engaged</Label>
                 <Input id="dateEngaged" type="date" {...form.register("dateEngaged")} />
               </div>
+              <div className={dateFieldClass}>
+                <Label htmlFor="lastDateWorked" className="text-xs">Last Date Worked</Label>
+                <Input id="lastDateWorked" type="date" {...form.register("lastDateWorked")} />
+              </div>
               <div className={fieldClass}>
                 <Label htmlFor="certificate" className="text-xs">Certificate</Label>
                 <Input id="certificate" {...form.register("certificate")} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Work */}
+        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[340px] sm:flex-1")}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Work</h3>
+          </div>
+          <div className={sectionContentClass}>
+            <div className="flex flex-wrap gap-2">
+              <div className={wideFieldClass}>
+                <Label htmlFor="hrsPerPeriod" className="text-xs">Hours per Period</Label>
+                <Input id="hrsPerPeriod" type="number" step="0.01" {...form.register("hrsPerPeriod")} />
+              </div>
+              <div className={fieldClass}>
+                <Label htmlFor="hoursPerDay" className="text-xs">Hours per Day</Label>
+                <Input id="hoursPerDay" type="number" {...form.register("hoursPerDay")} />
+              </div>
+              <div className={wideFieldClass}>
+                <Label htmlFor="workAddressCode" className="text-xs">Work Address Code</Label>
+                <Input id="workAddressCode" type="number" {...form.register("workAddressCode")} />
               </div>
             </div>
           </div>

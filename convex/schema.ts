@@ -159,22 +159,36 @@ export default defineSchema({
       v.literal("I"), // Indian
       v.literal("B")  // Black
     ),
+    language: v.optional(v.string()),
 
     // Contact
     cellNumber: v.string(),
+    alternativeNumber: v.optional(v.string()),
 
     // Address
+    resUnit: v.optional(v.string()),
+    resComplex: v.optional(v.string()),
     resStreetNo: v.string(),
     resStreetName: v.string(),
     resSuburb: v.string(),
     resCity: v.string(),
     resPostCode: v.string(),
+    residentialCountry: v.optional(v.string()),
 
     // Status & Dates
     dateRegistered: v.optional(v.number()),
     dateEngaged: v.optional(v.number()),
+    lastDateWorked: v.optional(v.number()),
     taxNumber: v.optional(v.string()),
     certificate: v.optional(v.string()),
+
+    // Work
+    hrsPerPeriod: v.optional(v.number()),
+    hoursPerDay: v.optional(v.number()),
+    workAddressCode: v.optional(v.number()),
+
+    // Health
+    illnessCondition: v.optional(v.string()),
 
     // Banking Details
     payMethod: v.optional(v.union(v.literal("02"), v.literal("03"))),

@@ -28,12 +28,17 @@ export const employeeFormSchema = z.object({
     .transform((s) => new Date(s).getTime()),
   gender: genderEnum,
   ethnicGroup: ethnicGroupEnum,
+  language: z.string().optional(),
   cellNumber: z.string().min(1, "Cell number required"),
+  alternativeNumber: z.string().optional(),
+  resUnit: z.string().optional(),
+  resComplex: z.string().optional(),
   resStreetNo: z.string().min(1, "Street number required"),
   resStreetName: z.string().min(1, "Street name required"),
   resSuburb: z.string().min(1, "Suburb required"),
   resCity: z.string().min(1, "City required"),
   resPostCode: z.string().min(1, "Postal code required"),
+  residentialCountry: z.string().optional(),
   dateRegistered: z
     .string()
     .optional()
@@ -42,8 +47,37 @@ export const employeeFormSchema = z.object({
     .string()
     .optional()
     .transform((s) => (s ? new Date(s).getTime() : undefined)),
+  lastDateWorked: z
+    .string()
+    .optional()
+    .transform((s) => (s ? new Date(s).getTime() : undefined)),
   taxNumber: z.string().optional(),
   certificate: z.string().optional(),
+  hrsPerPeriod: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((s) => {
+      if (s === "" || s === undefined || s === null) return undefined;
+      const n = typeof s === "number" ? s : Number(s);
+      return Number.isNaN(n) ? undefined : n;
+    }),
+  hoursPerDay: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((s) => {
+      if (s === "" || s === undefined || s === null) return undefined;
+      const n = typeof s === "number" ? s : Number(s);
+      return Number.isNaN(n) ? undefined : n;
+    }),
+  workAddressCode: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((s) => {
+      if (s === "" || s === undefined || s === null) return undefined;
+      const n = typeof s === "number" ? s : Number(s);
+      return Number.isNaN(n) ? undefined : n;
+    }),
+  illnessCondition: z.string().optional(),
   payMethod: z
     .union([payMethodEnum, z.literal("")])
     .optional()
