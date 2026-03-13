@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { Link } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled, type ModuleName } from "@/hooks/useModuleEnabled";
@@ -12,7 +13,7 @@ const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
 export function ModulesPage() {
-  const { isAdmin, isLoading: userLoading, organizationId } = useCurrentUser();
+  const { isAdmin, isLoading: userLoading, organizationId, hasNoOrganizations } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const documentsEnabled = useModuleEnabled("documents");
   const exportingEnabled = useModuleEnabled("exporting");
@@ -29,10 +30,24 @@ export function ModulesPage() {
     }
   };
 
-  if (userLoading || !organizationId) {
+  if (userLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (hasNoOrganizations || !organizationId) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">
+          You need to belong to an organization to manage modules.{" "}
+          <Link to="/organizations/new" className="text-primary underline">
+            Create or join an organization
+          </Link>{" "}
+          to get started.
+        </p>
       </div>
     );
   }

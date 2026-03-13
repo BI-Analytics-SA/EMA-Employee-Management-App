@@ -17,10 +17,14 @@ export function useCurrentUser() {
     activeOrganizationId ? { id: activeOrganizationId } : "skip"
   );
 
-  const isLoading = orgContextLoading || profile === undefined || organization === undefined;
+  // When the org context is done loading but there's no active org,
+  // the user has no organizations — don't wait on skipped queries.
+  const hasNoOrganizations = !orgContextLoading && !activeOrganizationId;
+  const isLoading = orgContextLoading || (!hasNoOrganizations && (profile === undefined || organization === undefined));
 
   return {
     isLoading,
+    hasNoOrganizations,
     profile: profile ?? null,
     organization: organization ?? null,
     // Convenience accessors

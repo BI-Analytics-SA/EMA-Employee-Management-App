@@ -118,6 +118,10 @@ export function AddOrganizationPage() {
       setError("Please enter your name.");
       return;
     }
+    if (inviteDetails === undefined) {
+      setError("Invite is still loading…");
+      return;
+    }
     if (!inviteDetails) {
       setError("Invalid or expired invite code. Please check and try again.");
       return;

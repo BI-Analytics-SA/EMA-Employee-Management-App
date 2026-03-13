@@ -77,7 +77,7 @@ export function ExportButton({ className }: ExportButtonProps) {
     }
   }, [employees, columns]);
 
-  if (userLoading || organization === undefined) return null;
+  if (userLoading || !organization) return null;
 
   const canExport = employees && employees.length > 0 && columns.length > 0;
 
