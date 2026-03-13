@@ -40,24 +40,29 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     [organizations]
   );
 
-  // When orgs load, ensure activeId is valid; otherwise default to first org
+  // Derive a validated org ID: null while loading, validated once orgs arrive.
+  // This prevents stale localStorage values from reaching downstream queries.
+  const resolvedActiveId = useMemo(() => {
+    if (myOrgs === undefined) return null;
+    if (myOrgs.length === 0) return null;
+    if (activeId && validIds.has(activeId)) return activeId;
+    return myOrgs[0].organization._id;
+  }, [myOrgs, activeId, validIds]);
+
+  // Sync internal state and localStorage when the resolved ID diverges
   useEffect(() => {
     if (myOrgs === undefined) return;
-    if (myOrgs.length === 0) {
-      setActiveId(null);
-      return;
+    if (resolvedActiveId !== activeId) {
+      setActiveId(resolvedActiveId);
     }
-    const ids = myOrgs.map((o) => o.organization._id);
-    if (!activeId || !validIds.has(activeId)) {
-      const next = ids[0];
-      setActiveId(next);
+    if (resolvedActiveId) {
       try {
-        localStorage.setItem(STORAGE_KEY, next);
+        localStorage.setItem(STORAGE_KEY, resolvedActiveId);
       } catch {
         // ignore
       }
     }
-  }, [myOrgs, activeId, validIds]);
+  }, [myOrgs, resolvedActiveId, activeId]);
 
   const setActiveOrganization = useCallback((id: Id<"organizations">) => {
     setActiveId(id);
@@ -70,12 +75,12 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<OrganizationContextValue>(
     () => ({
-      activeOrganizationId: activeId,
+      activeOrganizationId: resolvedActiveId,
       setActiveOrganization,
       organizations,
       isLoading: myOrgs === undefined,
     }),
-    [activeId, setActiveOrganization, organizations, myOrgs]
+    [resolvedActiveId, setActiveOrganization, organizations, myOrgs]
   );
 
   return (
