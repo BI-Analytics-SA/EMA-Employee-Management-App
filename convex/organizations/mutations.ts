@@ -184,8 +184,12 @@ export const removeSettingsItem = mutation({
     if (!org) {
       throw new Error("Organization not found");
     }
+    const trimmedValue = args.value.trim();
+    if (!trimmedValue) {
+      throw new Error("Value cannot be empty");
+    }
     const current = org.settings?.[args.field] ?? [];
-    const newArray = current.filter((item) => item !== args.value);
+    const newArray = current.filter((item) => item !== trimmedValue);
     if (newArray.length === current.length) {
       throw new Error("Item not found");
     }

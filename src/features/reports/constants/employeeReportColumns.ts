@@ -81,74 +81,74 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "lastDateWorked",
     label: "Last Date Worked",
-    getValue: (emp) => formatDate((emp as Record<string, unknown>).lastDateWorked as number | undefined),
+    getValue: (emp) => formatDate(emp.lastDateWorked),
     defaultVisible: false,
   },
   {
     id: "uifEndDate",
     label: "UIF End Date",
-    getValue: (emp) => formatDate((emp as Record<string, unknown>).uifEndDate as number | undefined),
+    getValue: (emp) => formatDate(emp.uifEndDate),
     defaultVisible: false,
   },
   {
     id: "language",
     label: "Language",
-    getValue: (emp) => (emp as Record<string, unknown>).language as string | undefined,
+    getValue: (emp) => emp.language ?? undefined,
     defaultVisible: false,
   },
   {
     id: "alternativeNumber",
     label: "Alternative Number",
-    getValue: (emp) => (emp as Record<string, unknown>).alternativeNumber as string | undefined,
+    getValue: (emp) => emp.alternativeNumber ?? undefined,
     defaultVisible: false,
   },
   {
     id: "hrsPerPeriod",
     label: "Hours per Period",
-    getValue: (emp) => (emp as Record<string, unknown>).hrsPerPeriod as number | undefined,
+    getValue: (emp) => emp.hrsPerPeriod ?? undefined,
     defaultVisible: false,
   },
   {
     id: "hoursPerDay",
     label: "Hours per Day",
-    getValue: (emp) => (emp as Record<string, unknown>).hoursPerDay as number | undefined,
+    getValue: (emp) => emp.hoursPerDay ?? undefined,
     defaultVisible: false,
   },
   {
     id: "workAddressCode",
     label: "Work Address Code",
-    getValue: (emp) => (emp as Record<string, unknown>).workAddressCode as number | undefined,
+    getValue: (emp) => emp.workAddressCode ?? undefined,
     defaultVisible: false,
   },
   {
     id: "resUnit",
     label: "Res Unit",
-    getValue: (emp) => (emp as Record<string, unknown>).resUnit as string | undefined,
+    getValue: (emp) => emp.resUnit ?? undefined,
     defaultVisible: false,
   },
   {
     id: "resComplex",
     label: "Res Complex",
-    getValue: (emp) => (emp as Record<string, unknown>).resComplex as string | undefined,
+    getValue: (emp) => emp.resComplex ?? undefined,
     defaultVisible: false,
   },
   {
     id: "residentialCountry",
     label: "Residential Country",
-    getValue: (emp) => (emp as Record<string, unknown>).residentialCountry as string | undefined,
+    getValue: (emp) => emp.residentialCountry ?? undefined,
     defaultVisible: false,
   },
   {
     id: "illnessCondition",
     label: "Illness Condition",
-    getValue: (emp) => (emp as Record<string, unknown>).illnessCondition as string | undefined,
+    getValue: (emp) => emp.illnessCondition ?? undefined,
     defaultVisible: false,
   },
   {
     id: "training",
     label: "Training",
     getValue: (emp) => {
-      const v = (emp as Record<string, unknown>).training as boolean | undefined;
+      const v = emp.training;
       return v != null ? (v ? "Yes" : "No") : undefined;
     },
     defaultVisible: false,
@@ -156,38 +156,38 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "shift",
     label: "Shift",
-    getValue: (emp) => (emp as Record<string, unknown>).shift as string | undefined,
+    getValue: (emp) => emp.shift ?? undefined,
     defaultVisible: false,
   },
   {
     id: "shiftAllocation",
     label: "Shift Allocation",
-    getValue: (emp) => (emp as Record<string, unknown>).shiftAllocation as string | undefined,
+    getValue: (emp) => emp.shiftAllocation ?? undefined,
     defaultVisible: false,
   },
   {
     id: "deptGroup",
     label: "Department Group",
-    getValue: (emp) => (emp as Record<string, unknown>).deptGroup as string | undefined,
+    getValue: (emp) => emp.deptGroup ?? undefined,
     defaultVisible: false,
   },
   {
     id: "departmentWorked",
     label: "Department Worked",
-    getValue: (emp) => (emp as Record<string, unknown>).departmentWorked as string | undefined,
+    getValue: (emp) => emp.departmentWorked ?? undefined,
     defaultVisible: false,
   },
   {
     id: "department",
     label: "Department",
-    getValue: (emp) => (emp as Record<string, unknown>).department as string | undefined,
+    getValue: (emp) => emp.department ?? undefined,
     defaultVisible: false,
   },
   {
     id: "maritalStatus",
     label: "Marital Status",
     getValue: (emp) => {
-      const v = (emp as Record<string, unknown>).maritalStatus as string | undefined;
+      const v = emp.maritalStatus;
       return v ? (MARITAL_STATUS_LABELS[v] ?? v) : undefined;
     },
     defaultVisible: false,
@@ -238,43 +238,43 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "taxYearStart",
     label: "Tax Year Start",
-    getValue: (emp) => formatDate((emp as Record<string, unknown>).taxYearStart as number | undefined),
+    getValue: (emp) => formatDate(emp.taxYearStart),
     defaultVisible: false,
   },
   {
     id: "newUifStartDate",
     label: "New UIF Start Date",
-    getValue: (emp) => formatDate((emp as Record<string, unknown>).newUifStartDate as number | undefined),
+    getValue: (emp) => formatDate(emp.newUifStartDate),
     defaultVisible: false,
   },
   {
     id: "repAddr1",
     label: "Rep Address 1",
-    getValue: (emp) => (emp as Record<string, unknown>).repAddr1 as string | undefined,
+    getValue: (emp) => emp.repAddr1 ?? undefined,
     defaultVisible: false,
   },
   {
     id: "repAddr2",
     label: "Rep Address 2",
-    getValue: (emp) => (emp as Record<string, unknown>).repAddr2 as string | undefined,
+    getValue: (emp) => emp.repAddr2 ?? undefined,
     defaultVisible: false,
   },
   {
     id: "repAddr3",
     label: "Rep Address 3",
-    getValue: (emp) => (emp as Record<string, unknown>).repAddr3 as string | undefined,
+    getValue: (emp) => emp.repAddr3 ?? undefined,
     defaultVisible: false,
   },
   {
     id: "repPostCode",
     label: "Rep Post Code",
-    getValue: (emp) => (emp as Record<string, unknown>).repPostCode as string | undefined,
+    getValue: (emp) => emp.repPostCode ?? undefined,
     defaultVisible: false,
   },
   {
     id: "fullNames",
     label: "Full Names",
-    getValue: (emp) => (emp as Record<string, unknown>).fullNames as string | undefined,
+    getValue: (emp) => emp.fullNames ?? undefined,
     defaultVisible: false,
   },
 ];

@@ -69,7 +69,6 @@ type Props = {
 };
 
 function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput> {
-  const empAny = emp as Record<string, unknown>;
   return {
     idNumber: emp.idNumber,
     employeeNo: emp.employeeNo ?? "",
@@ -82,34 +81,34 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     dateOfBirth: timestampToDateString(emp.dateOfBirth),
     gender: emp.gender,
     ethnicGroup: emp.ethnicGroup,
-    language: (empAny.language as string | undefined) ?? "",
+    language: emp.language ?? "",
     cellNumber: emp.cellNumber,
-    alternativeNumber: (empAny.alternativeNumber as string | undefined) ?? "",
-    resUnit: (empAny.resUnit as string | undefined) ?? "",
-    resComplex: (empAny.resComplex as string | undefined) ?? "",
+    alternativeNumber: emp.alternativeNumber ?? "",
+    resUnit: emp.resUnit ?? "",
+    resComplex: emp.resComplex ?? "",
     resStreetNo: emp.resStreetNo,
     resStreetName: emp.resStreetName,
     resSuburb: emp.resSuburb,
     resCity: emp.resCity,
     resPostCode: emp.resPostCode,
-    residentialCountry: (empAny.residentialCountry as string | undefined) ?? "",
+    residentialCountry: emp.residentialCountry ?? "",
     dateRegistered: timestampToDateString(emp.dateRegistered),
     dateEngaged: timestampToDateString(emp.dateEngaged),
-    lastDateWorked: timestampToDateString(empAny.lastDateWorked as number | undefined),
-    uifEndDate: timestampToDateString(empAny.uifEndDate as number | undefined),
+    lastDateWorked: timestampToDateString(emp.lastDateWorked),
+    uifEndDate: timestampToDateString(emp.uifEndDate),
     taxNumber: emp.taxNumber ?? "",
     certificate: emp.certificate ?? "",
-    hrsPerPeriod: (empAny.hrsPerPeriod as number | undefined) ?? "",
-    hoursPerDay: (empAny.hoursPerDay as number | undefined) ?? "",
-    workAddressCode: (empAny.workAddressCode as number | undefined) ?? "",
-    training: ((empAny.training as boolean | undefined) != null ? String(empAny.training) : "") as "" | "true" | "false",
-    shift: (empAny.shift as string | undefined) ?? "",
-    shiftAllocation: (empAny.shiftAllocation as string | undefined) ?? "",
-    deptGroup: (empAny.deptGroup as string | undefined) ?? "",
-    departmentWorked: (empAny.departmentWorked as string | undefined) ?? "",
-    department: (empAny.department as string | undefined) ?? "",
-    maritalStatus: ((empAny.maritalStatus as string | undefined) ?? "") as "" | "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED",
-    illnessCondition: (empAny.illnessCondition as string | undefined) ?? "",
+    hrsPerPeriod: emp.hrsPerPeriod ?? "",
+    hoursPerDay: emp.hoursPerDay ?? "",
+    workAddressCode: emp.workAddressCode ?? "",
+    training: (emp.training != null ? String(emp.training) : "") as "" | "true" | "false",
+    shift: emp.shift ?? "",
+    shiftAllocation: emp.shiftAllocation ?? "",
+    deptGroup: emp.deptGroup ?? "",
+    departmentWorked: emp.departmentWorked ?? "",
+    department: emp.department ?? "",
+    maritalStatus: (emp.maritalStatus ?? "") as "" | "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED",
+    illnessCondition: emp.illnessCondition ?? "",
     payMethod: emp.payMethod ?? "03",
     bankAccType: emp.bankAccType ?? "S",
     bankAccNo: emp.bankAccNo ?? "",
@@ -420,14 +419,23 @@ export function EmployeeForm({
               <div className={wideFieldClass}>
                 <Label htmlFor="hrsPerPeriod" className="text-xs">Hours per Period</Label>
                 <Input id="hrsPerPeriod" type="number" step="0.01" {...form.register("hrsPerPeriod")} />
+                {form.formState.errors.hrsPerPeriod && (
+                  <p className="text-xs text-destructive">{form.formState.errors.hrsPerPeriod.message}</p>
+                )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="hoursPerDay" className="text-xs">Hours per Day</Label>
                 <Input id="hoursPerDay" type="number" {...form.register("hoursPerDay")} />
+                {form.formState.errors.hoursPerDay && (
+                  <p className="text-xs text-destructive">{form.formState.errors.hoursPerDay.message}</p>
+                )}
               </div>
               <div className={wideFieldClass}>
                 <Label htmlFor="workAddressCode" className="text-xs">Work Address Code</Label>
                 <Input id="workAddressCode" type="number" {...form.register("workAddressCode")} />
+                {form.formState.errors.workAddressCode && (
+                  <p className="text-xs text-destructive">{form.formState.errors.workAddressCode.message}</p>
+                )}
               </div>
               <div className={fieldClass}>
                 <Label htmlFor="training" className="text-xs">Training</Label>

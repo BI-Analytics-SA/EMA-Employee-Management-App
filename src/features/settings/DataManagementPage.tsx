@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -28,12 +28,32 @@ export function DataManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const items: string[] = organization?.settings?.[activeTab] ?? [];
+
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current != null) {
+        clearTimeout(messageTimeoutRef.current);
+        messageTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const clearMessages = () => {
     setError(null);
     setSuccess(null);
+  };
+
+  const scheduleClearMessages = () => {
+    if (messageTimeoutRef.current != null) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+    messageTimeoutRef.current = setTimeout(() => {
+      messageTimeoutRef.current = null;
+      clearMessages();
+    }, 3000);
   };
 
   const handleAdd = async () => {
@@ -52,7 +72,7 @@ export function DataManagementPage() {
         value: trimmed,
       });
       setSuccess("Added.");
-      setTimeout(clearMessages, 3000);
+      scheduleClearMessages();
       setNewValue("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to add.");
@@ -69,7 +89,7 @@ export function DataManagementPage() {
     try {
       await removeItem({ organizationId, field: activeTab, value });
       setSuccess("Removed.");
-      setTimeout(clearMessages, 3000);
+      scheduleClearMessages();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to remove.");
     } finally {
@@ -119,7 +139,7 @@ export function DataManagementPage() {
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => { setActiveTab(tab.id); clearMessages(); }}
             className={cn(
               "px-4 py-2 text-sm font-medium rounded-t-md border-b-2 -mb-px transition-colors",
               activeTab === tab.id
@@ -172,9 +192,9 @@ export function DataManagementPage() {
             </p>
           ) : (
             <ul className="space-y-2">
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <li
-                  key={item}
+                  key={`${item}-${index}`}
                   className="flex items-center justify-between gap-2 rounded-lg border p-3"
                 >
                   <span className="font-medium">{item}</span>

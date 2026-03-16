@@ -28,7 +28,7 @@ export function useCurrentUser() {
     profile: profile ?? null,
     organization: organization ?? null,
     // Convenience accessors
-    organizationId: profile?.organizationId ?? activeOrganizationId ?? undefined,
+    organizationId: profile?.organizationId ?? activeOrganizationId,
     role: profile?.role,
     isAdmin: profile?.role === "admin",
     isManager: profile?.role === "admin" || profile?.role === "manager",
@@ -46,7 +46,7 @@ export function useHasRole(requiredRole: "admin" | "manager" | "user"): boolean 
     return false;
   }
 
-  const roleHierarchy: Record<string, number> = {
+  const roleHierarchy: Record<"admin" | "manager" | "user", number> = {
     admin: 3,
     manager: 2,
     user: 1,

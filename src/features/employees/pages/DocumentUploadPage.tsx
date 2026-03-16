@@ -175,9 +175,11 @@ export function DocumentUploadPage() {
         <h1 className="text-2xl font-bold truncate">{displayName}</h1>
       </div>
 
-      <div className="rounded-lg border bg-card overflow-hidden p-4 space-y-4">
-        <h2 className="text-sm font-semibold">Upload document</h2>
-
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="bg-muted/70 px-3 py-2 border-b">
+          <h2 className="text-sm font-semibold">Upload document</h2>
+        </div>
+        <div className="p-4 space-y-4">
         {/* Document type */}
         <div className="space-y-2">
           <Label htmlFor="documentType">Document type</Label>
@@ -263,7 +265,7 @@ export function DocumentUploadPage() {
             type="date"
             value={issuedDate}
             onChange={(e) => setIssuedDate(e.target.value)}
-            className="h-9"
+            className="h-9 sm:min-w-[160px]"
           />
         </div>
 
@@ -349,6 +351,7 @@ export function DocumentUploadPage() {
           >
             Cancel
           </Button>
+        </div>
         </div>
       </div>
     </div>

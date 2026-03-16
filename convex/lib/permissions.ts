@@ -80,10 +80,7 @@ export async function requireOrganizationAccess(
   ctx: QueryCtx | MutationCtx,
   organizationId: Id<"organizations">
 ): Promise<Doc<"userProfiles">> {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
-    throw new Error("Not authenticated");
-  }
+  const userId = await getAuthenticatedUserId(ctx);
 
   const profile = await ctx.db
     .query("userProfiles")

@@ -6,6 +6,26 @@ const idNumberSchema = z
   .length(13, "ID number must be exactly 13 digits")
   .regex(/^\d+$/, "ID number must contain only digits");
 
+/** Reusable schema: accepts string|number, returns number or undefined */
+const optionalNumeric = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((s) => {
+    if (s === "" || s === undefined || s === null) return undefined;
+    const n = typeof s === "number" ? s : Number(s);
+    return Number.isNaN(n) ? undefined : n;
+  });
+
+/** Reusable schema: optional date string → timestamp, guards against invalid dates */
+const optionalDateTimestamp = z
+  .string()
+  .optional()
+  .transform((s) => {
+    if (!s) return undefined;
+    const t = new Date(s).getTime();
+    return isNaN(t) ? undefined : t;
+  });
+
 export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS", "DR", "PROF", "REV"]);
 export const genderEnum = z.enum(["M", "F"]);
 export const ethnicGroupEnum = z.enum(["A", "C", "W", "I", "B"]);
@@ -40,48 +60,15 @@ export const employeeFormSchema = z.object({
   resCity: z.string().min(1, "City required"),
   resPostCode: z.string().min(1, "Postal code required"),
   residentialCountry: z.string().optional(),
-  dateRegistered: z
-    .string()
-    .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
-  dateEngaged: z
-    .string()
-    .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
-  lastDateWorked: z
-    .string()
-    .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
-  uifEndDate: z
-    .string()
-    .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
+  dateRegistered: optionalDateTimestamp,
+  dateEngaged: optionalDateTimestamp,
+  lastDateWorked: optionalDateTimestamp,
+  uifEndDate: optionalDateTimestamp,
   taxNumber: z.string().optional(),
   certificate: z.string().optional(),
-  hrsPerPeriod: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((s) => {
-      if (s === "" || s === undefined || s === null) return undefined;
-      const n = typeof s === "number" ? s : Number(s);
-      return Number.isNaN(n) ? undefined : n;
-    }),
-  hoursPerDay: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((s) => {
-      if (s === "" || s === undefined || s === null) return undefined;
-      const n = typeof s === "number" ? s : Number(s);
-      return Number.isNaN(n) ? undefined : n;
-    }),
-  workAddressCode: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((s) => {
-      if (s === "" || s === undefined || s === null) return undefined;
-      const n = typeof s === "number" ? s : Number(s);
-      return Number.isNaN(n) ? undefined : n;
-    }),
+  hrsPerPeriod: optionalNumeric,
+  hoursPerDay: optionalNumeric,
+  workAddressCode: optionalNumeric,
   training: z
     .union([z.boolean(), z.enum(["true", "false"]), z.literal("")])
     .optional()

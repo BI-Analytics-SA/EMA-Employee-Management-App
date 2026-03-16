@@ -52,6 +52,7 @@ export function ExportButton({ className }: ExportButtonProps) {
     organizationId ? { organizationId } : "skip"
   );
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const convex = useConvex();
   const recalcDerivedFields = useMutation(api.employees.mutations.recalcDerivedFields);
 
@@ -64,6 +65,7 @@ export function ExportButton({ className }: ExportButtonProps) {
   const handleExport = useCallback(async () => {
     if (!organizationId || !employees || employees.length === 0) return;
     setExporting(true);
+    setExportError(null);
     try {
       await recalcDerivedFields({ organizationId });
       const freshEmployees = await convex.query(api.employees.queries.listAll, {
@@ -78,6 +80,9 @@ export function ExportButton({ className }: ExportButtonProps) {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Employees");
       XLSX.writeFile(wb, "employees.xlsx");
+    } catch (err) {
+      console.error("Export failed:", err);
+      setExportError(err instanceof Error ? err.message : "Export failed. Please try again.");
     } finally {
       setExporting(false);
     }
@@ -88,20 +93,25 @@ export function ExportButton({ className }: ExportButtonProps) {
   const canExport = employees && employees.length > 0 && columns.length > 0;
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={handleExport}
-      disabled={!canExport || exporting}
-      className={cn(className)}
-    >
-      {exporting ? (
-        <Loader2 className="h-4 w-4 animate-spin mr-1" />
-      ) : (
-        <FileDown className="h-4 w-4 mr-1" />
+    <div className="inline-flex flex-col items-start gap-1">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleExport}
+        disabled={!canExport || exporting}
+        className={cn(className)}
+      >
+        {exporting ? (
+          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+        ) : (
+          <FileDown className="h-4 w-4 mr-1" />
+        )}
+        Export to Excel
+      </Button>
+      {exportError && (
+        <p className="text-xs text-destructive">{exportError}</p>
       )}
-      Export to Excel
-    </Button>
+    </div>
   );
 }

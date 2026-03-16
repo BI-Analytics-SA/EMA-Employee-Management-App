@@ -255,7 +255,7 @@ export function DocumentTypesPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)}>
+                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting}>
                           <Pencil className="h-4 w-4 mr-1" />
                           Edit
                         </Button>

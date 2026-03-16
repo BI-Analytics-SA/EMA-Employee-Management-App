@@ -1,6 +1,7 @@
 import { mutation, internalMutation } from "../_generated/server";
 import type { MutationCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
+import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import {
   requireRoleInOrganization,
@@ -10,12 +11,12 @@ import {
 function computeTaxYearStart(dateEngaged: number | undefined): number | undefined {
   if (dateEngaged == null) return undefined;
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth() + 1;
   const marchFirst =
     month < 3
-      ? new Date(year - 1, 2, 1).getTime()
-      : new Date(year, 2, 1).getTime();
+      ? Date.UTC(year - 1, 2, 1)
+      : Date.UTC(year, 2, 1);
   return Math.max(dateEngaged, marchFirst);
 }
 
@@ -365,22 +366,10 @@ export const recalcDerivedFieldsInternal = internalMutation({
 });
 
 /**
- * Backfill all derived fields for existing employees. Same as recalcDerivedFields; run once after deploy.
+ * Backfill all derived fields for existing employees.
+ * Alias for recalcDerivedFields — kept for backward compatibility with existing call sites.
  */
-export const backfillDerivedFields = mutation({
-  args: { organizationId: v.id("organizations") },
-  handler: async (ctx, args) => {
-    const profile = await requireRoleInOrganization(
-      ctx,
-      args.organizationId,
-      "user"
-    );
-    if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot run this action");
-    }
-    return runRecalcDerivedFieldsForOrg(ctx, args.organizationId);
-  },
-});
+export const backfillDerivedFields = recalcDerivedFields;
 
 /**
  * Backfill bank detail defaults for existing employees in an organization.
@@ -461,17 +450,20 @@ export const remove = mutation({
 });
 
 /**
- * Internal: run recalc derived fields for all organizations. Used by cron (March 1-7).
+ * Internal: schedule recalc derived fields for all organizations. Used by cron (March 1-7).
+ * Fans out one scheduled mutation per org so each runs independently (no timeout, failure isolation).
  */
 export const recalcAllOrgs = internalMutation({
   args: {},
   handler: async (ctx) => {
     const orgs = await ctx.db.query("organizations").collect();
-    const results: { organizationId: Id<"organizations">; updated: number; total: number }[] = [];
-    for (const org of orgs) {
-      const result = await runRecalcDerivedFieldsForOrg(ctx, org._id);
-      results.push({ organizationId: org._id, ...result });
+    for (let i = 0; i < orgs.length; i++) {
+      await ctx.scheduler.runAfter(
+        i * 100,
+        internal.employees.mutations.recalcDerivedFieldsInternal,
+        { organizationId: orgs[i]._id }
+      );
     }
-    return results;
+    return { scheduled: orgs.length };
   },
 });

@@ -221,6 +221,7 @@ export function ExportConfigPage() {
 
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
   const [backfillError, setBackfillError] = useState<string | null>(null);
@@ -279,11 +280,14 @@ export function ExportConfigPage() {
     const orgId = organization?._id;
     if (!orgId) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await updateExportConfig({
         organizationId: orgId,
         columns,
       });
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Failed to save configuration.");
     } finally {
       setSaving(false);
     }
@@ -379,6 +383,10 @@ export function ExportConfigPage() {
           </SortableContext>
         </DndContext>
       </div>
+
+      {saveError && (
+        <p className="text-sm text-destructive">{saveError}</p>
+      )}
 
       <div className="flex items-center gap-2 pt-2">
         <Button onClick={handleSave} disabled={saving}>
