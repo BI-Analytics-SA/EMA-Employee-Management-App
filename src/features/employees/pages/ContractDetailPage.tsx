@@ -155,7 +155,7 @@ export function ContractDetailPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
+  const displayName = `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
   const hasPdf = !!contract.pdfUrl;
 
   return (

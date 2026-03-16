@@ -104,7 +104,7 @@ export const getExpiringWithEmployees = query({
 
     const result: Array<{
       document: typeof filtered[0];
-      employee: { _id: typeof filtered[0]["employeeId"]; firstName: string; lastName: string; title: string } | null;
+      employee: { _id: typeof filtered[0]["employeeId"]; firstName?: string; lastName?: string; title?: string } | null;
     }> = [];
 
     for (const doc of filtered) {

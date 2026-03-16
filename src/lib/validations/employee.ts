@@ -37,28 +37,34 @@ export const maritalStatusEnum = z.enum(["SINGLE", "MARRIED", "DIVORCED", "WIDOW
 export const employeeFormSchema = z.object({
   idNumber: idNumberSchema,
   employeeNo: z.string().optional(),
-  title: employeeTitleEnum,
-  initials: z.string().min(1, "Initials required").max(10),
-  firstName: z.string().min(1, "First name required"),
+  title: z
+    .union([employeeTitleEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  initials: z.string().max(10).optional(),
+  firstName: z.string().optional(),
   secondName: z.string().optional(),
-  lastName: z.string().min(1, "Last name required"),
-  knownAs: z.string().min(1, "Known as required"),
-  dateOfBirth: z
-    .string()
-    .min(1, "Date of birth required")
-    .transform((s) => new Date(s).getTime()),
-  gender: genderEnum,
-  ethnicGroup: ethnicGroupEnum,
+  lastName: z.string().optional(),
+  knownAs: z.string().optional(),
+  dateOfBirth: optionalDateTimestamp,
+  gender: z
+    .union([genderEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  ethnicGroup: z
+    .union([ethnicGroupEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
   language: z.string().optional(),
-  cellNumber: z.string().min(1, "Cell number required"),
+  cellNumber: z.string().optional(),
   alternativeNumber: z.string().optional(),
   resUnit: z.string().optional(),
   resComplex: z.string().optional(),
-  resStreetNo: z.string().min(1, "Street number required"),
-  resStreetName: z.string().min(1, "Street name required"),
-  resSuburb: z.string().min(1, "Suburb required"),
-  resCity: z.string().min(1, "City required"),
-  resPostCode: z.string().min(1, "Postal code required"),
+  resStreetNo: z.string().optional(),
+  resStreetName: z.string().optional(),
+  resSuburb: z.string().optional(),
+  resCity: z.string().optional(),
+  resPostCode: z.string().optional(),
   residentialCountry: z.string().optional(),
   dateRegistered: optionalDateTimestamp,
   dateEngaged: optionalDateTimestamp,

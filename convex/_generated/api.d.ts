@@ -18,6 +18,7 @@ import type * as documents_actions from "../documents/actions.js";
 import type * as documents_mutations from "../documents/mutations.js";
 import type * as documents_queries from "../documents/queries.js";
 import type * as employees_actions from "../employees/actions.js";
+import type * as employees_import from "../employees/import.js";
 import type * as employees_mutations from "../employees/mutations.js";
 import type * as employees_queries from "../employees/queries.js";
 import type * as http from "../http.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   "documents/mutations": typeof documents_mutations;
   "documents/queries": typeof documents_queries;
   "employees/actions": typeof employees_actions;
+  "employees/import": typeof employees_import;
   "employees/mutations": typeof employees_mutations;
   "employees/queries": typeof employees_queries;
   http: typeof http;

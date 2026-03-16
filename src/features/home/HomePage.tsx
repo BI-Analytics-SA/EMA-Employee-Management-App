@@ -230,7 +230,7 @@ export function HomePage() {
                       {/* Name + subtitle */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {emp.title} {emp.firstName} {emp.lastName}
+                          {emp.title ?? ""} {emp.firstName ?? ""} {emp.lastName ?? ""}
                         </p>
                         <p className="text-xs text-muted-foreground truncate sm:hidden">
                           ID: {emp.idNumber}
