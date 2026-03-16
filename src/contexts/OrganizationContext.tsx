@@ -13,26 +13,50 @@ import type { Id } from "../../convex/_generated/dataModel";
 
 const STORAGE_KEY = "ema-active-org";
 
+type OrganizationProfile = {
+  _id: Id<"userProfiles">;
+  organizationId: Id<"organizations">;
+  role: string;
+  name: string;
+};
+
+type OrganizationEntry = {
+  _id: Id<"organizations">;
+  name: string;
+  slug: string;
+};
+
+export type OrganizationWithProfile = {
+  profile: OrganizationProfile;
+  organization: OrganizationEntry;
+};
+
 type OrganizationContextValue = {
   activeOrganizationId: Id<"organizations"> | null;
   setActiveOrganization: (id: Id<"organizations">) => void;
-  organizations: { profile: { _id: Id<"userProfiles">; organizationId: Id<"organizations">; role: string; name: string }; organization: { _id: Id<"organizations">; name: string; slug: string } }[];
+  organizations: OrganizationWithProfile[];
   isLoading: boolean;
+  /** True after client has read active org from localStorage; use to avoid acting on pre-hydration null. */
+  isHydrated: boolean;
 };
 
 const OrganizationContext = createContext<OrganizationContextValue | null>(null);
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const myOrgs = useQuery(api.userProfiles.queries.getMyOrganizations);
-  const [activeId, setActiveId] = useState<Id<"organizations"> | null>(() => {
-    if (typeof window === "undefined") return null;
+  const [activeId, setActiveId] = useState<Id<"organizations"> | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Read stored active org on client only to avoid SSR/hydration mismatch
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored as Id<"organizations"> | null;
+      if (stored) setActiveId(stored as Id<"organizations">);
     } catch {
-      return null;
+      // ignore
     }
-  });
+    setIsHydrated(true);
+  }, []);
 
   const organizations = myOrgs ?? [];
   const validIds = useMemo(
@@ -55,12 +79,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     if (resolvedActiveId !== activeId) {
       setActiveId(resolvedActiveId);
     }
-    if (resolvedActiveId) {
-      try {
+    try {
+      if (resolvedActiveId) {
         localStorage.setItem(STORAGE_KEY, resolvedActiveId);
-      } catch {
-        // ignore
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
       }
+    } catch {
+      // ignore
     }
   }, [myOrgs, resolvedActiveId, activeId]);
 
@@ -79,8 +105,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       setActiveOrganization,
       organizations,
       isLoading: myOrgs === undefined,
+      isHydrated,
     }),
-    [resolvedActiveId, setActiveOrganization, organizations, myOrgs]
+    [resolvedActiveId, setActiveOrganization, organizations, myOrgs, isHydrated]
   );
 
   return (

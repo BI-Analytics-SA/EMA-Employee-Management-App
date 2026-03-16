@@ -33,6 +33,7 @@ import { NewContractPage } from "@/features/employees/pages/NewContractPage";
 import { ContractDetailPage } from "@/features/employees/pages/ContractDetailPage";
 import { ContractTemplatePage } from "@/features/settings/ContractTemplatePage";
 import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
+import { DataManagementPage } from "@/features/settings/DataManagementPage";
 import { EmployeeReportPage } from "@/features/reports/pages/EmployeeReportPage";
 import { AddOrganizationPage } from "@/features/organizations/AddOrganizationPage";
 export const router = createBrowserRouter([
@@ -85,6 +86,10 @@ export const router = createBrowserRouter([
               {
                 path: "settings/modules",
                 element: <ModulesPage />,
+              },
+              {
+                path: "settings/data-management",
+                element: <DataManagementPage />,
               },
               {
                 path: "settings/contract-template",

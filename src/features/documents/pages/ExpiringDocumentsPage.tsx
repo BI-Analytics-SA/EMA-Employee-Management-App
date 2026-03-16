@@ -74,7 +74,7 @@ export function ExpiringDocumentsPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-4 py-3 border-b">
+        <div className="bg-muted/70 px-3 py-2 border-b">
           <h2 className="text-sm font-semibold">
             Documents expiring in the next {daysFilter} days (or already expired)
           </h2>

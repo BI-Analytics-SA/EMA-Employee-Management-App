@@ -83,8 +83,12 @@ export function AddOrganizationPage() {
       setError("Organization URL must be at least 3 characters.");
       return;
     }
-    if (isSlugAvailable === false) {
-      setError("This organization URL is already taken. Please choose another.");
+    if (isSlugAvailable !== true) {
+      if (isSlugAvailable === false) {
+        setError("This organization URL is already taken. Please choose another.");
+      } else {
+        setError("Please wait for URL availability to be checked.");
+      }
       return;
     }
     if (createUserName.trim().length < 1) {
@@ -377,7 +381,7 @@ export function AddOrganizationPage() {
               className="w-full"
               disabled={
                 isLoading ||
-                isSlugAvailable === false ||
+                isSlugAvailable !== true ||
                 slug.length < 3 ||
                 createUserName.trim().length < 1
               }

@@ -19,12 +19,16 @@ export function ModulesPage() {
   const exportingEnabled = useModuleEnabled("exporting");
   const toggleModule = useMutation(api.organizations.mutations.toggleModule);
   const [toggling, setToggling] = useState<ModuleName | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   const handleToggle = async (moduleName: ModuleName, enabled: boolean) => {
     if (!organizationId) return;
     setToggling(moduleName);
+    setToggleError(null);
     try {
       await toggleModule({ organizationId, moduleName, enabled });
+    } catch {
+      setToggleError(`Failed to update "${moduleName}" module. Please try again.`);
     } finally {
       setToggling(null);
     }
@@ -134,6 +138,9 @@ export function ModulesPage() {
               <Loader2 className="h-4 w-4 animate-spin" />
               Updating…
             </p>
+          )}
+          {toggleError && (
+            <p className="text-sm text-destructive">{toggleError}</p>
           )}
         </div>
       </section>

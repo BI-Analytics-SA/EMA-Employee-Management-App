@@ -58,6 +58,17 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "dateEngaged", source: "database", dbField: "dateEngaged", label: "Date Engaged", dataType: "date", enabled: true },
   { id: "taxNumber", source: "database", dbField: "taxNumber", label: "Tax Number", dataType: "text", enabled: true },
   { id: "certificate", source: "database", dbField: "certificate", label: "Certificate", dataType: "text", enabled: true },
+  { id: "lastDateWorked", source: "database", dbField: "lastDateWorked", label: "Last Date Worked", dataType: "date", enabled: false },
+  { id: "uifEndDate", source: "database", dbField: "uifEndDate", label: "UIF End Date", dataType: "date", enabled: false },
+  { id: "language", source: "database", dbField: "language", label: "Language", dataType: "text", enabled: false },
+  { id: "alternativeNumber", source: "database", dbField: "alternativeNumber", label: "Alternative Number", dataType: "text", enabled: false },
+  { id: "hrsPerPeriod", source: "database", dbField: "hrsPerPeriod", label: "Hours per Period", dataType: "number", enabled: false },
+  { id: "hoursPerDay", source: "database", dbField: "hoursPerDay", label: "Hours per Day", dataType: "number", enabled: false },
+  { id: "workAddressCode", source: "database", dbField: "workAddressCode", label: "Work Address Code", dataType: "number", enabled: false },
+  { id: "resUnit", source: "database", dbField: "resUnit", label: "Res Unit", dataType: "text", enabled: false },
+  { id: "resComplex", source: "database", dbField: "resComplex", label: "Res Complex", dataType: "text", enabled: false },
+  { id: "residentialCountry", source: "database", dbField: "residentialCountry", label: "Residential Country", dataType: "text", enabled: false },
+  { id: "illnessCondition", source: "database", dbField: "illnessCondition", label: "Illness Condition", dataType: "text", enabled: false },
   { id: "payMethod", source: "database", dbField: "payMethod", label: "Pay Method", dataType: "text", enabled: false },
   { id: "bankAccType", source: "database", dbField: "bankAccType", label: "Bank Account Type", dataType: "text", enabled: false },
   { id: "bankAccNo", source: "database", dbField: "bankAccNo", label: "Bank Account No", dataType: "text", enabled: false },
@@ -65,6 +76,20 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "branchCode", source: "database", dbField: "branchCode", label: "Branch Code", dataType: "text", enabled: false },
   { id: "accHolder", source: "database", dbField: "accHolder", label: "Account Holder", dataType: "text", enabled: false },
   { id: "accRelationship", source: "database", dbField: "accRelationship", label: "Account Relationship", dataType: "text", enabled: false },
+  { id: "training", source: "database", dbField: "training", label: "Training", dataType: "text", enabled: false },
+  { id: "shift", source: "database", dbField: "shift", label: "Shift", dataType: "text", enabled: false },
+  { id: "shiftAllocation", source: "database", dbField: "shiftAllocation", label: "Shift Allocation", dataType: "text", enabled: false },
+  { id: "deptGroup", source: "database", dbField: "deptGroup", label: "Department Group", dataType: "text", enabled: false },
+  { id: "departmentWorked", source: "database", dbField: "departmentWorked", label: "Department Worked", dataType: "text", enabled: false },
+  { id: "department", source: "database", dbField: "department", label: "Department", dataType: "text", enabled: false },
+  { id: "maritalStatus", source: "database", dbField: "maritalStatus", label: "Marital Status", dataType: "text", enabled: false },
+  { id: "taxYearStart", source: "database", dbField: "taxYearStart", label: "Tax Year Start", dataType: "date", enabled: false },
+  { id: "newUifStartDate", source: "database", dbField: "newUifStartDate", label: "New UIF Start Date", dataType: "date", enabled: false },
+  { id: "repAddr1", source: "database", dbField: "repAddr1", label: "Rep Address 1", dataType: "text", enabled: false },
+  { id: "repAddr2", source: "database", dbField: "repAddr2", label: "Rep Address 2", dataType: "text", enabled: false },
+  { id: "repAddr3", source: "database", dbField: "repAddr3", label: "Rep Address 3", dataType: "text", enabled: false },
+  { id: "repPostCode", source: "database", dbField: "repPostCode", label: "Rep Post Code", dataType: "text", enabled: false },
+  { id: "fullNames", source: "database", dbField: "fullNames", label: "Full Names", dataType: "text", enabled: false },
 ];
 
 /** Merge saved export columns with defaults so new default columns (e.g. bank details) always appear; saved overrides (label, enabled) apply when present. Preserves saved column order; appends any defaults not in saved. */
@@ -196,6 +221,7 @@ export function ExportConfigPage() {
 
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
   const [backfillError, setBackfillError] = useState<string | null>(null);
@@ -254,11 +280,14 @@ export function ExportConfigPage() {
     const orgId = organization?._id;
     if (!orgId) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await updateExportConfig({
         organizationId: orgId,
         columns,
       });
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Failed to save configuration.");
     } finally {
       setSaving(false);
     }
@@ -354,6 +383,10 @@ export function ExportConfigPage() {
           </SortableContext>
         </DndContext>
       </div>
+
+      {saveError && (
+        <p className="text-sm text-destructive">{saveError}</p>
+      )}
 
       <div className="flex items-center gap-2 pt-2">
         <Button onClick={handleSave} disabled={saving}>

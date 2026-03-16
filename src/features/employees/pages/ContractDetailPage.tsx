@@ -334,7 +334,7 @@ export function ContractDetailPage() {
       {canManageContracts && (
         <div className="pt-4 border-t">
           {confirmDeleteFooter ? (
-            <div className="flex flex-wrap gap-2 w-full">
+            <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
               <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
               <Button
                 variant="destructive"

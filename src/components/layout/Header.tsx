@@ -139,12 +139,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </p>
               </div>
               {/* Organizations */}
-              {organizations.length > 0 && (
-                <div className="border-b py-1">
-                  <p className="px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Organizations
-                  </p>
-                  {organizations.map(({ profile: _profile, organization: org }) => (
+              <div className="border-b py-1">
+                <p className="px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Organizations
+                </p>
+                {organizations.length > 0 &&
+                  organizations.map(({ profile: _profile, organization: org }) => (
                     <button
                       key={org._id}
                       type="button"
@@ -162,24 +162,23 @@ export function Header({ onMenuClick }: HeaderProps) {
                       <span className="truncate">{org.name}</span>
                     </button>
                   ))}
-                  <Link
-                    to="/organizations/new"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                  >
-                    <Building2 className="h-4 w-4 shrink-0" />
-                    Create Organization
-                  </Link>
-                  <Link
-                    to="/organizations/new?mode=join"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                  >
-                    <UserPlus className="h-4 w-4 shrink-0" />
-                    Join Organization
-                  </Link>
-                </div>
-              )}
+                <Link
+                  to="/organizations/new"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <Building2 className="h-4 w-4 shrink-0" />
+                  Create Organization
+                </Link>
+                <Link
+                  to="/organizations/new?mode=join"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <UserPlus className="h-4 w-4 shrink-0" />
+                  Join Organization
+                </Link>
+              </div>
               {/* Actions */}
               <Link
                 to="/settings/profile"

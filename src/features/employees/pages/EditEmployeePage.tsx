@@ -30,10 +30,12 @@ export function EditEmployeePage() {
   );
   const updateMutation = useMutation(api.employees.mutations.update);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (values: EmployeeFormValues) => {
     if (!employeeId) return;
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       await updateMutation({
         id: employeeId,
@@ -48,16 +50,34 @@ export function EditEmployeePage() {
         dateOfBirth: values.dateOfBirth,
         gender: values.gender,
         ethnicGroup: values.ethnicGroup,
+        language: values.language || undefined,
         cellNumber: values.cellNumber,
+        alternativeNumber: values.alternativeNumber || undefined,
+        resUnit: values.resUnit || undefined,
+        resComplex: values.resComplex || undefined,
         resStreetNo: values.resStreetNo,
         resStreetName: values.resStreetName,
         resSuburb: values.resSuburb,
         resCity: values.resCity,
         resPostCode: values.resPostCode,
+        residentialCountry: values.residentialCountry || undefined,
         dateRegistered: values.dateRegistered,
         dateEngaged: values.dateEngaged,
+        lastDateWorked: values.lastDateWorked,
+        uifEndDate: values.uifEndDate,
         taxNumber: values.taxNumber || undefined,
         certificate: values.certificate || undefined,
+        hrsPerPeriod: values.hrsPerPeriod,
+        hoursPerDay: values.hoursPerDay,
+        workAddressCode: values.workAddressCode,
+        training: values.training,
+        shift: values.shift || undefined,
+        shiftAllocation: values.shiftAllocation || undefined,
+        deptGroup: values.deptGroup || undefined,
+        departmentWorked: values.departmentWorked || undefined,
+        department: values.department || undefined,
+        maritalStatus: values.maritalStatus,
+        illnessCondition: values.illnessCondition || undefined,
         payMethod: values.payMethod,
         bankAccType: values.bankAccType,
         bankAccNo: values.bankAccNo || undefined,
@@ -67,6 +87,9 @@ export function EditEmployeePage() {
         accRelationship: values.accRelationship,
       });
       navigate(returnTo ?? `/employees/${employeeId}`);
+    } catch (err) {
+      console.error(err);
+      setSubmitError(err instanceof Error ? err.message : "Failed to save changes. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -99,6 +122,9 @@ export function EditEmployeePage() {
   return (
     <div className="p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-4">Edit Employee</h1>
+      {submitError && (
+        <p className="text-sm text-destructive mb-4">{submitError}</p>
+      )}
       <EmployeeForm
         organizationId={organizationId}
         employee={employee}
