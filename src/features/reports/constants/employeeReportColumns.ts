@@ -9,6 +9,10 @@ const TITLES: Record<string, string> = {
   MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms",
   DR: "Dr", PROF: "Prof", REV: "Rev",
 };
+const GENDERS: Record<string, string> = { M: "Male", F: "Female" };
+const ETHNIC_GROUPS: Record<string, string> = {
+  A: "African", C: "Coloured", W: "White", I: "Indian", B: "Black",
+};
 const MARITAL_STATUS_LABELS: Record<string, string> = {
   SINGLE: "Single", MARRIED: "Married", DIVORCED: "Divorced", WIDOWED: "Widowed", SEPARATED: "Separated",
 };
@@ -37,6 +41,36 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     defaultVisible: true,
   },
   {
+    id: "title",
+    label: "Title",
+    getValue: (emp) => TITLES[emp.title] ?? emp.title,
+    defaultVisible: false,
+  },
+  {
+    id: "initials",
+    label: "Initials",
+    getValue: (emp) => emp.initials,
+    defaultVisible: false,
+  },
+  {
+    id: "firstName",
+    label: "First Name",
+    getValue: (emp) => emp.firstName,
+    defaultVisible: false,
+  },
+  {
+    id: "secondName",
+    label: "Second Name",
+    getValue: (emp) => emp.secondName ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "lastName",
+    label: "Last Name",
+    getValue: (emp) => emp.lastName,
+    defaultVisible: false,
+  },
+  {
     id: "idNumber",
     label: "ID Number",
     getValue: (emp) => emp.idNumber,
@@ -61,6 +95,18 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     defaultVisible: false,
   },
   {
+    id: "gender",
+    label: "Gender",
+    getValue: (emp) => GENDERS[emp.gender] ?? emp.gender,
+    defaultVisible: false,
+  },
+  {
+    id: "ethnicGroup",
+    label: "Ethnic Group",
+    getValue: (emp) => ETHNIC_GROUPS[emp.ethnicGroup] ?? emp.ethnicGroup,
+    defaultVisible: false,
+  },
+  {
     id: "dateEngaged",
     label: "Date Engaged",
     getValue: (emp) => formatDate(emp.dateEngaged),
@@ -70,6 +116,18 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     id: "dateRegistered",
     label: "Date Registered",
     getValue: (emp) => formatDate(emp.dateRegistered),
+    defaultVisible: false,
+  },
+  {
+    id: "taxNumber",
+    label: "Tax Number",
+    getValue: (emp) => emp.taxNumber ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "certificate",
+    label: "Certificate",
+    getValue: (emp) => emp.certificate ?? undefined,
     defaultVisible: false,
   },
   {
@@ -118,6 +176,36 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     id: "workAddressCode",
     label: "Work Address Code",
     getValue: (emp) => emp.workAddressCode ?? undefined,
+    defaultVisible: false,
+  },
+  {
+    id: "resStreetNo",
+    label: "Street No",
+    getValue: (emp) => emp.resStreetNo,
+    defaultVisible: false,
+  },
+  {
+    id: "resStreetName",
+    label: "Street Name",
+    getValue: (emp) => emp.resStreetName,
+    defaultVisible: false,
+  },
+  {
+    id: "resSuburb",
+    label: "Suburb",
+    getValue: (emp) => emp.resSuburb,
+    defaultVisible: false,
+  },
+  {
+    id: "resCity",
+    label: "City",
+    getValue: (emp) => emp.resCity,
+    defaultVisible: false,
+  },
+  {
+    id: "resPostCode",
+    label: "Post Code",
+    getValue: (emp) => emp.resPostCode,
     defaultVisible: false,
   },
   {
