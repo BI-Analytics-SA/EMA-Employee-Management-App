@@ -102,14 +102,15 @@ export const getExpiringWithEmployees = query({
       return d.expiryDate <= futureCutoff;
     });
 
-    const result: Array<{
-      document: typeof filtered[0];
-      employee: { _id: typeof filtered[0]["employeeId"]; firstName?: string; lastName?: string; title?: string } | null;
-    }> = [];
+    const uniqueEmployeeIds = Array.from(new Set(filtered.map((d) => d.employeeId)));
+    const employees = await Promise.all(uniqueEmployeeIds.map((id) => ctx.db.get(id)));
+    const employeeMap = new Map(
+      uniqueEmployeeIds.map((id, i) => [id, employees[i]] as const)
+    );
 
-    for (const doc of filtered) {
-      const employee = await ctx.db.get(doc.employeeId);
-      result.push({
+    return filtered.map((doc) => {
+      const employee = employeeMap.get(doc.employeeId) ?? null;
+      return {
         document: doc,
         employee: employee
           ? {
@@ -119,10 +120,8 @@ export const getExpiringWithEmployees = query({
               title: employee.title,
             }
           : null,
-      });
-    }
-
-    return result;
+      };
+    });
   },
 });
 

@@ -200,7 +200,7 @@ export function EmployeeDetailPage() {
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
-            <InfoRow label="Full name" value={`${employee.firstName ?? ""} ${employee.secondName || ""} ${employee.lastName ?? ""}`.trim()} />
+            <InfoRow label="Full name" value={[employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ")} />
             <InfoRow label="Initials" value={employee.initials} />
             <InfoRow label="Date of birth" value={timestampToDateString(employee.dateOfBirth) || "—"} />
             <InfoRow label="Gender" value={employee.gender ? (GENDERS[employee.gender] ?? employee.gender) : undefined} />

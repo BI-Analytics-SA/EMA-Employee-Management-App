@@ -103,7 +103,7 @@ export function ContractListPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-4 py-3 border-b">
+        <div className="bg-muted/70 px-3 py-2 border-b">
           <h2 className="text-sm font-semibold">Contracts</h2>
         </div>
         <div className="p-4">
@@ -157,6 +157,9 @@ export function ContractListPage() {
                         setDeletingId(c._id);
                         try {
                           await removeContract({ id: c._id });
+                        } catch (err) {
+                          console.error("Failed to delete contract:", err);
+                          alert(err instanceof Error ? err.message : "Failed to delete contract. Please try again.");
                         } finally {
                           setDeletingId(null);
                         }

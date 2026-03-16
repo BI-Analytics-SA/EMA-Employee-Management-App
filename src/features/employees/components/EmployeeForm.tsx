@@ -159,7 +159,7 @@ export function EmployeeForm({
 
   // Section card styling - prominent header with background
   const sectionClass = "rounded-lg border bg-card overflow-hidden";
-  const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
+  const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
   const sectionTitleClass = "text-sm font-semibold text-foreground";
   const sectionContentClass = "p-4";
 
@@ -560,14 +560,14 @@ export function EmployeeForm({
         </section>
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-4">
-        <div className="flex-1 min-w-0 sm:min-w-[120px]">
+      <div className="flex flex-wrap gap-2 pt-4">
+        <div className="w-full min-w-0 sm:w-auto">
           <Button type="submit" disabled={isSubmitting} size="sm" className="w-full">
             {isSubmitting ? "Saving…" : submitLabel}
           </Button>
         </div>
         {onCancel && (
-          <div className="flex-1 min-w-0 sm:min-w-[120px]">
+          <div className="w-full min-w-0 sm:w-auto">
             <Button type="button" variant="outline" size="sm" onClick={onCancel} className="w-full">
               Cancel
             </Button>

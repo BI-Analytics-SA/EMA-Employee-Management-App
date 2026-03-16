@@ -161,7 +161,7 @@ export function DocumentUploadPage() {
     );
   }
 
-  const displayName = `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+  const displayName = [employee.title ? (TITLES[employee.title] ?? employee.title) : "", employee.firstName, employee.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="space-y-6 p-4 md:p-6">

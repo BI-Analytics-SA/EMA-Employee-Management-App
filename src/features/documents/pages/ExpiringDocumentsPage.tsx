@@ -92,7 +92,7 @@ export function ExpiringDocumentsPage() {
             <ul className="space-y-2">
               {list.map(({ document: doc, employee }) => {
                 const employeeName = employee
-                  ? `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim()
+                  ? `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim() || "Unknown employee"
                   : "Unknown employee";
                 return (
                   <li
