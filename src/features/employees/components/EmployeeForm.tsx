@@ -72,25 +72,25 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
   return {
     idNumber: emp.idNumber,
     employeeNo: emp.employeeNo ?? "",
-    title: emp.title,
-    initials: emp.initials,
-    firstName: emp.firstName,
+    title: emp.title ?? "",
+    initials: emp.initials ?? "",
+    firstName: emp.firstName ?? "",
     secondName: emp.secondName ?? "",
-    lastName: emp.lastName,
-    knownAs: emp.knownAs,
+    lastName: emp.lastName ?? "",
+    knownAs: emp.knownAs ?? "",
     dateOfBirth: timestampToDateString(emp.dateOfBirth),
-    gender: emp.gender,
-    ethnicGroup: emp.ethnicGroup,
+    gender: emp.gender ?? "",
+    ethnicGroup: emp.ethnicGroup ?? "",
     language: emp.language ?? "",
-    cellNumber: emp.cellNumber,
+    cellNumber: emp.cellNumber ?? "",
     alternativeNumber: emp.alternativeNumber ?? "",
     resUnit: emp.resUnit ?? "",
     resComplex: emp.resComplex ?? "",
-    resStreetNo: emp.resStreetNo,
-    resStreetName: emp.resStreetName,
-    resSuburb: emp.resSuburb,
-    resCity: emp.resCity,
-    resPostCode: emp.resPostCode,
+    resStreetNo: emp.resStreetNo ?? "",
+    resStreetName: emp.resStreetName ?? "",
+    resSuburb: emp.resSuburb ?? "",
+    resCity: emp.resCity ?? "",
+    resPostCode: emp.resPostCode ?? "",
     residentialCountry: emp.residentialCountry ?? "",
     dateRegistered: timestampToDateString(emp.dateRegistered),
     dateEngaged: timestampToDateString(emp.dateEngaged),
@@ -137,9 +137,6 @@ export function EmployeeForm({
   const initial = employee
     ? employeeToFormValues(employee)
     : {
-        title: "MR" as const,
-        gender: "M" as const,
-        ethnicGroup: "A" as const,
         payMethod: "03" as const,
         bankAccType: "S" as const,
         accRelationship: "O" as const,
@@ -162,7 +159,7 @@ export function EmployeeForm({
 
   // Section card styling - prominent header with background
   const sectionClass = "rounded-lg border bg-card overflow-hidden";
-  const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
+  const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
   const sectionTitleClass = "text-sm font-semibold text-foreground";
   const sectionContentClass = "p-4";
 
@@ -293,6 +290,7 @@ export function EmployeeForm({
               <div className={narrowFieldClass}>
                 <Label htmlFor="title" className="text-xs">Title</Label>
                 <select id="title" className={selectClass} {...form.register("title")}>
+                  <option value="">— Select —</option>
                   {TITLES.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
                   ))}
@@ -340,6 +338,7 @@ export function EmployeeForm({
               <div className={fieldClass}>
                 <Label htmlFor="gender" className="text-xs">Gender</Label>
                 <select id="gender" className={selectClass} {...form.register("gender")}>
+                  <option value="">— Select —</option>
                   {GENDERS.map((g) => (
                     <option key={g.value} value={g.value}>{g.label}</option>
                   ))}
@@ -348,6 +347,7 @@ export function EmployeeForm({
               <div className={wideFieldClass}>
                 <Label htmlFor="ethnicGroup" className="text-xs">Ethnic Group</Label>
                 <select id="ethnicGroup" className={selectClass} {...form.register("ethnicGroup")}>
+                  <option value="">— Select —</option>
                   {ETHNIC_GROUPS.map((e) => (
                     <option key={e.value} value={e.value}>{e.label}</option>
                   ))}
@@ -560,14 +560,14 @@ export function EmployeeForm({
         </section>
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-4">
-        <div className="flex-1 min-w-0 sm:min-w-[120px]">
+      <div className="flex flex-wrap gap-2 pt-4">
+        <div className="w-full min-w-0 sm:w-auto">
           <Button type="submit" disabled={isSubmitting} size="sm" className="w-full">
             {isSubmitting ? "Saving…" : submitLabel}
           </Button>
         </div>
         {onCancel && (
-          <div className="flex-1 min-w-0 sm:min-w-[120px]">
+          <div className="w-full min-w-0 sm:w-auto">
             <Button type="button" variant="outline" size="sm" onClick={onCancel} className="w-full">
               Cancel
             </Button>

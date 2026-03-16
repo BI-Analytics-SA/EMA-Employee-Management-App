@@ -21,6 +21,7 @@ import { HomePage } from "@/features/home/HomePage";
 import { EmployeeListPage } from "@/features/employees/pages/EmployeeListPage";
 import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPage";
 import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
+import { ImportEmployeesPage } from "@/features/employees/pages/ImportEmployeesPage";
 import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
 import { CaptureImagePage } from "@/features/employees/pages/CaptureImagePage";
 import { EmployeeDocumentsPage } from "@/features/employees/pages/EmployeeDocumentsPage";
@@ -121,6 +122,10 @@ export const router = createBrowserRouter([
                   {
                     path: "new",
                     element: <AddEmployeePage />,
+                  },
+                  {
+                    path: "import",
+                    element: <ImportEmployeesPage />,
                   },
                   {
                     path: ":id",

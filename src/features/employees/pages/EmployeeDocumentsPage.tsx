@@ -12,7 +12,7 @@ import { useState } from "react";
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
-const sectionHeaderClass = "bg-muted/70 px-4 py-3 border-b";
+const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
 const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
@@ -73,7 +73,7 @@ export function EmployeeDocumentsPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
+  const displayName = [employee.title ? (TITLES[employee.title] ?? employee.title) : "", employee.firstName, employee.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="space-y-6 p-4 md:p-6">

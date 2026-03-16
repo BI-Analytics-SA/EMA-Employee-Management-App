@@ -26,8 +26,8 @@ function computeDerivedFields(data: {
   resStreetName?: string;
   resCity?: string;
   resPostCode?: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
 }) {
   return {
     taxYearStart: computeTaxYearStart(data.dateEngaged),
@@ -36,7 +36,9 @@ function computeDerivedFields(data: {
     repAddr2: data.resStreetName,
     repAddr3: data.resCity,
     repPostCode: data.resPostCode,
-    fullNames: `${data.firstName} ${data.lastName}`,
+    fullNames: data.firstName || data.lastName
+      ? `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim()
+      : undefined,
   };
 }
 
@@ -72,25 +74,25 @@ const createArgs = {
   organizationId: v.id("organizations"),
   idNumber: v.string(),
   employeeNo: v.optional(v.string()),
-  title: employeeTitle,
-  initials: v.string(),
-  firstName: v.string(),
+  title: v.optional(employeeTitle),
+  initials: v.optional(v.string()),
+  firstName: v.optional(v.string()),
   secondName: v.optional(v.string()),
-  lastName: v.string(),
-  knownAs: v.string(),
-  dateOfBirth: v.number(),
-  gender: genderValidator,
-  ethnicGroup: ethnicGroupValidator,
+  lastName: v.optional(v.string()),
+  knownAs: v.optional(v.string()),
+  dateOfBirth: v.optional(v.number()),
+  gender: v.optional(genderValidator),
+  ethnicGroup: v.optional(ethnicGroupValidator),
   language: v.optional(v.string()),
-  cellNumber: v.string(),
+  cellNumber: v.optional(v.string()),
   alternativeNumber: v.optional(v.string()),
   resUnit: v.optional(v.string()),
   resComplex: v.optional(v.string()),
-  resStreetNo: v.string(),
-  resStreetName: v.string(),
-  resSuburb: v.string(),
-  resCity: v.string(),
-  resPostCode: v.string(),
+  resStreetNo: v.optional(v.string()),
+  resStreetName: v.optional(v.string()),
+  resSuburb: v.optional(v.string()),
+  resCity: v.optional(v.string()),
+  resPostCode: v.optional(v.string()),
   residentialCountry: v.optional(v.string()),
   dateRegistered: v.optional(v.number()),
   dateEngaged: v.optional(v.number()),

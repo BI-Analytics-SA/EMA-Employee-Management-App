@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BarcodeScanner } from "@/components/shared/BarcodeScanner";
 import { ExportButton } from "@/features/employees/components/ExportButton";
-import { Loader2, UserPlus, Search, QrCode, Users, X } from "lucide-react";
+import { Loader2, UserPlus, Search, QrCode, Users, X, FileUp } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 
@@ -58,6 +58,12 @@ export function EmployeeListPage() {
               <ExportButton className="w-full sm:w-auto" />
             </div>
           )}
+          <Button variant="outline" asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
+            <Link to="/employees/import">
+              <FileUp className="h-4 w-4" />
+              Import
+            </Link>
+          </Button>
           <Button asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
             <Link to="/employees/new">
               <UserPlus className="h-4 w-4" />
@@ -193,7 +199,7 @@ export function EmployeeListPage() {
                       {/* Name + subtitle */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {emp.title} {emp.firstName} {emp.lastName}
+                          {[emp.title, emp.firstName, emp.lastName].filter(Boolean).join(" ")}
                         </p>
                         <p className="text-xs text-muted-foreground truncate sm:hidden">
                           ID: {emp.idNumber}

@@ -124,7 +124,7 @@ export function EmployeeDetailPage() {
             {employee.imageUrl ? (
               <img
                 src={employee.imageUrl}
-                alt={`${employee.firstName} ${employee.lastName}`}
+                alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
                 className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
               />
             ) : (
@@ -137,7 +137,7 @@ export function EmployeeDetailPage() {
           {/* Name + subtitle - min-width so name stays on one line and buttons wrap when tight */}
           <div className="flex-1 min-w-[260px] text-center sm:text-left">
             <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis">
-              {TITLES[employee.title] ?? employee.title} {employee.firstName} {employee.lastName}
+              {employee.title ? (TITLES[employee.title] ?? employee.title) : ""} {employee.firstName ?? ""} {employee.lastName ?? ""}
             </h1>
             <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Known as: {employee.knownAs}</span>
@@ -200,11 +200,11 @@ export function EmployeeDetailPage() {
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
-            <InfoRow label="Full name" value={`${employee.firstName} ${employee.secondName || ""} ${employee.lastName}`.trim()} />
+            <InfoRow label="Full name" value={[employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ")} />
             <InfoRow label="Initials" value={employee.initials} />
             <InfoRow label="Date of birth" value={timestampToDateString(employee.dateOfBirth) || "—"} />
-            <InfoRow label="Gender" value={GENDERS[employee.gender] ?? employee.gender} />
-            <InfoRow label="Ethnic group" value={ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup} />
+            <InfoRow label="Gender" value={employee.gender ? (GENDERS[employee.gender] ?? employee.gender) : undefined} />
+            <InfoRow label="Ethnic group" value={employee.ethnicGroup ? (ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup) : undefined} />
             <InfoRow label="Language" value={employee.language} />
             <InfoRow label="Marital status" value={employee.maritalStatus ? (MARITAL[employee.maritalStatus] ?? employee.maritalStatus) : undefined} />
             <InfoRow label="Illness/Condition" value={employee.illnessCondition} />

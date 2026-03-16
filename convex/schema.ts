@@ -144,7 +144,7 @@ export default defineSchema({
     employeeNo: v.optional(v.string()),
 
     // Personal Info
-    title: v.union(
+    title: v.optional(v.union(
       v.literal("MR"),
       v.literal("MISS"),
       v.literal("MRS"),
@@ -152,35 +152,35 @@ export default defineSchema({
       v.literal("DR"),
       v.literal("PROF"),
       v.literal("REV")
-    ),
-    initials: v.string(),
-    firstName: v.string(),
+    )),
+    initials: v.optional(v.string()),
+    firstName: v.optional(v.string()),
     secondName: v.optional(v.string()),
-    lastName: v.string(),
-    knownAs: v.string(),
-    dateOfBirth: v.number(),
-    gender: v.union(v.literal("M"), v.literal("F")),
-    ethnicGroup: v.union(
+    lastName: v.optional(v.string()),
+    knownAs: v.optional(v.string()),
+    dateOfBirth: v.optional(v.number()),
+    gender: v.optional(v.union(v.literal("M"), v.literal("F"))),
+    ethnicGroup: v.optional(v.union(
       v.literal("A"), // African
       v.literal("C"), // Coloured
       v.literal("W"), // White
       v.literal("I"), // Indian
       v.literal("B")  // Black
-    ),
+    )),
     language: v.optional(v.string()),
 
     // Contact
-    cellNumber: v.string(),
+    cellNumber: v.optional(v.string()),
     alternativeNumber: v.optional(v.string()),
 
     // Address
     resUnit: v.optional(v.string()),
     resComplex: v.optional(v.string()),
-    resStreetNo: v.string(),
-    resStreetName: v.string(),
-    resSuburb: v.string(),
-    resCity: v.string(),
-    resPostCode: v.string(),
+    resStreetNo: v.optional(v.string()),
+    resStreetName: v.optional(v.string()),
+    resSuburb: v.optional(v.string()),
+    resCity: v.optional(v.string()),
+    resPostCode: v.optional(v.string()),
     residentialCountry: v.optional(v.string()),
 
     // Status & Dates

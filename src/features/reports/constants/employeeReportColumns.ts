@@ -37,13 +37,13 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "name",
     label: "Name",
-    getValue: (emp) => `${TITLES[emp.title] ?? emp.title} ${emp.firstName} ${emp.lastName}`.trim(),
+    getValue: (emp) => `${emp.title ? (TITLES[emp.title] ?? emp.title) : ""} ${emp.firstName ?? ""} ${emp.lastName ?? ""}`.trim(),
     defaultVisible: true,
   },
   {
     id: "title",
     label: "Title",
-    getValue: (emp) => TITLES[emp.title] ?? emp.title,
+    getValue: (emp) => emp.title ? (TITLES[emp.title] ?? emp.title) : undefined,
     defaultVisible: false,
   },
   {
@@ -55,7 +55,7 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "firstName",
     label: "First Name",
-    getValue: (emp) => emp.firstName,
+    getValue: (emp) => emp.firstName ?? undefined,
     defaultVisible: false,
   },
   {
@@ -67,7 +67,7 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "lastName",
     label: "Last Name",
-    getValue: (emp) => emp.lastName,
+    getValue: (emp) => emp.lastName ?? undefined,
     defaultVisible: false,
   },
   {
@@ -97,13 +97,13 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
   {
     id: "gender",
     label: "Gender",
-    getValue: (emp) => GENDERS[emp.gender] ?? emp.gender,
+    getValue: (emp) => emp.gender ? (GENDERS[emp.gender] ?? emp.gender) : undefined,
     defaultVisible: false,
   },
   {
     id: "ethnicGroup",
     label: "Ethnic Group",
-    getValue: (emp) => ETHNIC_GROUPS[emp.ethnicGroup] ?? emp.ethnicGroup,
+    getValue: (emp) => emp.ethnicGroup ? (ETHNIC_GROUPS[emp.ethnicGroup] ?? emp.ethnicGroup) : undefined,
     defaultVisible: false,
   },
   {
