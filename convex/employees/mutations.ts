@@ -422,6 +422,91 @@ export const backfillBankDefaults = mutation({
   },
 });
 
+/** Allowlist of column IDs that can be bulk-cleared. Must match frontend clearableColumns. */
+const CLEARABLE_COLUMNS = [
+  "employeeNo", "title", "initials", "firstName", "secondName", "lastName",
+  "knownAs", "dateOfBirth", "gender", "ethnicGroup", "language",
+  "cellNumber", "alternativeNumber",
+  "resUnit", "resComplex", "resStreetNo", "resStreetName", "resSuburb",
+  "resCity", "resPostCode", "residentialCountry",
+  "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
+  "taxNumber", "certificate",
+  "hrsPerPeriod", "hoursPerDay", "workAddressCode", "training",
+  "shift", "shiftAllocation", "deptGroup", "departmentWorked", "department",
+  "maritalStatus", "illnessCondition",
+  "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode",
+  "accHolder", "accRelationship",
+] as const;
+
+const CLEARABLE_SET = new Set<string>(CLEARABLE_COLUMNS);
+
+/**
+ * Bulk-clear selected columns for all employees in the organization.
+ * Admin only. Validates columns against allowlist; recomputes derived fields after clearing.
+ */
+export const bulkClearColumns = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    columns: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    if (args.columns.length === 0) {
+      throw new Error("At least one column must be selected");
+    }
+    const invalid = args.columns.filter((c) => !CLEARABLE_SET.has(c));
+    if (invalid.length > 0) {
+      throw new Error(`Invalid or protected columns: ${invalid.join(", ")}`);
+    }
+    const now = Date.now();
+    let total = 0;
+    let updated = 0;
+    let cursor: string | null = null;
+
+    while (true) {
+      const result = await ctx.db
+        .query("employees")
+        .withIndex("by_organization_createdAt", (q) =>
+          q.eq("organizationId", args.organizationId)
+        )
+        .order("desc")
+        .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+
+      for (const emp of result.page) {
+        const patch: Record<string, unknown> = {};
+        for (const col of args.columns) {
+          patch[col] = undefined;
+        }
+        const merged = { ...emp, ...patch } as typeof emp & Record<string, unknown>;
+        const derived = computeDerivedFields({
+          dateEngaged: merged.dateEngaged,
+          resStreetNo: merged.resStreetNo,
+          resStreetName: merged.resStreetName,
+          resCity: merged.resCity,
+          resPostCode: merged.resPostCode,
+          firstName: merged.firstName,
+          lastName: merged.lastName,
+        });
+        Object.assign(patch, derived);
+
+        const empRecord = emp as Record<string, unknown>;
+        const hasChanges = Object.keys(patch).some(
+          (key) => empRecord[key] !== patch[key]
+        );
+        if (hasChanges) {
+          patch.updatedAt = now;
+          await ctx.db.patch(emp._id, patch as Record<string, never>);
+          updated++;
+        }
+      }
+      total += result.page.length;
+      if (result.isDone) break;
+      cursor = result.continueCursor;
+    }
+    return { updated, total };
+  },
+});
+
 /**
  * Delete an employee
  */
