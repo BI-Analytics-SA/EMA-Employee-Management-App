@@ -72,7 +72,7 @@ export const CLEARABLE_COLUMNS: ClearableColumnDef[] = [
   { id: "deptGroup", label: "Department Group", category: "work" },
   { id: "departmentWorked", label: "Department Worked", category: "work" },
   { id: "department", label: "Department", category: "work" },
-  { id: "maritalStatus", label: "Marital Status", category: "work" },
+  { id: "maritalStatus", label: "Marital Status", category: "personal" },
   // Health
   { id: "illnessCondition", label: "Illness Condition", category: "health" },
   // Banking
@@ -92,7 +92,7 @@ export function getCategoryLabel(category: ClearableColumnCategory): string {
   return CATEGORY_LABELS[category];
 }
 
-export function getColumnsByCategory(): Map<ClearableColumnCategory, ClearableColumnDef[]> {
+const COLUMNS_BY_CATEGORY: Map<ClearableColumnCategory, ClearableColumnDef[]> = (() => {
   const map = new Map<ClearableColumnCategory, ClearableColumnDef[]>();
   const order: ClearableColumnCategory[] = [
     "personal",
@@ -107,4 +107,8 @@ export function getColumnsByCategory(): Map<ClearableColumnCategory, ClearableCo
     map.set(cat, CLEARABLE_COLUMNS.filter((c) => c.category === cat));
   }
   return map;
+})();
+
+export function getColumnsByCategory(): Map<ClearableColumnCategory, ClearableColumnDef[]> {
+  return COLUMNS_BY_CATEGORY;
 }

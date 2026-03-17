@@ -473,7 +473,7 @@ export const bulkClearColumns = mutation({
         .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
 
       for (const emp of result.page) {
-        const patch: Record<string, unknown> = { updatedAt: now };
+        const patch: Record<string, unknown> = {};
         for (const col of args.columns) {
           patch[col] = undefined;
         }
@@ -488,8 +488,16 @@ export const bulkClearColumns = mutation({
           lastName: merged.lastName,
         });
         Object.assign(patch, derived);
-        await ctx.db.patch(emp._id, patch as Record<string, never>);
-        updated++;
+
+        const empRecord = emp as Record<string, unknown>;
+        const hasChanges = Object.keys(patch).some(
+          (key) => empRecord[key] !== patch[key]
+        );
+        if (hasChanges) {
+          patch.updatedAt = now;
+          await ctx.db.patch(emp._id, patch as Record<string, never>);
+          updated++;
+        }
       }
       total += result.page.length;
       if (result.isDone) break;

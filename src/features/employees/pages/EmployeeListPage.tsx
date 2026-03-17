@@ -51,24 +51,22 @@ export function EmployeeListPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Page header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold">Employees</h1>
-        <div className="flex flex-wrap w-full gap-2 sm:w-auto min-w-0">
+        <div className="grid grid-cols-2 gap-2 w-full lg:flex lg:flex-wrap lg:w-auto lg:justify-end">
           {exportingEnabled && (
-            <div className="flex-1 min-w-0 sm:flex-initial">
-              <ExportButton className="w-full sm:w-auto" />
-            </div>
+            <ExportButton className="w-full lg:w-auto" />
           )}
           {isAdmin && (
             <ClearColumnsDialog organizationId={organizationId} />
           )}
-          <Button variant="outline" asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
+          <Button variant="outline" asChild className="w-full lg:w-auto">
             <Link to="/employees/import">
               <FileUp className="h-4 w-4" />
               Import
             </Link>
           </Button>
-          <Button asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
+          <Button asChild className="w-full lg:w-auto">
             <Link to="/employees/new">
               <UserPlus className="h-4 w-4" />
               Add Employee

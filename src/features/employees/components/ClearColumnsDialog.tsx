@@ -96,6 +96,7 @@ export function ClearColumnsDialog({ organizationId }: ClearColumnsDialogProps) 
       <Button
         type="button"
         variant="destructive"
+        className="w-full lg:w-auto"
         onClick={() => setSheetOpen(true)}
         title="Clear data in selected columns for all employees"
       >
@@ -234,27 +235,33 @@ export function ClearColumnsDialog({ organizationId }: ClearColumnsDialogProps) 
                   className="font-mono"
                 />
               </div>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={closeConfirm}
-                  disabled={isClearing}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleConfirmClear}
-                  disabled={
-                    confirmInput.trim() !== CONFIRM_TEXT || isClearing
-                  }
-                >
-                  {isClearing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    "Clear data"
-                  )}
-                </Button>
+              <div className="flex flex-wrap gap-2 justify-end">
+                <div className="w-full min-w-0 sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={closeConfirm}
+                    disabled={isClearing}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <div className="w-full min-w-0 sm:w-auto">
+                  <Button
+                    variant="destructive"
+                    className="w-full sm:w-auto"
+                    onClick={handleConfirmClear}
+                    disabled={
+                      confirmInput.trim() !== CONFIRM_TEXT || isClearing
+                    }
+                  >
+                    {isClearing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Clear data"
+                    )}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
