@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
@@ -16,12 +16,8 @@ type DocumentTypeRow = {
 };
 
 export function DocumentTypesPage() {
-  const { organizationId, isAdmin, isLoading: userLoading } = useCurrentUser();
+  const { organizationId, organization, isAdmin, isLoading: userLoading } = useCurrentUser();
   const documentsEnabled = useModuleEnabled("documents");
-  const organization = useQuery(
-    api.organizations.queries.getCurrentUserOrganization,
-    undefined
-  );
   const addType = useMutation(api.organizations.mutations.addDocumentType);
   const updateType = useMutation(api.organizations.mutations.updateDocumentType);
   const removeType = useMutation(api.organizations.mutations.removeDocumentType);
@@ -259,7 +255,7 @@ export function DocumentTypesPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)}>
+                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting}>
                           <Pencil className="h-4 w-4 mr-1" />
                           Edit
                         </Button>

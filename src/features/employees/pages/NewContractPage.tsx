@@ -17,18 +17,18 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 export function NewContractPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { organizationId, isLoading: userLoading } = useCurrentUser();
+  const { organizationId, organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(
     api.employees.queries.getById,
     employeeId ? { id: employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const createContract = useMutation(api.contracts.mutations.create);
   const saveContractSignature = useMutation(api.contracts.actions.saveContractSignature);
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
   const defaultTemplate = useMemo(() => getDefaultTemplate(organization ?? undefined), [organization]);
@@ -45,8 +45,12 @@ export function NewContractPage() {
     html: { termsAndConditionsHtml: string }
   ) => {
     if (!organizationId || !employeeId) return;
-    if (!signatureFile) return;
+    if (!signatureFile) {
+      setSubmitError("Please draw or upload a signature before submitting.");
+      return;
+    }
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const contractId = await createContract({
         organizationId,
@@ -78,6 +82,7 @@ export function NewContractPage() {
       navigate(`/employees/${employeeId}/contracts/${contractId}`);
     } catch (err) {
       console.error(err);
+      setSubmitError(err instanceof Error ? err.message : "Failed to create contract. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -121,8 +126,8 @@ export function NewContractPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
-  const nameSurname = `${employee.firstName} ${employee.secondName ?? ""} ${employee.lastName}`.trim();
+  const displayName = [employee.title ? (TITLES[employee.title] ?? employee.title) : "", employee.firstName, employee.lastName].filter(Boolean).join(" ");
+  const nameSurname = [employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -135,6 +140,10 @@ export function NewContractPage() {
         </Link>
         <h1 className="text-2xl font-bold break-words min-w-0 flex-1">New contract · {displayName}</h1>
       </div>
+
+      {submitError && (
+        <p className="text-sm text-destructive">{submitError}</p>
+      )}
 
       {templates.length > 1 && (
         <div className="space-y-2 w-full min-w-0">

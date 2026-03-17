@@ -14,7 +14,7 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 
 export function ContractListPage() {
   const { id } = useParams<{ id: string }>();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const canManageContracts = useHasRole("manager");
   const employeeId = id as Id<"employees"> | undefined;
@@ -26,7 +26,6 @@ export function ContractListPage() {
     api.contracts.queries.listByEmployee,
     employeeId ? { employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
   const removeContract = useMutation(api.contracts.mutations.remove);
   const [deletingId, setDeletingId] = useState<Id<"contracts"> | null>(null);
@@ -77,7 +76,7 @@ export function ContractListPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
+  const displayName = `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -104,7 +103,7 @@ export function ContractListPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-4 py-3 border-b">
+        <div className="bg-muted/70 px-3 py-2 border-b">
           <h2 className="text-sm font-semibold">Contracts</h2>
         </div>
         <div className="p-4">
@@ -158,6 +157,9 @@ export function ContractListPage() {
                         setDeletingId(c._id);
                         try {
                           await removeContract({ id: c._id });
+                        } catch (err) {
+                          console.error("Failed to delete contract:", err);
+                          alert(err instanceof Error ? err.message : "Failed to delete contract. Please try again.");
                         } finally {
                           setDeletingId(null);
                         }

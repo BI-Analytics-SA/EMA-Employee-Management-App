@@ -17,7 +17,7 @@ import {
 import { useState } from "react";
 import { useMutation } from "convex/react";
 
-const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
+const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms", DR: "Dr", PROF: "Prof", REV: "Rev" };
 const GENDERS: Record<string, string> = { M: "Male", F: "Female" };
 const ETHNIC: Record<string, string> = {
   A: "African",
@@ -25,6 +25,9 @@ const ETHNIC: Record<string, string> = {
   W: "White",
   I: "Indian",
   B: "Black",
+};
+const MARITAL: Record<string, string> = {
+  SINGLE: "Single", MARRIED: "Married", DIVORCED: "Divorced", WIDOWED: "Widowed", SEPARATED: "Separated",
 };
 
 const payMethodLabels: Record<string, string> = Object.fromEntries(PAY_METHODS.map((p) => [p.value, p.label]));
@@ -121,7 +124,7 @@ export function EmployeeDetailPage() {
             {employee.imageUrl ? (
               <img
                 src={employee.imageUrl}
-                alt={`${employee.firstName} ${employee.lastName}`}
+                alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
                 className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
               />
             ) : (
@@ -134,7 +137,7 @@ export function EmployeeDetailPage() {
           {/* Name + subtitle - min-width so name stays on one line and buttons wrap when tight */}
           <div className="flex-1 min-w-[260px] text-center sm:text-left">
             <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis">
-              {TITLES[employee.title] ?? employee.title} {employee.firstName} {employee.lastName}
+              {employee.title ? (TITLES[employee.title] ?? employee.title) : ""} {employee.firstName ?? ""} {employee.lastName ?? ""}
             </h1>
             <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Known as: {employee.knownAs}</span>
@@ -197,10 +200,14 @@ export function EmployeeDetailPage() {
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
-            <InfoRow label="Full name" value={`${employee.firstName} ${employee.secondName || ""} ${employee.lastName}`.trim()} />
+            <InfoRow label="Full name" value={[employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ")} />
+            <InfoRow label="Initials" value={employee.initials} />
             <InfoRow label="Date of birth" value={timestampToDateString(employee.dateOfBirth) || "—"} />
-            <InfoRow label="Gender" value={GENDERS[employee.gender] ?? employee.gender} />
-            <InfoRow label="Ethnic group" value={ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup} />
+            <InfoRow label="Gender" value={employee.gender ? (GENDERS[employee.gender] ?? employee.gender) : undefined} />
+            <InfoRow label="Ethnic group" value={employee.ethnicGroup ? (ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup) : undefined} />
+            <InfoRow label="Language" value={employee.language} />
+            <InfoRow label="Marital status" value={employee.maritalStatus ? (MARITAL[employee.maritalStatus] ?? employee.maritalStatus) : undefined} />
+            <InfoRow label="Illness/Condition" value={employee.illnessCondition} />
           </div>
         </section>
 
@@ -211,6 +218,7 @@ export function EmployeeDetailPage() {
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Cell" value={employee.cellNumber} />
+            <InfoRow label="Alternative" value={employee.alternativeNumber} />
           </div>
         </section>
 
@@ -219,9 +227,13 @@ export function EmployeeDetailPage() {
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Address</h3>
           </div>
-          <div className={sectionContentClass}>
+          <div className={`${sectionContentClass} space-y-1`}>
+            {(employee.resUnit || employee.resComplex) && (
+              <p>{[employee.resUnit, employee.resComplex].filter(Boolean).join(", ")}</p>
+            )}
             <p>{employee.resStreetNo} {employee.resStreetName}</p>
             <p>{employee.resSuburb}, {employee.resCity} {employee.resPostCode}</p>
+            <InfoRow label="Country" value={employee.residentialCountry} />
           </div>
         </section>
 
@@ -233,6 +245,30 @@ export function EmployeeDetailPage() {
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Date registered" value={timestampToDateString(employee.dateRegistered)} />
             <InfoRow label="Date engaged" value={timestampToDateString(employee.dateEngaged)} />
+            <InfoRow label="Last date worked" value={timestampToDateString(employee.lastDateWorked)} />
+            <InfoRow label="UIF end date" value={timestampToDateString(employee.uifEndDate)} />
+            <InfoRow label="Tax number" value={employee.taxNumber} />
+            <InfoRow label="Certificate" value={employee.certificate} />
+            <InfoRow label="Tax year start" value={timestampToDateString(employee.taxYearStart)} />
+            <InfoRow label="New UIF start date" value={timestampToDateString(employee.newUifStartDate)} />
+          </div>
+        </section>
+
+        {/* Work */}
+        <section className={`${sectionClass} w-full min-w-0 sm:w-auto sm:min-w-[280px] sm:flex-1`}>
+          <div className={sectionHeaderClass}>
+            <h3 className={sectionTitleClass}>Work</h3>
+          </div>
+          <div className={`${sectionContentClass} space-y-1`}>
+            <InfoRow label="Department" value={employee.department} />
+            <InfoRow label="Department group" value={employee.deptGroup} />
+            <InfoRow label="Department worked" value={employee.departmentWorked} />
+            <InfoRow label="Shift" value={employee.shift} />
+            <InfoRow label="Shift allocation" value={employee.shiftAllocation} />
+            <InfoRow label="Hours per period" value={employee.hrsPerPeriod} />
+            <InfoRow label="Hours per day" value={employee.hoursPerDay} />
+            <InfoRow label="Work address code" value={employee.workAddressCode} />
+            <InfoRow label="Training" value={employee.training != null ? (employee.training ? "Yes" : "No") : undefined} />
           </div>
         </section>
 

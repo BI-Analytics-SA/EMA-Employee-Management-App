@@ -22,6 +22,59 @@ export const getCurrentProfile = query({
 });
 
 /**
+ * Get the current user's profile for a specific organization.
+ * Returns null if not authenticated or not a member of that org.
+ */
+export const getProfileForOrganization = query({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    return await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user_organization", (q) =>
+        q.eq("userId", userId).eq("organizationId", args.organizationId)
+      )
+      .first();
+  },
+});
+
+/**
+ * Get all organizations the current user belongs to (profile + org for each).
+ * Used by the org switcher.
+ */
+export const getMyOrganizations = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    const profiles = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const result = await Promise.all(
+      profiles
+        .filter((p) => p.isActive)
+        .map(async (profile) => {
+          const organization = await ctx.db.get(profile.organizationId);
+          return organization
+            ? { profile, organization }
+            : null;
+        })
+    );
+
+    return result.filter((x): x is NonNullable<typeof x> => x !== null);
+  },
+});
+
+/**
  * Get a user profile by ID
  */
 export const getById = query({

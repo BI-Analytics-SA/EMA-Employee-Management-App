@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getEffectiveTemplates } from "@/lib/contractTemplates";
@@ -20,9 +20,8 @@ const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
 export function ContractTemplatePage() {
-  const { isAdmin, isLoading: userLoading } = useCurrentUser();
+  const { organization, isAdmin, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
   const migrateContractTemplates = useMutation(api.organizations.mutations.migrateContractTemplates);
   const updateContractTemplate = useMutation(api.organizations.mutations.updateContractTemplate);
   const saveEmployerSignature = useMutation(api.organizations.mutations.saveEmployerSignature);

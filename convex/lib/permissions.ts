@@ -73,16 +73,28 @@ export async function getOptionalUserProfile(ctx: QueryCtx | MutationCtx): Promi
 }
 
 /**
- * Verify that a user has access to a specific organization
+ * Verify that a user has access to a specific organization.
+ * Uses by_user_organization index for multi-org support.
  */
 export async function requireOrganizationAccess(
   ctx: QueryCtx | MutationCtx,
   organizationId: Id<"organizations">
 ): Promise<Doc<"userProfiles">> {
-  const profile = await getAuthenticatedUserProfile(ctx);
+  const userId = await getAuthenticatedUserId(ctx);
 
-  if (profile.organizationId !== organizationId) {
+  const profile = await ctx.db
+    .query("userProfiles")
+    .withIndex("by_user_organization", (q) =>
+      q.eq("userId", userId).eq("organizationId", organizationId)
+    )
+    .first();
+
+  if (!profile) {
     throw new Error("Access denied: You do not belong to this organization");
+  }
+
+  if (!profile.isActive) {
+    throw new Error("User account is deactivated");
   }
 
   return profile;

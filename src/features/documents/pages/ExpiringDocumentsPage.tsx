@@ -12,9 +12,8 @@ import { useState } from "react";
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
 export function ExpiringDocumentsPage() {
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const documentsEnabled = useModuleEnabled("documents");
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization);
   const [daysFilter, setDaysFilter] = useState<30 | 60 | 90>(90);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
@@ -75,7 +74,7 @@ export function ExpiringDocumentsPage() {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="bg-muted/70 px-4 py-3 border-b">
+        <div className="bg-muted/70 px-3 py-2 border-b">
           <h2 className="text-sm font-semibold">
             Documents expiring in the next {daysFilter} days (or already expired)
           </h2>
@@ -93,7 +92,7 @@ export function ExpiringDocumentsPage() {
             <ul className="space-y-2">
               {list.map(({ document: doc, employee }) => {
                 const employeeName = employee
-                  ? `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`
+                  ? `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim() || "Unknown employee"
                   : "Unknown employee";
                 return (
                   <li

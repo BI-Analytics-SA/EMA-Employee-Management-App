@@ -2,10 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Menu, Bell, Sun, Moon, LogOut, ChevronDown, User } from "lucide-react";
+import { Menu, Bell, Sun, Moon, LogOut, ChevronDown, User, Building2, UserPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganizationContext } from "@/contexts/OrganizationContext";
 import { useTheme } from "@/components/theme-provider";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { APP_VERSION } from "@/lib/version";
@@ -16,6 +17,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { organization, organizationId, userName } = useCurrentUser();
+  const { organizations, activeOrganizationId, setActiveOrganization } = useOrganizationContext();
   const { signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const documentsEnabled = useModuleEnabled("documents");
@@ -135,6 +137,47 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <p className="text-xs text-muted-foreground mt-1" title="App version">
                   App version {APP_VERSION}
                 </p>
+              </div>
+              {/* Organizations */}
+              <div className="border-b py-1">
+                <p className="px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Organizations
+                </p>
+                {organizations.length > 0 &&
+                  organizations.map(({ profile: _profile, organization: org }) => (
+                    <button
+                      key={org._id}
+                      type="button"
+                      onClick={() => {
+                        setActiveOrganization(org._id);
+                        setDropdownOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-secondary transition-colors"
+                    >
+                      {activeOrganizationId === org._id ? (
+                        <Check className="h-4 w-4 shrink-0 text-primary" />
+                      ) : (
+                        <span className="w-4 shrink-0" />
+                      )}
+                      <span className="truncate">{org.name}</span>
+                    </button>
+                  ))}
+                <Link
+                  to="/organizations/new"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <Building2 className="h-4 w-4 shrink-0" />
+                  Create Organization
+                </Link>
+                <Link
+                  to="/organizations/new?mode=join"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <UserPlus className="h-4 w-4 shrink-0" />
+                  Join Organization
+                </Link>
               </div>
               {/* Actions */}
               <Link

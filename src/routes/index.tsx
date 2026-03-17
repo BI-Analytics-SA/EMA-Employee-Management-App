@@ -4,6 +4,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RequireProfile } from "@/components/auth/RequireProfile";
+import { OrganizationProvider } from "@/contexts/OrganizationContext";
 
 // Auth Pages
 import { SignInPage } from "@/features/auth/SignInPage";
@@ -20,6 +21,7 @@ import { HomePage } from "@/features/home/HomePage";
 import { EmployeeListPage } from "@/features/employees/pages/EmployeeListPage";
 import { EmployeeDetailPage } from "@/features/employees/pages/EmployeeDetailPage";
 import { AddEmployeePage } from "@/features/employees/pages/AddEmployeePage";
+import { ImportEmployeesPage } from "@/features/employees/pages/ImportEmployeesPage";
 import { EditEmployeePage } from "@/features/employees/pages/EditEmployeePage";
 import { CaptureImagePage } from "@/features/employees/pages/CaptureImagePage";
 import { EmployeeDocumentsPage } from "@/features/employees/pages/EmployeeDocumentsPage";
@@ -32,7 +34,9 @@ import { NewContractPage } from "@/features/employees/pages/NewContractPage";
 import { ContractDetailPage } from "@/features/employees/pages/ContractDetailPage";
 import { ContractTemplatePage } from "@/features/settings/ContractTemplatePage";
 import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
+import { DataManagementPage } from "@/features/settings/DataManagementPage";
 import { EmployeeReportPage } from "@/features/reports/pages/EmployeeReportPage";
+import { AddOrganizationPage } from "@/features/organizations/AddOrganizationPage";
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -58,101 +62,117 @@ export const router = createBrowserRouter([
         element: <RequireProfile />,
         children: [
           {
-            element: <AppShell />,
-            children: [
-          {
-            index: true,
-            element: <HomePage />,
-          },
-          {
-            path: "settings/team",
-            element: <TeamPage />,
-          },
-          {
-            path: "settings/profile",
-            element: <ProfilePage />,
-          },
-          {
-            path: "settings/document-types",
-            element: <DocumentTypesPage />,
-          },
-          {
-            path: "settings/modules",
-            element: <ModulesPage />,
-          },
-          {
-            path: "settings/contract-template",
-            element: <ContractTemplatePage />,
-          },
-          {
-            path: "settings/export-config",
-            element: <ExportConfigPage />,
-          },
-          {
-            path: "documents/expiring",
-            element: <ExpiringDocumentsPage />,
-          },
-          {
-            path: "reports/employees",
-            element: <EmployeeReportPage />,
-          },
-          {
-            path: "employees",
+            element: (
+              <OrganizationProvider>
+                <AppShell />
+              </OrganizationProvider>
+            ),
             children: [
               {
                 index: true,
-                element: <EmployeeListPage />,
+                element: <HomePage />,
               },
               {
-                path: "new",
-                element: <AddEmployeePage />,
+                path: "settings/team",
+                element: <TeamPage />,
               },
               {
-                path: ":id",
-                element: <EmployeeDetailPage />,
+                path: "settings/profile",
+                element: <ProfilePage />,
               },
               {
-                path: ":id/edit",
-                element: <EditEmployeePage />,
+                path: "settings/document-types",
+                element: <DocumentTypesPage />,
               },
               {
-                path: ":id/capture",
-                element: <CaptureImagePage />,
+                path: "settings/modules",
+                element: <ModulesPage />,
               },
               {
-                path: ":id/documents",
+                path: "settings/data-management",
+                element: <DataManagementPage />,
+              },
+              {
+                path: "settings/contract-template",
+                element: <ContractTemplatePage />,
+              },
+              {
+                path: "settings/export-config",
+                element: <ExportConfigPage />,
+              },
+              {
+                path: "documents/expiring",
+                element: <ExpiringDocumentsPage />,
+              },
+              {
+                path: "reports/employees",
+                element: <EmployeeReportPage />,
+              },
+              {
+                path: "organizations/new",
+                element: <AddOrganizationPage />,
+              },
+              {
+                path: "employees",
                 children: [
                   {
                     index: true,
-                    element: <EmployeeDocumentsPage />,
-                  },
-                  {
-                    path: "upload",
-                    element: <DocumentUploadPage />,
-                  },
-                ],
-              },
-              {
-                path: ":id/contracts",
-                children: [
-                  {
-                    index: true,
-                    element: <ContractListPage />,
+                    element: <EmployeeListPage />,
                   },
                   {
                     path: "new",
-                    element: <NewContractPage />,
+                    element: <AddEmployeePage />,
                   },
                   {
-                    path: ":contractId",
-                    element: <ContractDetailPage />,
+                    path: "import",
+                    element: <ImportEmployeesPage />,
+                  },
+                  {
+                    path: ":id",
+                    element: <EmployeeDetailPage />,
+                  },
+                  {
+                    path: ":id/edit",
+                    element: <EditEmployeePage />,
+                  },
+                  {
+                    path: ":id/capture",
+                    element: <CaptureImagePage />,
+                  },
+                  {
+                    path: ":id/documents",
+                    children: [
+                      {
+                        index: true,
+                        element: <EmployeeDocumentsPage />,
+                      },
+                      {
+                        path: "upload",
+                        element: <DocumentUploadPage />,
+                      },
+                    ],
+                  },
+                  {
+                    path: ":id/contracts",
+                    children: [
+                      {
+                        index: true,
+                        element: <ContractListPage />,
+                      },
+                      {
+                        path: "new",
+                        element: <NewContractPage />,
+                      },
+                      {
+                        path: ":contractId",
+                        element: <ContractDetailPage />,
+                      },
+                    ],
                   },
                 ],
               },
             ],
           },
-        ],
-      },
         ],
       },
     ],

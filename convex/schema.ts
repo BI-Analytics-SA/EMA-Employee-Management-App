@@ -144,37 +144,75 @@ export default defineSchema({
     employeeNo: v.optional(v.string()),
 
     // Personal Info
-    title: v.union(v.literal("MR"), v.literal("MISS"), v.literal("MRS"), v.literal("MS")),
-    initials: v.string(),
-    firstName: v.string(),
+    title: v.optional(v.union(
+      v.literal("MR"),
+      v.literal("MISS"),
+      v.literal("MRS"),
+      v.literal("MS"),
+      v.literal("DR"),
+      v.literal("PROF"),
+      v.literal("REV")
+    )),
+    initials: v.optional(v.string()),
+    firstName: v.optional(v.string()),
     secondName: v.optional(v.string()),
-    lastName: v.string(),
-    knownAs: v.string(),
-    dateOfBirth: v.number(),
-    gender: v.union(v.literal("M"), v.literal("F")),
-    ethnicGroup: v.union(
+    lastName: v.optional(v.string()),
+    knownAs: v.optional(v.string()),
+    dateOfBirth: v.optional(v.number()),
+    gender: v.optional(v.union(v.literal("M"), v.literal("F"))),
+    ethnicGroup: v.optional(v.union(
       v.literal("A"), // African
       v.literal("C"), // Coloured
       v.literal("W"), // White
       v.literal("I"), // Indian
       v.literal("B")  // Black
-    ),
+    )),
+    language: v.optional(v.string()),
 
     // Contact
-    cellNumber: v.string(),
+    cellNumber: v.optional(v.string()),
+    alternativeNumber: v.optional(v.string()),
 
     // Address
-    resStreetNo: v.string(),
-    resStreetName: v.string(),
-    resSuburb: v.string(),
-    resCity: v.string(),
-    resPostCode: v.string(),
+    resUnit: v.optional(v.string()),
+    resComplex: v.optional(v.string()),
+    resStreetNo: v.optional(v.string()),
+    resStreetName: v.optional(v.string()),
+    resSuburb: v.optional(v.string()),
+    resCity: v.optional(v.string()),
+    resPostCode: v.optional(v.string()),
+    residentialCountry: v.optional(v.string()),
 
     // Status & Dates
     dateRegistered: v.optional(v.number()),
     dateEngaged: v.optional(v.number()),
+    lastDateWorked: v.optional(v.number()),
+    uifEndDate: v.optional(v.number()),
     taxNumber: v.optional(v.string()),
     certificate: v.optional(v.string()),
+
+    // Work
+    hrsPerPeriod: v.optional(v.number()),
+    hoursPerDay: v.optional(v.number()),
+    workAddressCode: v.optional(v.number()),
+    training: v.optional(v.boolean()),
+    shift: v.optional(v.string()),
+    shiftAllocation: v.optional(v.string()),
+    deptGroup: v.optional(v.string()),
+    departmentWorked: v.optional(v.string()),
+    department: v.optional(v.string()),
+    maritalStatus: v.optional(
+      v.union(
+        v.literal("SINGLE"),
+        v.literal("MARRIED"),
+        v.literal("DIVORCED"),
+        v.literal("WIDOWED"),
+        v.literal("SEPARATED")
+      )
+    ),
+
+    // Health
+    illnessCondition: v.optional(v.string()),
 
     // Banking Details
     payMethod: v.optional(v.union(v.literal("02"), v.literal("03"))),
@@ -188,6 +226,15 @@ export default defineSchema({
     // Image (Convex file storage)
     imageStorageId: v.optional(v.id("_storage")),
     imageUrl: v.optional(v.string()),
+
+    // Auto-computed fields
+    taxYearStart: v.optional(v.number()),
+    newUifStartDate: v.optional(v.number()),
+    repAddr1: v.optional(v.string()),
+    repAddr2: v.optional(v.string()),
+    repAddr3: v.optional(v.string()),
+    repPostCode: v.optional(v.string()),
+    fullNames: v.optional(v.string()),
 
     createdAt: v.number(),
     updatedAt: v.number(),

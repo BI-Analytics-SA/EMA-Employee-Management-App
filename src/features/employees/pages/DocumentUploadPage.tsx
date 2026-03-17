@@ -40,13 +40,12 @@ function addDurationToNow(
 export function DocumentUploadPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { isLoading: userLoading, organization } = useCurrentUser();
   const employeeId = id as Id<"employees"> | undefined;
   const employee = useQuery(
     api.employees.queries.getById,
     employeeId ? { id: employeeId } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization);
   const generateUploadUrl = useMutation(api.documents.actions.generateDocumentUploadUrl);
   const createDocument = useMutation(api.documents.mutations.create);
 
@@ -162,7 +161,7 @@ export function DocumentUploadPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
+  const displayName = [employee.title ? (TITLES[employee.title] ?? employee.title) : "", employee.firstName, employee.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -176,9 +175,11 @@ export function DocumentUploadPage() {
         <h1 className="text-2xl font-bold truncate">{displayName}</h1>
       </div>
 
-      <div className="rounded-lg border bg-card overflow-hidden p-4 space-y-4">
-        <h2 className="text-sm font-semibold">Upload document</h2>
-
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="bg-muted/70 px-3 py-2 border-b">
+          <h2 className="text-sm font-semibold">Upload document</h2>
+        </div>
+        <div className="p-4 space-y-4">
         {/* Document type */}
         <div className="space-y-2">
           <Label htmlFor="documentType">Document type</Label>
@@ -264,7 +265,7 @@ export function DocumentUploadPage() {
             type="date"
             value={issuedDate}
             onChange={(e) => setIssuedDate(e.target.value)}
-            className="h-9"
+            className="h-9 sm:min-w-[160px]"
           />
         </div>
 
@@ -350,6 +351,7 @@ export function DocumentUploadPage() {
           >
             Cancel
           </Button>
+        </div>
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS:
 export function ContractDetailPage() {
   const { id, contractId } = useParams<{ id: string; contractId: string }>();
   const navigate = useNavigate();
-  const { isLoading: userLoading } = useCurrentUser();
+  const { organization, isLoading: userLoading } = useCurrentUser();
   const contractsEnabled = useModuleEnabled("contracts");
   const canManageContracts = useHasRole("manager");
   const employeeId = id as Id<"employees"> | undefined;
@@ -31,7 +31,6 @@ export function ContractDetailPage() {
     api.contracts.queries.getById,
     contractIdTyped ? { id: contractIdTyped } : "skip"
   );
-  const organization = useQuery(api.organizations.queries.getCurrentUserOrganization, undefined);
 
   const updateContract = useMutation(api.contracts.mutations.update);
   const saveContractSignature = useMutation(api.contracts.actions.saveContractSignature);
@@ -156,7 +155,7 @@ export function ContractDetailPage() {
     );
   }
 
-  const displayName = `${TITLES[employee.title] ?? employee.title} ${employee.firstName} ${employee.lastName}`;
+  const displayName = `${employee.title ? (TITLES[employee.title] ?? employee.title) : ""} ${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
   const hasPdf = !!contract.pdfUrl;
 
   return (
@@ -249,60 +248,62 @@ export function ContractDetailPage() {
         )}
       </div>
 
-      <div className="rounded-lg border bg-card overflow-hidden p-3 space-y-2">
+      <div className="rounded-lg border bg-card overflow-hidden">
         <h2 className="text-sm font-semibold bg-muted/70 px-3 py-2 border-b">PDF</h2>
-        {hasPdf ? (
-          <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
-            <span className="text-sm text-muted-foreground flex items-center gap-1 w-full basis-full">
-              <FileText className="h-4 w-4" />
-              PDF generated
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="flex-1 min-w-[100px]"
-            >
-              <a href={contract.pdfUrl!} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4 mr-1" />
-                View PDF
-              </a>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="flex-1 min-w-[100px]"
-            >
-              <a href={contract.pdfUrl!} download={`contract-${contractIdTyped}.pdf`}>
-                <FileDown className="h-4 w-4 mr-1" />
-                Download
-              </a>
-            </Button>
-            {canManageContracts && (
+        <div className="p-3 space-y-2">
+          {hasPdf ? (
+            <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
+              <span className="text-sm text-muted-foreground flex items-center gap-1 w-full basis-full">
+                <FileText className="h-4 w-4" />
+                PDF generated
+              </span>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
-                onClick={handleDeletePdf}
-                disabled={deletingPdf}
+                asChild
+                className="flex-1 min-w-[100px]"
               >
-                {deletingPdf ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete PDF
-                  </>
-                )}
+                <a href={contract.pdfUrl!} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  View PDF
+                </a>
               </Button>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No PDF yet. Save the contract, then use &quot;Generate PDF&quot; below.
-          </p>
-        )}
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="flex-1 min-w-[100px]"
+              >
+                <a href={contract.pdfUrl!} download={`contract-${contractIdTyped}.pdf`}>
+                  <FileDown className="h-4 w-4 mr-1" />
+                  Download
+                </a>
+              </Button>
+              {canManageContracts && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
+                  onClick={handleDeletePdf}
+                  disabled={deletingPdf}
+                >
+                  {deletingPdf ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete PDF
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No PDF yet. Save the contract, then use &quot;Generate PDF&quot; below.
+            </p>
+          )}
+        </div>
       </div>
 
       {canManageContracts && (
@@ -335,7 +336,7 @@ export function ContractDetailPage() {
       {canManageContracts && (
         <div className="pt-4 border-t">
           {confirmDeleteFooter ? (
-            <div className="flex flex-wrap gap-2 w-full">
+            <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
               <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
               <Button
                 variant="destructive"

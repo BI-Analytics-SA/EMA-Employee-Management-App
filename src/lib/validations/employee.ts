@@ -6,44 +6,99 @@ const idNumberSchema = z
   .length(13, "ID number must be exactly 13 digits")
   .regex(/^\d+$/, "ID number must contain only digits");
 
-export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS"]);
+/** Reusable schema: optional string that normalises "" to undefined */
+const optionalString = z
+  .string()
+  .optional()
+  .transform((s) => (s ? s : undefined));
+
+/** Reusable schema: accepts string|number, returns number or undefined */
+const optionalNumeric = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((s) => {
+    if (s === "" || s === undefined || s === null) return undefined;
+    const n = typeof s === "number" ? s : Number(s);
+    return Number.isNaN(n) ? undefined : n;
+  });
+
+/** Reusable schema: optional date string → timestamp, guards against invalid dates */
+const optionalDateTimestamp = z
+  .string()
+  .optional()
+  .transform((s) => {
+    if (!s) return undefined;
+    const t = new Date(s).getTime();
+    return isNaN(t) ? undefined : t;
+  });
+
+export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS", "DR", "PROF", "REV"]);
 export const genderEnum = z.enum(["M", "F"]);
 export const ethnicGroupEnum = z.enum(["A", "C", "W", "I", "B"]);
 export const payMethodEnum = z.enum(["02", "03"]);
 export const bankAccTypeEnum = z.enum(["S", "C"]);
 export const accRelationshipEnum = z.enum(["O", "T"]);
+export const maritalStatusEnum = z.enum(["SINGLE", "MARRIED", "DIVORCED", "WIDOWED", "SEPARATED"]);
 
 export const employeeFormSchema = z.object({
   idNumber: idNumberSchema,
-  employeeNo: z.string().optional(),
-  title: employeeTitleEnum,
-  initials: z.string().min(1, "Initials required").max(10),
-  firstName: z.string().min(1, "First name required"),
-  secondName: z.string().optional(),
-  lastName: z.string().min(1, "Last name required"),
-  knownAs: z.string().min(1, "Known as required"),
-  dateOfBirth: z
-    .string()
-    .min(1, "Date of birth required")
-    .transform((s) => new Date(s).getTime()),
-  gender: genderEnum,
-  ethnicGroup: ethnicGroupEnum,
-  cellNumber: z.string().min(1, "Cell number required"),
-  resStreetNo: z.string().min(1, "Street number required"),
-  resStreetName: z.string().min(1, "Street name required"),
-  resSuburb: z.string().min(1, "Suburb required"),
-  resCity: z.string().min(1, "City required"),
-  resPostCode: z.string().min(1, "Postal code required"),
-  dateRegistered: z
-    .string()
+  employeeNo: optionalString,
+  title: z
+    .union([employeeTitleEnum, z.literal("")])
     .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
-  dateEngaged: z
-    .string()
+    .transform((v) => (v === "" ? undefined : v)),
+  initials: z.string().max(10).optional().transform((s) => (s ? s : undefined)),
+  firstName: optionalString,
+  secondName: optionalString,
+  lastName: optionalString,
+  knownAs: optionalString,
+  dateOfBirth: optionalDateTimestamp,
+  gender: z
+    .union([genderEnum, z.literal("")])
     .optional()
-    .transform((s) => (s ? new Date(s).getTime() : undefined)),
-  taxNumber: z.string().optional(),
-  certificate: z.string().optional(),
+    .transform((v) => (v === "" ? undefined : v)),
+  ethnicGroup: z
+    .union([ethnicGroupEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  language: optionalString,
+  cellNumber: optionalString,
+  alternativeNumber: optionalString,
+  resUnit: optionalString,
+  resComplex: optionalString,
+  resStreetNo: optionalString,
+  resStreetName: optionalString,
+  resSuburb: optionalString,
+  resCity: optionalString,
+  resPostCode: optionalString,
+  residentialCountry: optionalString,
+  dateRegistered: optionalDateTimestamp,
+  dateEngaged: optionalDateTimestamp,
+  lastDateWorked: optionalDateTimestamp,
+  uifEndDate: optionalDateTimestamp,
+  taxNumber: optionalString,
+  certificate: optionalString,
+  hrsPerPeriod: optionalNumeric,
+  hoursPerDay: optionalNumeric,
+  workAddressCode: optionalNumeric,
+  training: z
+    .union([z.boolean(), z.enum(["true", "false"]), z.literal("")])
+    .optional()
+    .transform((v) => {
+      if (v === undefined || v === "") return undefined;
+      if (typeof v === "boolean") return v;
+      return v === "true";
+    }),
+  shift: optionalString,
+  shiftAllocation: optionalString,
+  deptGroup: optionalString,
+  departmentWorked: optionalString,
+  department: optionalString,
+  maritalStatus: z
+    .union([maritalStatusEnum, z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  illnessCondition: optionalString,
   payMethod: z
     .union([payMethodEnum, z.literal("")])
     .optional()
@@ -52,10 +107,10 @@ export const employeeFormSchema = z.object({
     .union([bankAccTypeEnum, z.literal("")])
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
-  bankAccNo: z.string().optional(),
-  bankName: z.string().optional(),
-  branchCode: z.string().optional(),
-  accHolder: z.string().optional(),
+  bankAccNo: optionalString,
+  bankName: optionalString,
+  branchCode: optionalString,
+  accHolder: optionalString,
   accRelationship: z
     .union([accRelationshipEnum, z.literal("")])
     .optional()

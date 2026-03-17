@@ -2,7 +2,7 @@ import { mutation } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { requireRole } from "../lib/permissions";
+import { requireRoleInOrganization } from "../lib/permissions";
 
 /**
  * Create a new organization
@@ -18,16 +18,6 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    // Check if user already has a profile (already belongs to an org)
-    const existingProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
-
-    if (existingProfile) {
-      throw new Error("You already belong to an organization");
     }
 
     // Check if slug is already taken
@@ -115,6 +105,97 @@ export const updateSettings = mutation({
       },
     });
 
+    return { success: true };
+  },
+});
+
+const dataManagementFieldValidator = v.union(
+  v.literal("departments"),
+  v.literal("deptGroups"),
+  v.literal("shifts"),
+  v.literal("shiftAllocations")
+);
+
+/** Build full settings with one of the data-management arrays updated. */
+function mergeSettingsWithDataArray(
+  existing: OrgSettings | undefined,
+  field: "departments" | "deptGroups" | "shifts" | "shiftAllocations",
+  newArray: string[]
+): OrgSettings {
+  return {
+    departments: field === "departments" ? newArray : (existing?.departments ?? []),
+    deptGroups: field === "deptGroups" ? newArray : (existing?.deptGroups ?? []),
+    shifts: field === "shifts" ? newArray : (existing?.shifts ?? []),
+    shiftAllocations: field === "shiftAllocations" ? newArray : (existing?.shiftAllocations ?? []),
+    suburbs: existing?.suburbs ?? [],
+    cities: existing?.cities ?? [],
+    postCodes: existing?.postCodes ?? [],
+    documentTypes: existing?.documentTypes,
+    enabledModules: existing?.enabledModules,
+    contractTemplate: existing?.contractTemplate,
+    contractTemplates: existing?.contractTemplates,
+    exportConfig: existing?.exportConfig,
+  };
+}
+
+/**
+ * Add an item to a data-management array (departments, deptGroups, shifts, shiftAllocations). Admin only.
+ */
+export const addSettingsItem = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    field: dataManagementFieldValidator,
+    value: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+    const current = org.settings?.[args.field] ?? [];
+    const trimmed = args.value.trim();
+    if (!trimmed) {
+      throw new Error("Value cannot be empty");
+    }
+    if (current.includes(trimmed)) {
+      throw new Error("This value already exists");
+    }
+    const newArray = [...current, trimmed];
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettingsWithDataArray(org.settings, args.field, newArray),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Remove an item from a data-management array. Admin only.
+ */
+export const removeSettingsItem = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    field: dataManagementFieldValidator,
+    value: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+    const trimmedValue = args.value.trim();
+    if (!trimmedValue) {
+      throw new Error("Value cannot be empty");
+    }
+    const current = org.settings?.[args.field] ?? [];
+    const newArray = current.filter((item) => item !== trimmedValue);
+    if (newArray.length === current.length) {
+      throw new Error("Item not found");
+    }
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettingsWithDataArray(org.settings, args.field, newArray),
+    });
     return { success: true };
   },
 });
@@ -322,12 +403,13 @@ function mergeSettingsWithModules(
  */
 export const toggleModule = mutation({
   args: {
+    organizationId: v.id("organizations"),
     moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const profile = await requireRole(ctx, "admin");
-    const org = await ctx.db.get(profile.organizationId);
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
     if (!org) {
       throw new Error("Organization not found");
     }
@@ -338,7 +420,7 @@ export const toggleModule = mutation({
       newEnabledModules[key] = key === args.moduleName ? args.enabled : current[key];
     }
     const newSettings = mergeSettingsWithModules(org.settings, newEnabledModules);
-    await ctx.db.patch(profile.organizationId, {
+    await ctx.db.patch(args.organizationId, {
       settings: newSettings,
     });
     return { success: true };
