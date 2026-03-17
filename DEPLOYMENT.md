@@ -76,6 +76,52 @@ VITE_CONVEX_SITE_URL=https://resilient-lemming-288.convex.site
 
 ---
 
+## Versioning (semantic-release)
+
+Version bumps are **automated** via [semantic-release](https://github.com/semantic-release/semantic-release) on push to `main`. The bump type is determined entirely by your commit messages using [Conventional Commits](https://www.conventionalcommits.org/) syntax.
+
+### Commit message → version bump
+
+| Commit message | Bump | Example version change |
+|---|---|---|
+| `fix: resolve date overlap` | **PATCH** | 1.0.0 → 1.0.1 |
+| `fix(contracts): handle null dates` | **PATCH** | 1.0.0 → 1.0.1 |
+| `feat: add employee import` | **MINOR** | 1.0.1 → 1.1.0 |
+| `feat(reports): custom column picker` | **MINOR** | 1.0.1 → 1.1.0 |
+| `feat!: require org slug on signup` | **MAJOR** | 1.1.0 → 2.0.0 |
+| `fix!: rename auth endpoints` | **MAJOR** | 1.1.0 → 2.0.0 |
+| With `BREAKING CHANGE:` in body | **MAJOR** | 1.1.0 → 2.0.0 |
+
+### Breaking change syntax (major bump)
+
+There are two ways to signal a breaking change:
+
+1. **Bang (`!`) after the type** — append `!` before the colon:
+   ```
+   feat!: require org slug on signup
+   ```
+
+2. **`BREAKING CHANGE:` footer** in the commit body:
+   ```
+   feat: require org slug on signup
+
+   BREAKING CHANGE: the signup endpoint now requires an org slug parameter
+   ```
+
+### Non-release prefixes
+
+These prefixes are valid but do **not** trigger a version bump:
+
+`chore:`, `docs:`, `refactor:`, `style:`, `test:`, `ci:`, `build:`, `perf:`
+
+### Rules
+
+- Prefixes **must be lowercase**: `fix:` not `Fix:`, `feat:` not `Feat:`
+- A **colon is required** after the type: `feat: add X` not `feat add X`
+- Use present tense, lowercase after the colon: `fix: resolve overlap`
+
+---
+
 ## Deploying Convex to production (manual)
 
 Convex production is **not** deployed on git push. Deploy when you’re ready:
