@@ -6,13 +6,14 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BarcodeScanner } from "@/components/shared/BarcodeScanner";
+import { ClearColumnsDialog } from "@/features/employees/components/ClearColumnsDialog";
 import { ExportButton } from "@/features/employees/components/ExportButton";
 import { Loader2, UserPlus, Search, QrCode, Users, X, FileUp } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 
 export function EmployeeListPage() {
-  const { organizationId, isLoading: userLoading } = useCurrentUser();
+  const { organizationId, isLoading: userLoading, isAdmin } = useCurrentUser();
   const exportingEnabled = useModuleEnabled("exporting");
   const [searchId, setSearchId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,6 +58,9 @@ export function EmployeeListPage() {
             <div className="flex-1 min-w-0 sm:flex-initial">
               <ExportButton className="w-full sm:w-auto" />
             </div>
+          )}
+          {isAdmin && (
+            <ClearColumnsDialog organizationId={organizationId} />
           )}
           <Button variant="outline" asChild className="flex-1 min-w-0 sm:flex-initial w-full sm:w-auto">
             <Link to="/employees/import">
