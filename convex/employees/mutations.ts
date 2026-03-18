@@ -86,6 +86,7 @@ const createArgs = {
   language: v.optional(v.string()),
   cellNumber: v.optional(v.string()),
   alternativeNumber: v.optional(v.string()),
+  email: v.optional(v.string()),
   resUnit: v.optional(v.string()),
   resComplex: v.optional(v.string()),
   resStreetNo: v.optional(v.string()),
@@ -187,6 +188,7 @@ export const update = mutation({
     language: v.optional(v.string()),
     cellNumber: v.optional(v.string()),
     alternativeNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
     resUnit: v.optional(v.string()),
     resComplex: v.optional(v.string()),
     resStreetNo: v.optional(v.string()),
@@ -254,7 +256,7 @@ export const update = mutation({
     const allowedKeys = [
       "idNumber", "employeeNo", "title", "initials", "firstName", "secondName",
       "lastName", "knownAs", "dateOfBirth", "gender", "ethnicGroup", "language",
-      "cellNumber", "alternativeNumber",
+      "cellNumber", "alternativeNumber", "email",
       "resUnit", "resComplex", "resStreetNo", "resStreetName",
       "resSuburb", "resCity", "resPostCode", "residentialCountry",
       "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
@@ -426,7 +428,7 @@ export const backfillBankDefaults = mutation({
 const CLEARABLE_COLUMNS = [
   "employeeNo", "title", "initials", "firstName", "secondName", "lastName",
   "knownAs", "dateOfBirth", "gender", "ethnicGroup", "language",
-  "cellNumber", "alternativeNumber",
+  "cellNumber", "alternativeNumber", "email",
   "resUnit", "resComplex", "resStreetNo", "resStreetName", "resSuburb",
   "resCity", "resPostCode", "residentialCountry",
   "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",

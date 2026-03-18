@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as contracts_actions from "../contracts/actions.js";
+import type * as contracts_emailAction from "../contracts/emailAction.js";
 import type * as contracts_mutations from "../contracts/mutations.js";
 import type * as contracts_queries from "../contracts/queries.js";
 import type * as crons from "../crons.js";
@@ -46,6 +47,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "contracts/actions": typeof contracts_actions;
+  "contracts/emailAction": typeof contracts_emailAction;
   "contracts/mutations": typeof contracts_mutations;
   "contracts/queries": typeof contracts_queries;
   crons: typeof crons;

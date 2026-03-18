@@ -172,6 +172,7 @@ export default defineSchema({
     // Contact
     cellNumber: v.optional(v.string()),
     alternativeNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
 
     // Address
     resUnit: v.optional(v.string()),
@@ -282,12 +283,17 @@ export default defineSchema({
     pdfStorageId: v.optional(v.id("_storage")),
     pdfUrl: v.optional(v.string()),
 
+    // Email tracking
+    emailSentAt: v.optional(v.number()),
+    emailSentTo: v.optional(v.string()),
+
     createdAt: v.number(),
     createdBy: v.optional(v.id("userProfiles")),
   })
     .index("by_organization", ["organizationId"])
     .index("by_employee", ["employeeId"])
-    .index("by_organization_employee", ["organizationId", "employeeId"]),
+    .index("by_organization_employee", ["organizationId", "employeeId"])
+    .index("by_organization_emailSentAt", ["organizationId", "emailSentAt"]),
 
   // Employee Documents
   employeeDocuments: defineTable({
