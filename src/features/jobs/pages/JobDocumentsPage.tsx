@@ -40,6 +40,8 @@ export function JobDocumentsPage() {
     setIsDeleting(docId);
     try {
       await removeMutation({ id: docId });
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
     } finally {
       setIsDeleting(null);
     }

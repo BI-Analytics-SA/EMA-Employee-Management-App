@@ -34,6 +34,7 @@ export const getById = query({
       return null;
     }
     await requireOrganizationAccess(ctx, doc.organizationId);
+    await requireModuleEnabled(ctx, doc.organizationId, "jobs");
     return doc;
   },
 });

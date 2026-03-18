@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { parseLocalDate, formatDateInput } from "@/lib/dateUtils";
 import { Id } from "../../../../convex/_generated/dataModel";
 
 type JobStatus = "open" | "in_progress" | "completed" | "cancelled";
@@ -18,8 +19,7 @@ const sectionTitleClass = "text-sm font-semibold text-foreground";
 const sectionContentClass = "p-4";
 
 function timestampToDateInput(ts?: number): string {
-  if (!ts) return "";
-  return new Date(ts).toISOString().split("T")[0];
+  return formatDateInput(ts);
 }
 
 export function EditJobPage() {
@@ -93,6 +93,12 @@ export function EditJobPage() {
       setError("Title is required.");
       return;
     }
+    const startTs = parseLocalDate(startDate);
+    const endTs = parseLocalDate(endDate);
+    if (startTs !== undefined && endTs !== undefined && endTs < startTs) {
+      setError("End date cannot be before start date.");
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -101,8 +107,8 @@ export function EditJobPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         status,
-        startDate: startDate ? new Date(startDate).getTime() : undefined,
-        endDate: endDate ? new Date(endDate).getTime() : undefined,
+        startDate: startTs,
+        endDate: endTs,
       });
       navigate(`/jobs/${jobId}`);
     } catch (err) {

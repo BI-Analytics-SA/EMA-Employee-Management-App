@@ -11,6 +11,7 @@ import { DocumentUpload } from "@/components/shared/DocumentUpload";
 import { SelectedFileCard } from "@/components/shared/SelectedFileCard";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { parseLocalDate } from "@/lib/dateUtils";
 
 type ExpiryMode = "date" | "duration";
 
@@ -74,9 +75,7 @@ export function JobDocumentUploadPage() {
 
   const computeExpiryTimestamp = (): number | undefined => {
     if (expiryMode === "date") {
-      if (!expiryDate.trim()) return undefined;
-      const t = new Date(expiryDate).getTime();
-      return Number.isNaN(t) ? undefined : t;
+      return parseLocalDate(expiryDate);
     }
     if (durationAmount <= 0) return undefined;
     return addDurationToNow(durationAmount, durationUnit);
@@ -103,14 +102,13 @@ export function JobDocumentUploadPage() {
       if (!response.ok) {
         throw new Error("Upload failed");
       }
-      const { storageId } = await response.json();
+      const body = await response.json();
+      const { storageId } = body;
+      if (!storageId) {
+        throw new Error("Upload succeeded but no storageId returned");
+      }
       const expiryTs = showExpiry ? computeExpiryTimestamp() : undefined;
-      const issuedTs = issuedDate.trim()
-        ? (() => {
-            const t = new Date(issuedDate).getTime();
-            return Number.isNaN(t) ? undefined : t;
-          })()
-        : undefined;
+      const issuedTs = parseLocalDate(issuedDate);
 
       await createDocument({
         jobId,

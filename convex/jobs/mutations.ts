@@ -25,6 +25,10 @@ export const create = mutation({
     const profile = await requireRoleInOrganization(ctx, args.organizationId, "user");
     await requireModuleEnabled(ctx, args.organizationId, "jobs");
 
+    if (args.startDate !== undefined && args.endDate !== undefined && args.endDate < args.startDate) {
+      throw new Error("End date cannot be before start date");
+    }
+
     const now = Date.now();
     return await ctx.db.insert("jobs", {
       organizationId: args.organizationId,
@@ -62,6 +66,12 @@ export const update = mutation({
     await requireRoleInOrganization(ctx, job.organizationId, "user");
     await requireModuleEnabled(ctx, job.organizationId, "jobs");
 
+    const newStart = updates.startDate ?? job.startDate;
+    const newEnd = updates.endDate ?? job.endDate;
+    if (newStart !== undefined && newEnd !== undefined && newEnd < newStart) {
+      throw new Error("End date cannot be before start date");
+    }
+
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
     if (updates.title !== undefined) patch.title = updates.title;
     if (updates.description !== undefined) patch.description = updates.description;
@@ -95,7 +105,11 @@ export const remove = mutation({
       .collect();
 
     for (const doc of jobDocs) {
-      await ctx.storage.delete(doc.storageId);
+      try {
+        await ctx.storage.delete(doc.storageId);
+      } catch {
+        console.error(`Failed to delete storage for jobDocument ${doc._id}`);
+      }
       await ctx.db.delete(doc._id);
     }
 

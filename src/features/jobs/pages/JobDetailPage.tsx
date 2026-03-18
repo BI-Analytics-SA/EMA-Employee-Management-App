@@ -51,6 +51,7 @@ export function JobDetailPage() {
   );
   const removeJob = useMutation(api.jobs.mutations.remove);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (userLoading || !jobId) {
     return (
@@ -90,10 +91,12 @@ export function JobDetailPage() {
   const handleDelete = async () => {
     if (!window.confirm("Delete this job and all its documents? This cannot be undone.")) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await removeJob({ id: jobId });
       navigate("/jobs");
-    } catch {
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete job. Please try again.");
       setIsDeleting(false);
     }
   };
@@ -139,6 +142,9 @@ export function JobDetailPage() {
             )}
             Delete
           </Button>
+          {deleteError && (
+            <p className="w-full text-sm text-destructive">{deleteError}</p>
+          )}
         </div>
       </div>
 

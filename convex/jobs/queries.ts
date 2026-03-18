@@ -30,6 +30,7 @@ export const getById = query({
       return null;
     }
     await requireOrganizationAccess(ctx, job.organizationId);
+    await requireModuleEnabled(ctx, job.organizationId, "jobs");
     return job;
   },
 });

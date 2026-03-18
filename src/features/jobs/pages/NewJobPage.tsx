@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { parseLocalDate } from "@/lib/dateUtils";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,12 @@ export function NewJobPage() {
       setError("Title is required.");
       return;
     }
+    const startTs = parseLocalDate(startDate);
+    const endTs = parseLocalDate(endDate);
+    if (startTs !== undefined && endTs !== undefined && endTs < startTs) {
+      setError("End date cannot be before start date.");
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -60,8 +67,8 @@ export function NewJobPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         status,
-        startDate: startDate ? new Date(startDate).getTime() : undefined,
-        endDate: endDate ? new Date(endDate).getTime() : undefined,
+        startDate: startTs,
+        endDate: endTs,
       });
       navigate(`/jobs/${id}`);
     } catch (err) {

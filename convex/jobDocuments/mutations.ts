@@ -104,7 +104,11 @@ export const remove = mutation({
     await requireRoleInOrganization(ctx, doc.organizationId, "user");
     await requireModuleEnabled(ctx, doc.organizationId, "jobs");
 
-    await ctx.storage.delete(doc.storageId);
+    try {
+      await ctx.storage.delete(doc.storageId);
+    } catch {
+      console.error(`Failed to delete storage for jobDocument ${args.id}`);
+    }
     await ctx.db.delete(args.id);
     return args.id;
   },
