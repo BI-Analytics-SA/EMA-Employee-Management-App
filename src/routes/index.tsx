@@ -37,6 +37,13 @@ import { ExportConfigPage } from "@/features/settings/ExportConfigPage";
 import { DataManagementPage } from "@/features/settings/DataManagementPage";
 import { EmployeeReportPage } from "@/features/reports/pages/EmployeeReportPage";
 import { AddOrganizationPage } from "@/features/organizations/AddOrganizationPage";
+import { JobListPage } from "@/features/jobs/pages/JobListPage";
+import { NewJobPage } from "@/features/jobs/pages/NewJobPage";
+import { JobDetailPage } from "@/features/jobs/pages/JobDetailPage";
+import { EditJobPage } from "@/features/jobs/pages/EditJobPage";
+import { JobDocumentsPage } from "@/features/jobs/pages/JobDocumentsPage";
+import { JobDocumentUploadPage } from "@/features/jobs/pages/JobDocumentUploadPage";
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -111,6 +118,40 @@ export const router = createBrowserRouter([
               {
                 path: "organizations/new",
                 element: <AddOrganizationPage />,
+              },
+              {
+                path: "jobs",
+                children: [
+                  {
+                    index: true,
+                    element: <JobListPage />,
+                  },
+                  {
+                    path: "new",
+                    element: <NewJobPage />,
+                  },
+                  {
+                    path: ":id",
+                    element: <JobDetailPage />,
+                  },
+                  {
+                    path: ":id/edit",
+                    element: <EditJobPage />,
+                  },
+                  {
+                    path: ":id/documents",
+                    children: [
+                      {
+                        index: true,
+                        element: <JobDocumentsPage />,
+                      },
+                      {
+                        path: "upload",
+                        element: <JobDocumentUploadPage />,
+                      },
+                    ],
+                  },
+                ],
               },
               {
                 path: "employees",

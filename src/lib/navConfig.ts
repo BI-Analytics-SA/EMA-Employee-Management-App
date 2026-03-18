@@ -10,6 +10,7 @@ import {
   FileText,
   FileDown,
   BarChart3,
+  Briefcase,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -18,7 +19,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   /** If set, this nav item is only shown when the given module is enabled */
-  requiredModule?: "contracts" | "documents" | "exporting";
+  requiredModule?: "contracts" | "documents" | "exporting" | "jobs";
 }
 
 export const mainNavItems: NavItem[] = [
@@ -26,6 +27,7 @@ export const mainNavItems: NavItem[] = [
   { label: "Employees", href: "/employees", icon: Users },
   { label: "Employee Report", href: "/reports/employees", icon: BarChart3 },
   { label: "Expiring Documents", href: "/documents/expiring", icon: AlertTriangle, requiredModule: "documents" },
+  { label: "Jobs", href: "/jobs", icon: Briefcase, requiredModule: "jobs" },
 ];
 
 export const settingsNavItems: NavItem[] = [

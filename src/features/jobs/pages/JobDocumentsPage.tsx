@@ -1,0 +1,198 @@
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { Button } from "@/components/ui/button";
+import { Loader2, ArrowLeft, Plus, Trash2, FileText, Eye } from "lucide-react";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { ExpiryBadge } from "@/components/shared/ExpiryBadge";
+import { DocumentViewer } from "@/components/shared/DocumentViewer";
+
+const sectionClass = "rounded-lg border bg-card overflow-hidden";
+const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
+const sectionTitleClass = "text-sm font-semibold text-foreground";
+const sectionContentClass = "p-4";
+
+export function JobDocumentsPage() {
+  const { id } = useParams<{ id: string }>();
+  const { isLoading: userLoading } = useCurrentUser();
+  const jobsEnabled = useModuleEnabled("jobs");
+  const jobId = id as Id<"jobs"> | undefined;
+
+  const job = useQuery(api.jobs.queries.getById, jobId ? { id: jobId } : "skip");
+  const documents = useQuery(
+    api.jobDocuments.queries.listByJob,
+    jobId ? { jobId } : "skip"
+  );
+  const removeMutation = useMutation(api.jobDocuments.mutations.remove);
+
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<{
+    url: string;
+    fileName: string;
+    fileType: string;
+  } | null>(null);
+
+  const handleDelete = async (docId: Id<"jobDocuments">) => {
+    if (!window.confirm("Delete this document? This cannot be undone.")) return;
+    setIsDeleting(docId);
+    try {
+      await removeMutation({ id: docId });
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  if (userLoading || !jobId) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!jobsEnabled) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">The Jobs module is not enabled.</p>
+      </div>
+    );
+  }
+
+  if (job === undefined) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">Loading…</p>
+      </div>
+    );
+  }
+
+  if (job === null) {
+    return (
+      <div className="p-4">
+        <p className="text-destructive">Job not found.</p>
+        <Link to="/jobs">
+          <Button variant="link" className="mt-2">Back to Jobs</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col gap-3 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link to={`/jobs/${jobId}`}>
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold truncate min-w-0 flex-1">{job.title}</h1>
+        </div>
+        <div className="w-full min-w-0 sm:w-auto">
+          <Button size="sm" className="w-full" asChild>
+            <Link to={`/jobs/${jobId}/documents/upload`}>
+              <Plus className="h-4 w-4 mr-1" />
+              Upload document
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className={sectionClass}>
+        <div className={sectionHeaderClass}>
+          <h2 className={sectionTitleClass}>Documents</h2>
+        </div>
+        <div className={sectionContentClass}>
+          {documents === undefined ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : documents.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-4">
+              No documents yet. Upload a document to get started.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {documents.map((doc) => (
+                <li
+                  key={doc._id}
+                  className="rounded-lg border bg-muted/30 p-3"
+                >
+                  <div className="flex items-start gap-2">
+                    <FileText className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 justify-between">
+                        <p className="font-medium truncate">
+                          {doc.title || doc.fileName}
+                        </p>
+                        <ExpiryBadge
+                          expiryDate={doc.expiryDate}
+                          daysBeforeExpiry={30}
+                          className="shrink-0"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        {doc.documentType}
+                        {doc.notes && ` · ${doc.notes}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-border/50">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 sm:px-3"
+                      onClick={() =>
+                        setViewingDoc({
+                          url: doc.fileUrl,
+                          fileName: doc.fileName,
+                          fileType: doc.fileType,
+                        })
+                      }
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="hidden sm:inline ml-1">View</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
+                      onClick={() => handleDelete(doc._id)}
+                      disabled={isDeleting === doc._id}
+                    >
+                      {isDeleting === doc._id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      <span className="hidden sm:inline ml-1">
+                        {isDeleting === doc._id ? "Deleting…" : "Delete"}
+                      </span>
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {viewingDoc && (
+        <DocumentViewer
+          url={viewingDoc.url}
+          fileName={viewingDoc.fileName}
+          fileType={viewingDoc.fileType}
+          onClose={() => setViewingDoc(null)}
+        />
+      )}
+    </div>
+  );
+}
