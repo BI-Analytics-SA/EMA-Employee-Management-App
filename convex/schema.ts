@@ -32,6 +32,7 @@ export default defineSchema({
             contracts: v.optional(v.boolean()),
             documents: v.optional(v.boolean()),
             exporting: v.optional(v.boolean()),
+            jobs: v.optional(v.boolean()),
           })
         ),
         contractTemplate: v.optional(
@@ -321,6 +322,52 @@ export default defineSchema({
     .index("by_employee", ["employeeId"])
     .index("by_organization_employee", ["organizationId", "employeeId"])
     .index("by_organization_expiry", ["organizationId", "expiryDate"]),
+
+  // Jobs
+  jobs: defineTable({
+    organizationId: v.id("organizations"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(
+      v.literal("open"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("cancelled")
+    ),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    createdBy: v.optional(v.id("userProfiles")),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_status", ["organizationId", "status"]),
+
+  // Job Documents
+  jobDocuments: defineTable({
+    organizationId: v.id("organizations"),
+    jobId: v.id("jobs"),
+
+    documentType: v.string(),
+
+    storageId: v.id("_storage"),
+    fileUrl: v.string(),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSizeBytes: v.number(),
+
+    title: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    issuedBy: v.optional(v.string()),
+    issuedDate: v.optional(v.number()),
+    expiryDate: v.optional(v.number()),
+
+    createdAt: v.number(),
+    createdBy: v.id("userProfiles"),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_job", ["jobId"])
+    .index("by_organization_job", ["organizationId", "jobId"]),
 
   // Report column preferences (per user, per report type)
   reportColumnPreferences: defineTable({

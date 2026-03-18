@@ -19,11 +19,13 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideT
   const contractsEnabled = useModuleEnabled("contracts");
   const documentsEnabled = useModuleEnabled("documents");
   const exportingEnabled = useModuleEnabled("exporting");
+  const jobsEnabled = useModuleEnabled("jobs");
 
   const enabledModules: Record<string, boolean> = {
     contracts: contractsEnabled,
     documents: documentsEnabled,
     exporting: exportingEnabled,
+    jobs: jobsEnabled,
   };
 
   const filterByModule = (items: typeof mainNavItems) =>

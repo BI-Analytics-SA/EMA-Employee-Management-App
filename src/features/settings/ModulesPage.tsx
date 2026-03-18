@@ -17,6 +17,7 @@ export function ModulesPage() {
   const contractsEnabled = useModuleEnabled("contracts");
   const documentsEnabled = useModuleEnabled("documents");
   const exportingEnabled = useModuleEnabled("exporting");
+  const jobsEnabled = useModuleEnabled("jobs");
   const toggleModule = useMutation(api.organizations.mutations.toggleModule);
   const [toggling, setToggling] = useState<ModuleName | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
@@ -128,6 +129,25 @@ export function ModulesPage() {
                 checked={exportingEnabled}
                 disabled={toggling === "exporting"}
                 onChange={(e) => handleToggle("exporting", e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-muted-foreground/20 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50" />
+            </label>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label htmlFor="module-jobs" className="text-base font-medium">Jobs</Label>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Work order management with document assignments.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                id="module-jobs"
+                type="checkbox"
+                checked={jobsEnabled}
+                disabled={toggling === "jobs"}
+                onChange={(e) => handleToggle("jobs", e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-muted-foreground/20 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50" />

@@ -404,7 +404,7 @@ function mergeSettingsWithModules(
 export const toggleModule = mutation({
   args: {
     organizationId: v.id("organizations"),
-    moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting")),
+    moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting"), v.literal("jobs")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -413,7 +413,7 @@ export const toggleModule = mutation({
     if (!org) {
       throw new Error("Organization not found");
     }
-    const allowedKeys = ["contracts", "documents", "exporting"] as const;
+    const allowedKeys = ["contracts", "documents", "exporting", "jobs"] as const;
     const current = org.settings?.enabledModules ?? {};
     const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {};
     for (const key of allowedKeys) {
