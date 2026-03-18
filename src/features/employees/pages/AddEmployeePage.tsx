@@ -32,6 +32,7 @@ export function AddEmployeePage() {
         language: values.language || undefined,
         cellNumber: values.cellNumber || undefined,
         alternativeNumber: values.alternativeNumber || undefined,
+        email: values.email || undefined,
         resUnit: values.resUnit || undefined,
         resComplex: values.resComplex || undefined,
         resStreetNo: values.resStreetNo || undefined,

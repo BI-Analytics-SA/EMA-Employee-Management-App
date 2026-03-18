@@ -49,6 +49,7 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "gender", source: "database", dbField: "gender", label: "Gender", dataType: "text", enabled: true },
   { id: "ethnicGroup", source: "database", dbField: "ethnicGroup", label: "Ethnic Group", dataType: "text", enabled: true },
   { id: "cellNumber", source: "database", dbField: "cellNumber", label: "Cell Number", dataType: "text", enabled: true },
+  { id: "email", source: "database", dbField: "email", label: "Email", dataType: "text", enabled: false },
   { id: "resStreetNo", source: "database", dbField: "resStreetNo", label: "Street No", dataType: "text", enabled: true },
   { id: "resStreetName", source: "database", dbField: "resStreetName", label: "Street Name", dataType: "text", enabled: true },
   { id: "resSuburb", source: "database", dbField: "resSuburb", label: "Suburb", dataType: "text", enabled: true },

@@ -122,12 +122,10 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
   };
 
   const handleFormSubmit = (values: ContractFormValues) => {
-    if (!contractId && !signatureFile) return;
     onSubmit(values, signatureFile, htmlFields);
   };
 
-  const canSubmit =
-    !isSubmitting && (contractId ? true : signatureFile !== null);
+  const canSubmit = !isSubmitting;
 
   const handleGeneratePdf = async () => {
     if (!contractId || !pdfContainerRef.current) return;

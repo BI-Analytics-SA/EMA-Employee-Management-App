@@ -172,6 +172,7 @@ export default defineSchema({
     // Contact
     cellNumber: v.optional(v.string()),
     alternativeNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
 
     // Address
     resUnit: v.optional(v.string()),
@@ -281,6 +282,10 @@ export default defineSchema({
     // Generated PDF (Convex file storage)
     pdfStorageId: v.optional(v.id("_storage")),
     pdfUrl: v.optional(v.string()),
+
+    // Email tracking
+    emailSentAt: v.optional(v.number()),
+    emailSentTo: v.optional(v.string()),
 
     createdAt: v.number(),
     createdBy: v.optional(v.id("userProfiles")),

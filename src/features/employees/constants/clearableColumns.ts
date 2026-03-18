@@ -46,6 +46,7 @@ export const CLEARABLE_COLUMNS: ClearableColumnDef[] = [
   // Contact
   { id: "cellNumber", label: "Cell Number", category: "contact" },
   { id: "alternativeNumber", label: "Alternative Number", category: "contact" },
+  { id: "email", label: "Email", category: "contact" },
   // Address
   { id: "resUnit", label: "Res Unit", category: "address" },
   { id: "resComplex", label: "Res Complex", category: "address" },
