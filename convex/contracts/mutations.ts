@@ -185,6 +185,10 @@ export const recordEmailSent = internalMutation({
     sentTo: v.string(),
   },
   handler: async (ctx, args) => {
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) {
+      throw new Error("Contract not found when recording email sent");
+    }
     await ctx.db.patch(args.contractId, {
       emailSentAt: Date.now(),
       emailSentTo: args.sentTo,

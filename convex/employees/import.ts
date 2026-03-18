@@ -1,5 +1,6 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import {
   requireRoleInOrganization,
   canManageEmployees,
@@ -32,6 +33,8 @@ const ethnicGroupValidator = v.union(
 const payMethodValidator = v.union(v.literal("02"), v.literal("03"));
 const bankAccTypeValidator = v.union(v.literal("S"), v.literal("C"));
 const accRelationshipValidator = v.union(v.literal("O"), v.literal("T"));
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function computeTaxYearStart(dateEngaged: number | undefined): number | undefined {
   if (dateEngaged == null) return undefined;
@@ -209,6 +212,10 @@ export const bulkUpsertEmployees = mutation({
       const item = args.batch[i];
       try {
         collectSettingsValues(item);
+        if (item.email && !EMAIL_RE.test(item.email)) {
+          errors.push({ row: i + 1, message: "Invalid email format" });
+          continue;
+        }
         if (item.mode === "create") {
           const existing = await ctx.db
             .query("employees")
@@ -345,7 +352,7 @@ export const bulkUpsertEmployees = mutation({
               continue;
             }
           }
-          await ctx.db.patch(existing._id, patch as Record<string, never>);
+          await ctx.db.patch(existing._id, patch as Partial<Doc<"employees">>);
           updated++;
         }
       } catch (err) {

@@ -292,7 +292,8 @@ export default defineSchema({
   })
     .index("by_organization", ["organizationId"])
     .index("by_employee", ["employeeId"])
-    .index("by_organization_employee", ["organizationId", "employeeId"]),
+    .index("by_organization_employee", ["organizationId", "employeeId"])
+    .index("by_organization_emailSentAt", ["organizationId", "emailSentAt"]),
 
   // Employee Documents
   employeeDocuments: defineTable({

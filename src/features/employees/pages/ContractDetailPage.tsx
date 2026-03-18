@@ -124,6 +124,10 @@ export function ContractDetailPage() {
 
   const handleSendEmail = async () => {
     if (!contractIdTyped || !emailAddress.trim()) return;
+    if (!/^\S+@\S+\.\S+$/.test(emailAddress.trim())) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
     setSendingEmail(true);
     setEmailError(null);
     setEmailSuccess(false);
@@ -346,9 +350,7 @@ export function ContractDetailPage() {
               {emailSuccess && (
                 <p className="text-sm text-green-600 w-full basis-full">
                   Contract emailed successfully.
-                  {contract.emailSentTo && (
-                    <span className="text-muted-foreground"> Sent to {contract.emailSentTo}.</span>
-                  )}
+                  <span className="text-muted-foreground"> Sent to {emailAddress || contract.emailSentTo}.</span>
                 </p>
               )}
               {showEmailForm && (
