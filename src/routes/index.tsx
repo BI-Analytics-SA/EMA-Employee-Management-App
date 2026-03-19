@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
@@ -41,8 +41,8 @@ import { JobListPage } from "@/features/jobs/pages/JobListPage";
 import { NewJobPage } from "@/features/jobs/pages/NewJobPage";
 import { JobDetailPage } from "@/features/jobs/pages/JobDetailPage";
 import { EditJobPage } from "@/features/jobs/pages/EditJobPage";
-import { JobDocumentsPage } from "@/features/jobs/pages/JobDocumentsPage";
 import { JobDocumentUploadPage } from "@/features/jobs/pages/JobDocumentUploadPage";
+import { JobDocumentTypesPage } from "@/features/settings/JobDocumentTypesPage";
 
 export const router = createBrowserRouter([
   {
@@ -108,8 +108,16 @@ export const router = createBrowserRouter([
                 element: <ExportConfigPage />,
               },
               {
-                path: "documents/expiring",
+                path: "settings/job-document-types",
+                element: <JobDocumentTypesPage />,
+              },
+              {
+                path: "expiring-items",
                 element: <ExpiringDocumentsPage />,
+              },
+              {
+                path: "documents/expiring",
+                element: <Navigate to="/expiring-items" replace />,
               },
               {
                 path: "reports/employees",
@@ -139,17 +147,8 @@ export const router = createBrowserRouter([
                     element: <EditJobPage />,
                   },
                   {
-                    path: ":id/documents",
-                    children: [
-                      {
-                        index: true,
-                        element: <JobDocumentsPage />,
-                      },
-                      {
-                        path: "upload",
-                        element: <JobDocumentUploadPage />,
-                      },
-                    ],
+                    path: ":id/documents/upload",
+                    element: <JobDocumentUploadPage />,
                   },
                 ],
               },

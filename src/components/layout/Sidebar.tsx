@@ -29,7 +29,12 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideT
   };
 
   const filterByModule = (items: typeof mainNavItems) =>
-    items.filter((item) => !item.requiredModule || enabledModules[item.requiredModule]);
+    items.filter((item) => {
+      if (item.requiredModuleAny) {
+        return item.requiredModuleAny.some((mod) => enabledModules[mod]);
+      }
+      return !item.requiredModule || enabledModules[item.requiredModule];
+    });
 
   const filteredMainNavItems = filterByModule(mainNavItems);
   const filteredSettingsNavItems = filterByModule(settingsNavItems);

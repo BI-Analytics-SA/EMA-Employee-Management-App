@@ -53,12 +53,12 @@ export const getDashboardStats = query({
     const documentsEnabled =
       org?.settings?.enabledModules?.documents === true;
 
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const futureCutoff = now + DEFAULT_EXPIRY_WINDOW_DAYS * dayMs;
+
     let expiringDocumentsCount: number | null = null;
     if (documentsEnabled) {
-      const now = Date.now();
-      const dayMs = 24 * 60 * 60 * 1000;
-      const futureCutoff = now + DEFAULT_EXPIRY_WINDOW_DAYS * dayMs;
-
       const docs = await ctx.db
         .query("employeeDocuments")
         .withIndex("by_organization", (q) =>
@@ -67,6 +67,24 @@ export const getDashboardStats = query({
         .collect();
 
       expiringDocumentsCount = docs.filter((d) => {
+        if (d.expiryDate == null) return false;
+        return d.expiryDate <= futureCutoff;
+      }).length;
+    }
+
+    // --- Expiring job documents count (only if jobs module is enabled) ---
+    const jobsEnabled = org?.settings?.enabledModules?.jobs === true;
+
+    let expiringJobDocumentsCount: number | null = null;
+    if (jobsEnabled) {
+      const jobDocs = await ctx.db
+        .query("jobDocuments")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", args.organizationId)
+        )
+        .collect();
+
+      expiringJobDocumentsCount = jobDocs.filter((d) => {
         if (d.expiryDate == null) return false;
         return d.expiryDate <= futureCutoff;
       }).length;
@@ -94,6 +112,7 @@ export const getDashboardStats = query({
       employeesWithoutTaxNumber,
       recentEmployees,
       expiringDocumentsCount,
+      expiringJobDocumentsCount,
       totalContracts,
     };
   },

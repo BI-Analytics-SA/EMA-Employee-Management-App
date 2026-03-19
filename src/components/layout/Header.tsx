@@ -21,15 +21,21 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const documentsEnabled = useModuleEnabled("documents");
+  const jobsEnabled = useModuleEnabled("jobs");
+  const showExpiryBell = documentsEnabled || jobsEnabled;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Expiring documents count (only query when documents module is enabled)
+  // Expiring items count (aggregates documents and job documents when their modules are enabled)
   const expiringDocs = useQuery(
     api.documents.queries.getExpiringByOrganization,
     documentsEnabled && organizationId ? { organizationId, daysAhead: 30 } : "skip"
   );
-  const expiringCount = expiringDocs?.length ?? 0;
+  const expiringJobDocs = useQuery(
+    api.jobDocuments.queries.getExpiringByOrganization,
+    jobsEnabled && organizationId ? { organizationId, daysAhead: 30 } : "skip"
+  );
+  const expiringCount = (expiringDocs?.length ?? 0) + (expiringJobDocs?.length ?? 0);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -86,10 +92,10 @@ export function Header({ onMenuClick }: HeaderProps) {
 
       {/* Right-side items */}
       <div className="flex items-center gap-1">
-        {/* Expiring documents bell (only when documents module is enabled) */}
-        {documentsEnabled && (
-          <Link to="/documents/expiring">
-            <Button variant="ghost" size="icon" className="relative" title="Expiring documents">
+        {/* Expiring items bell (when any expiry-capable module is enabled) */}
+        {showExpiryBell && (
+          <Link to="/expiring-items">
+            <Button variant="ghost" size="icon" className="relative" title="Expiring items">
               <Bell className="h-5 w-5" />
               {expiringCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">

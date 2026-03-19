@@ -38,3 +38,66 @@ export const getById = query({
     return doc;
   },
 });
+
+/**
+ * Get expiring job documents for an organization (within daysAhead window or already expired).
+ */
+export const getExpiringByOrganization = query({
+  args: {
+    organizationId: v.id("organizations"),
+    daysAhead: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+    await requireModuleEnabled(ctx, args.organizationId, "jobs");
+
+    const daysAhead = args.daysAhead ?? 90;
+    const cutoff = Date.now() + daysAhead * 24 * 60 * 60 * 1000;
+
+    const docs = await ctx.db
+      .query("jobDocuments")
+      .withIndex("by_organization_expiry", (q) =>
+        q.eq("organizationId", args.organizationId).lte("expiryDate", cutoff)
+      )
+      .collect();
+
+    // Filter out documents with no expiry (undefined sorts before numbers in the index)
+    return docs.filter((d) => d.expiryDate != null);
+  },
+});
+
+/**
+ * Get expiring job documents with their parent job info.
+ */
+export const getExpiringWithJobs = query({
+  args: {
+    organizationId: v.id("organizations"),
+    daysAhead: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+    await requireModuleEnabled(ctx, args.organizationId, "jobs");
+
+    const daysAhead = args.daysAhead ?? 90;
+    const cutoff = Date.now() + daysAhead * 24 * 60 * 60 * 1000;
+
+    const docs = await ctx.db
+      .query("jobDocuments")
+      .withIndex("by_organization_expiry", (q) =>
+        q.eq("organizationId", args.organizationId).lte("expiryDate", cutoff)
+      )
+      .collect();
+
+    const expiring = docs.filter((d) => d.expiryDate != null);
+
+    const results = await Promise.all(
+      expiring.map(async (doc) => {
+        const job = await ctx.db.get(doc.jobId);
+        if (!job) return null;
+        return { document: doc, job };
+      })
+    );
+
+    return results.filter((r): r is NonNullable<typeof r> => r !== null);
+  },
+});

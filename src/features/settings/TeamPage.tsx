@@ -395,9 +395,6 @@ export function TeamPage() {
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground truncate">{member.email ?? "—"}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Last login: {formatLastLogin(member.lastLoginAt)}
-                          </div>
                         </div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           member.role === "admin" ? "bg-primary/15 text-primary" :

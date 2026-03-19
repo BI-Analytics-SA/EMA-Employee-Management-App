@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -40,6 +40,7 @@ function addDurationToNow(
 export function JobDocumentUploadPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoading: userLoading, organization } = useCurrentUser();
   const jobsEnabled = useModuleEnabled("jobs");
   const jobId = id as Id<"jobs"> | undefined;
@@ -49,7 +50,7 @@ export function JobDocumentUploadPage() {
   const createDocument = useMutation(api.jobDocuments.mutations.create);
 
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState("");
+  const [documentType, setDocumentType] = useState(searchParams.get("type") ?? "");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [issuedBy, setIssuedBy] = useState("");
@@ -61,7 +62,7 @@ export function JobDocumentUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const documentTypes = organization?.settings?.documentTypes ?? [];
+  const documentTypes = organization?.settings?.jobDocumentTypes ?? [];
   const selectedDocType = documentTypes.find((dt) => dt.id === documentType);
   const showExpiry = selectedDocType?.requiresExpiry ?? false;
 
@@ -200,7 +201,7 @@ export function JobDocumentUploadPage() {
             </select>
             {documentTypes.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                No document types defined. Add them in Settings → Document types.
+                No job document types defined. Add them in Settings → Job Doc Types.
               </p>
             )}
           </div>
