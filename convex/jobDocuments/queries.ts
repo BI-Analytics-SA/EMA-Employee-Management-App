@@ -56,10 +56,13 @@ export const getExpiringByOrganization = query({
 
     const docs = await ctx.db
       .query("jobDocuments")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .withIndex("by_organization_expiry", (q) =>
+        q.eq("organizationId", args.organizationId).lte("expiryDate", cutoff)
+      )
       .collect();
 
-    return docs.filter((d) => d.expiryDate != null && d.expiryDate <= cutoff);
+    // Filter out documents with no expiry (undefined sorts before numbers in the index)
+    return docs.filter((d) => d.expiryDate != null);
   },
 });
 
@@ -80,16 +83,21 @@ export const getExpiringWithJobs = query({
 
     const docs = await ctx.db
       .query("jobDocuments")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .withIndex("by_organization_expiry", (q) =>
+        q.eq("organizationId", args.organizationId).lte("expiryDate", cutoff)
+      )
       .collect();
 
-    const expiring = docs.filter((d) => d.expiryDate != null && d.expiryDate <= cutoff);
+    const expiring = docs.filter((d) => d.expiryDate != null);
 
-    return Promise.all(
+    const results = await Promise.all(
       expiring.map(async (doc) => {
         const job = await ctx.db.get(doc.jobId);
+        if (!job) return null;
         return { document: doc, job };
       })
     );
+
+    return results.filter((r): r is NonNullable<typeof r> => r !== null);
   },
 });

@@ -26,7 +26,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Expiring documents count (query each source when its module is enabled)
+  // Expiring items count (aggregates documents and job documents when their modules are enabled)
   const expiringDocs = useQuery(
     api.documents.queries.getExpiringByOrganization,
     documentsEnabled && organizationId ? { organizationId, daysAhead: 30 } : "skip"
@@ -95,7 +95,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         {/* Expiring items bell (when any expiry-capable module is enabled) */}
         {showExpiryBell && (
           <Link to="/expiring-items">
-            <Button variant="ghost" size="icon" className="relative" title="Expiring documents">
+            <Button variant="ghost" size="icon" className="relative" title="Expiring items">
               <Bell className="h-5 w-5" />
               {expiringCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">

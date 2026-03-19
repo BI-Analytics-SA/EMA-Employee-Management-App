@@ -59,7 +59,8 @@ export function JobDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [isDeletingDoc, setIsDeletingDoc] = useState<string | null>(null);
+  const [deleteDocError, setDeleteDocError] = useState<string | null>(null);
+  const [isDeletingDoc, setIsDeletingDoc] = useState<Id<"jobDocuments"> | null>(null);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
     fileName: string;
@@ -152,10 +153,11 @@ export function JobDetailPage() {
   const handleDeleteDoc = async (docId: Id<"jobDocuments">) => {
     if (!window.confirm("Delete this document? This cannot be undone.")) return;
     setIsDeletingDoc(docId);
+    setDeleteDocError(null);
     try {
       await removeDoc({ id: docId });
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
+      setDeleteDocError(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
     } finally {
       setIsDeletingDoc(null);
     }
@@ -301,11 +303,15 @@ export function JobDetailPage() {
       {/* Documents */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Documents</h2>
+        {deleteDocError && (
+          <p className="text-sm text-destructive">{deleteDocError}</p>
+        )}
 
         {/* Filter pills */}
         {jobDocumentTypes.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={() => setTypeFilter("all")}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors border ${
                 typeFilter === "all"
@@ -319,6 +325,7 @@ export function JobDetailPage() {
               const count = groupedDocs[dt.id]?.length ?? 0;
               return (
                 <button
+                  type="button"
                   key={dt.id}
                   onClick={() => setTypeFilter(dt.id)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors border ${

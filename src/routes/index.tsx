@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
@@ -114,6 +114,10 @@ export const router = createBrowserRouter([
               {
                 path: "expiring-items",
                 element: <ExpiringDocumentsPage />,
+              },
+              {
+                path: "documents/expiring",
+                element: <Navigate to="/expiring-items" replace />,
               },
               {
                 path: "reports/employees",
