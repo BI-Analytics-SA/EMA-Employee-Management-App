@@ -53,10 +53,8 @@ function getErrorMessage(error: unknown, flow: AuthFlow): string {
   // Invalid/expired reset code
   if (
     flow === "resetCode" &&
-    (lowerMessage.includes("invalid") ||
-      lowerMessage.includes("expired") ||
-      lowerMessage.includes("code") ||
-      lowerMessage.includes("token"))
+    (lowerMessage.includes("invalid") || lowerMessage.includes("expired")) &&
+    (lowerMessage.includes("code") || lowerMessage.includes("token"))
   ) {
     return "Invalid or expired code. Please request a new reset code.";
   }
@@ -140,6 +138,15 @@ export function SignInPage() {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   // Email carried from "forgot" step into "resetCode" step
   const [resetEmail, setResetEmail] = useState("");
+  // Controlled value for the email input field
+  const [emailInput, setEmailInput] = useState(inviteDetails?.email || "");
+
+  // Sync emailInput when returning to "forgot" so the previous address is pre-filled
+  useEffect(() => {
+    if (flow === "forgot" && resetEmail) {
+      setEmailInput(resetEmail);
+    }
+  }, [flow, resetEmail]);
 
   // Update flow when invite code is detected
   useEffect(() => {
@@ -288,7 +295,8 @@ export function SignInPage() {
                   required
                   autoComplete="email"
                   disabled={isLoading}
-                  defaultValue={inviteDetails?.email || ""}
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
                   readOnly={!!inviteDetails?.email && flow === "signUp"}
                   className={inviteDetails?.email && flow === "signUp" ? "bg-muted" : ""}
                 />
@@ -424,7 +432,7 @@ export function SignInPage() {
               {flow === "forgot" && "Send Reset Code"}
               {flow === "resetCode" && (
                 <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  {!isLoading && <CheckCircle2 className="mr-2 h-4 w-4" />}
                   Reset Password
                 </>
               )}

@@ -1,9 +1,17 @@
 import Resend from "@auth/core/providers/resend";
 import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export const ResendOTPPasswordReset = Resend({
   id: "resend-otp",
-  apiKey: process.env.AUTH_RESEND_KEY,
+  apiKey: process.env.RESEND_API_KEY,
   async generateVerificationToken() {
     const random: RandomReader = {
       read(bytes) {
@@ -49,32 +57,48 @@ export const ResendOTPPasswordReset = Resend({
       </p>
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
       <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-        This email was sent to ${email}.<br>
+        This email was sent to ${escapeHtml(email)}.<br>
         If you didn't request this, you can safely ignore it.
       </p>
     </div>
   </body>
 </html>`;
 
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [email],
-        subject: "Reset your password",
-        html,
-        text: `Reset your password\n\nYour password reset code is: ${token}\n\nThis code expires shortly. If you did not request a password reset, you can safely ignore this email.`,
-      }),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
 
-    if (!response.ok) {
-      const body = await response.text();
-      console.error("Failed to send password reset email:", body);
-      throw new Error("Could not send password reset email");
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [email],
+          subject: "Reset your password",
+          html,
+          text: `Reset your password\n\nYour password reset code is: ${token}\n\nThis code expires shortly. If you did not request a password reset, you can safely ignore this email.`,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        console.error(
+          "Failed to send password reset email:",
+          response.status,
+          response.statusText
+        );
+        throw new Error("Could not send password reset email");
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw new Error("Timed out sending password reset email. Please try again.");
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
   },
 });
