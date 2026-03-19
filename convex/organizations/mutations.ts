@@ -98,6 +98,7 @@ export const updateSettings = mutation({
       settings: {
         ...args.settings,
         documentTypes: s?.documentTypes,
+        jobDocumentTypes: s?.jobDocumentTypes,
         enabledModules: s?.enabledModules,
         contractTemplate: s?.contractTemplate,
         contractTemplates: s?.contractTemplates,
@@ -131,6 +132,7 @@ function mergeSettingsWithDataArray(
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
     documentTypes: existing?.documentTypes,
+    jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -213,7 +215,7 @@ type ContractTemplatesArray = NonNullable<NonNullable<OrgSettings>["contractTemp
 /** Build full settings object so required arrays are never undefined when patching. */
 function mergeSettings(
   existing: OrgSettings | undefined,
-  override: { documentTypes: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
+  override: { documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[]; jobDocumentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
 ) {
   return {
     departments: existing?.departments ?? [],
@@ -223,7 +225,8 @@ function mergeSettings(
     suburbs: existing?.suburbs ?? [],
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
-    documentTypes: override.documentTypes,
+    documentTypes: override.documentTypes ?? existing?.documentTypes,
+    jobDocumentTypes: override.jobDocumentTypes ?? existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -377,6 +380,94 @@ export const removeDocumentType = mutation({
   },
 });
 
+/**
+ * Add a job document type to organization settings (admin only).
+ */
+export const addJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    documentType: documentTypeValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    if (currentTypes.some((t) => t.id === args.documentType.id)) {
+      throw new Error("A job document type with this ID already exists");
+    }
+
+    const newTypes = [...currentTypes, args.documentType];
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Update an existing job document type (admin only).
+ */
+export const updateJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    id: v.string(),
+    name: v.optional(v.string()),
+    requiresExpiry: v.optional(v.boolean()),
+    color: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    const index = currentTypes.findIndex((t) => t.id === args.id);
+    if (index === -1) throw new Error("Job document type not found");
+
+    const updated = { ...currentTypes[index] };
+    if (args.name !== undefined) updated.name = args.name;
+    if (args.requiresExpiry !== undefined) updated.requiresExpiry = args.requiresExpiry;
+    if (args.color !== undefined) updated.color = args.color;
+
+    const newTypes = [...currentTypes];
+    newTypes[index] = updated;
+
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Remove a job document type from organization settings (admin only).
+ * Does not delete existing job documents of that type.
+ */
+export const removeJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    const newTypes = currentTypes.filter((t) => t.id !== args.id);
+    if (newTypes.length === currentTypes.length) {
+      throw new Error("Job document type not found");
+    }
+
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
+    return { success: true };
+  },
+});
+
 /** Build full settings object with required arrays and updated enabledModules. */
 function mergeSettingsWithModules(
   existing: OrgSettings | undefined,
@@ -391,6 +482,7 @@ function mergeSettingsWithModules(
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
     documentTypes: existing?.documentTypes,
+    jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -497,6 +589,7 @@ export const updateContractTemplate = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       exportConfig: s?.exportConfig,
@@ -560,6 +653,7 @@ export const updateExportConfig = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: s?.contractTemplate,
       contractTemplates: s?.contractTemplates,
@@ -636,6 +730,7 @@ export const migrateContractTemplates = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplates: templates,
       exportConfig: s?.exportConfig,
@@ -723,6 +818,7 @@ export const saveEmployerSignature = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
@@ -791,6 +887,7 @@ export const deleteEmployerSignature = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
@@ -818,6 +915,7 @@ function buildFullSettings(
     cities: s?.cities ?? [],
     postCodes: s?.postCodes ?? [],
     documentTypes: s?.documentTypes,
+    jobDocumentTypes: s?.jobDocumentTypes,
     enabledModules: s?.enabledModules,
     contractTemplate: s?.contractTemplate,
     contractTemplates: override.contractTemplates,

@@ -38,3 +38,58 @@ export const getById = query({
     return doc;
   },
 });
+
+/**
+ * Get expiring job documents for an organization (within daysAhead window or already expired).
+ */
+export const getExpiringByOrganization = query({
+  args: {
+    organizationId: v.id("organizations"),
+    daysAhead: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+    await requireModuleEnabled(ctx, args.organizationId, "jobs");
+
+    const daysAhead = args.daysAhead ?? 90;
+    const cutoff = Date.now() + daysAhead * 24 * 60 * 60 * 1000;
+
+    const docs = await ctx.db
+      .query("jobDocuments")
+      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .collect();
+
+    return docs.filter((d) => d.expiryDate != null && d.expiryDate <= cutoff);
+  },
+});
+
+/**
+ * Get expiring job documents with their parent job info.
+ */
+export const getExpiringWithJobs = query({
+  args: {
+    organizationId: v.id("organizations"),
+    daysAhead: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+    await requireModuleEnabled(ctx, args.organizationId, "jobs");
+
+    const daysAhead = args.daysAhead ?? 90;
+    const cutoff = Date.now() + daysAhead * 24 * 60 * 60 * 1000;
+
+    const docs = await ctx.db
+      .query("jobDocuments")
+      .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+      .collect();
+
+    const expiring = docs.filter((d) => d.expiryDate != null && d.expiryDate <= cutoff);
+
+    return Promise.all(
+      expiring.map(async (doc) => {
+        const job = await ctx.db.get(doc.jobId);
+        return { document: doc, job };
+      })
+    );
+  },
+});

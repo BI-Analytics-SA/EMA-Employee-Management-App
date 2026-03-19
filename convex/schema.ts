@@ -27,6 +27,16 @@ export default defineSchema({
             })
           )
         ),
+        jobDocumentTypes: v.optional(
+          v.array(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+              requiresExpiry: v.boolean(),
+              color: v.optional(v.string()),
+            })
+          )
+        ),
         enabledModules: v.optional(
           v.object({
             contracts: v.optional(v.boolean()),
@@ -367,7 +377,8 @@ export default defineSchema({
   })
     .index("by_organization", ["organizationId"])
     .index("by_job", ["jobId"])
-    .index("by_organization_job", ["organizationId", "jobId"]),
+    .index("by_organization_job", ["organizationId", "jobId"])
+    .index("by_organization_expiry", ["organizationId", "expiryDate"]),
 
   // Report column preferences (per user, per report type)
   reportColumnPreferences: defineTable({
