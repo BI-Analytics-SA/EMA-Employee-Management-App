@@ -14,13 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, AlertCircle, UserPlus } from "lucide-react";
+import { Loader2, AlertCircle, UserPlus, CheckCircle2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
+
+type AuthFlow = "signIn" | "signUp" | "forgot" | "resetCode";
 
 /**
  * Parse Convex Auth errors into user-friendly messages
  */
-function getErrorMessage(error: unknown, flow: "signIn" | "signUp"): string {
+function getErrorMessage(error: unknown, flow: AuthFlow): string {
   const message = error instanceof Error ? error.message : String(error);
   const lowerMessage = message.toLowerCase();
 
@@ -31,6 +33,9 @@ function getErrorMessage(error: unknown, flow: "signIn" | "signUp"): string {
     lowerMessage.includes("account not found") ||
     lowerMessage.includes("user not found")
   ) {
+    if (flow === "forgot") {
+      return "No account found with this email address. Please check your email.";
+    }
     return "No account found with this email address. Please check your email (email addresses are case sensitive) or sign up for a new account.";
   }
 
@@ -43,6 +48,17 @@ function getErrorMessage(error: unknown, flow: "signIn" | "signUp"): string {
     lowerMessage.includes("invalid credentials")
   ) {
     return "Incorrect password. Please try again or reset your password.";
+  }
+
+  // Invalid/expired reset code
+  if (
+    flow === "resetCode" &&
+    (lowerMessage.includes("invalid") ||
+      lowerMessage.includes("expired") ||
+      lowerMessage.includes("code") ||
+      lowerMessage.includes("token"))
+  ) {
+    return "Invalid or expired code. Please request a new reset code.";
   }
 
   // Account already exists (during sign up)
@@ -81,8 +97,12 @@ function getErrorMessage(error: unknown, flow: "signIn" | "signUp"): string {
   // Generic fallback based on flow
   if (flow === "signIn") {
     return "Unable to sign in. Please check your email and password.";
-  } else {
+  } else if (flow === "signUp") {
     return "Unable to create account. Please try again.";
+  } else if (flow === "forgot") {
+    return "Unable to send reset code. Please try again.";
+  } else {
+    return "Unable to reset password. Please check the code and try again.";
   }
 }
 
@@ -113,10 +133,13 @@ export function SignInPage() {
   );
 
   // Default to sign-up flow if coming from an invite
-  const [flow, setFlow] = useState<"signIn" | "signUp">(inviteCode ? "signUp" : "signIn");
+  const [flow, setFlow] = useState<AuthFlow>(inviteCode ? "signUp" : "signIn");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  // Email carried from "forgot" step into "resetCode" step
+  const [resetEmail, setResetEmail] = useState("");
 
   // Update flow when invite code is detected
   useEffect(() => {
@@ -134,16 +157,30 @@ export function SignInPage() {
     }
   }, [isAuthenticated, isAuthLoading, navigate, redirectUrl]);
 
+  const switchFlow = (next: AuthFlow) => {
+    setFlow(next);
+    setError(null);
+    setConfirmPassword("");
+    setConfirmNewPassword("");
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const password = formData.get("password") as string;
 
-    // Validate password confirmation during sign up
     if (flow === "signUp") {
+      const password = formData.get("password") as string;
       if (password !== confirmPassword) {
+        setError("Passwords do not match. Please make sure both passwords are the same.");
+        return;
+      }
+    }
+
+    if (flow === "resetCode") {
+      const newPassword = formData.get("newPassword") as string;
+      if (newPassword !== confirmNewPassword) {
         setError("Passwords do not match. Please make sure both passwords are the same.");
         return;
       }
@@ -152,8 +189,16 @@ export function SignInPage() {
     setIsLoading(true);
 
     try {
-      await signIn("password", formData);
-      // Navigation will happen automatically via the useEffect above
+      if (flow === "forgot") {
+        const email = formData.get("email") as string;
+        await signIn("password", formData);
+        setResetEmail(email);
+        setFlow("resetCode");
+        setError(null);
+      } else {
+        await signIn("password", formData);
+        // For signIn/signUp/resetCode, navigation happens via the useEffect above
+      }
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : String(err);
       console.error("[Auth error]", err);
@@ -177,26 +222,31 @@ export function SignInPage() {
     );
   }
 
+  const cardTitle = {
+    signIn: "Welcome Back",
+    signUp: "Create Account",
+    forgot: "Reset Password",
+    resetCode: "Enter Reset Code",
+  }[flow];
+
+  const cardDescription = {
+    signIn: "Sign in to your Employee Management account",
+    signUp: inviteDetails ? "Create an account to join the team" : "Create a new account to get started",
+    forgot: "Enter your email address and we'll send you a reset code",
+    resetCode: `Check your email for the 8-digit code sent to ${resetEmail}`,
+  }[flow];
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-card">
         <CardHeader className="text-center">
-          {/* Pepl logo/brand */}
           <img
             src={logoImg}
             alt="Pepl"
             className="mx-auto mb-3 h-12 w-12 shrink-0 rounded-xl object-contain"
           />
-          <CardTitle className="text-2xl">
-            {flow === "signIn" ? "Welcome Back" : "Create Account"}
-          </CardTitle>
-          <CardDescription>
-            {flow === "signIn"
-              ? "Sign in to your Employee Management account"
-              : inviteDetails
-              ? "Create an account to join the team"
-              : "Create a new account to get started"}
-          </CardDescription>
+          <CardTitle className="text-2xl">{cardTitle}</CardTitle>
+          <CardDescription>{cardDescription}</CardDescription>
         </CardHeader>
 
         {/* Invite banner */}
@@ -226,46 +276,64 @@ export function SignInPage() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                required
-                autoComplete="email"
-                disabled={isLoading}
-                defaultValue={inviteDetails?.email || ""}
-                readOnly={!!inviteDetails?.email && flow === "signUp"}
-                className={inviteDetails?.email && flow === "signUp" ? "bg-muted" : ""}
-              />
-              {inviteDetails?.email && flow === "signUp" && (
-                <p className="text-xs text-muted-foreground">
-                  This invite is restricted to this email address
-                </p>
-              )}
-            </div>
+            {/* ── Sign in / Sign up / Forgot: email field ── */}
+            {(flow === "signIn" || flow === "signUp" || flow === "forgot") && (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                  disabled={isLoading}
+                  defaultValue={inviteDetails?.email || ""}
+                  readOnly={!!inviteDetails?.email && flow === "signUp"}
+                  className={inviteDetails?.email && flow === "signUp" ? "bg-muted" : ""}
+                />
+                {inviteDetails?.email && flow === "signUp" && (
+                  <p className="text-xs text-muted-foreground">
+                    This invite is restricted to this email address
+                  </p>
+                )}
+              </div>
+            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                required
-                autoComplete={flow === "signIn" ? "current-password" : "new-password"}
-                disabled={isLoading}
-                minLength={8}
-              />
-              {flow === "signUp" && (
-                <p className="text-xs text-muted-foreground">
-                  Password must be at least 8 characters
-                </p>
-              )}
-            </div>
+            {/* ── Sign in / Sign up: password field ── */}
+            {(flow === "signIn" || flow === "signUp") && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {flow === "signIn" && (
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => switchFlow("forgot")}
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  required
+                  autoComplete={flow === "signIn" ? "current-password" : "new-password"}
+                  disabled={isLoading}
+                  minLength={8}
+                />
+                {flow === "signUp" && (
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters
+                  </p>
+                )}
+              </div>
+            )}
 
+            {/* ── Sign up: confirm password ── */}
             {flow === "signUp" && (
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -283,48 +351,136 @@ export function SignInPage() {
               </div>
             )}
 
-            <input name="flow" type="hidden" value={flow} />
+            {/* ── Reset code step ── */}
+            {flow === "resetCode" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="code">Reset Code</Label>
+                  <Input
+                    id="code"
+                    name="code"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="12345678"
+                    required
+                    autoComplete="one-time-code"
+                    disabled={isLoading}
+                    maxLength={8}
+                    className="tracking-widest text-center text-lg font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the 8-digit code from the email
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    placeholder="Choose a new password"
+                    required
+                    autoComplete="new-password"
+                    disabled={isLoading}
+                    minLength={8}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmNewPassword"
+                    type="password"
+                    placeholder="Confirm your new password"
+                    required
+                    autoComplete="new-password"
+                    disabled={isLoading}
+                    minLength={8}
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                </div>
+
+                <input name="email" type="hidden" value={resetEmail} />
+              </>
+            )}
+
+            <input
+              name="flow"
+              type="hidden"
+              value={flow === "resetCode" ? "reset-verification" : flow === "forgot" ? "reset" : flow}
+            />
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {flow === "signIn" ? "Sign In" : "Create Account"}
+              {flow === "signIn" && "Sign In"}
+              {flow === "signUp" && "Create Account"}
+              {flow === "forgot" && "Send Reset Code"}
+              {flow === "resetCode" && (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Reset Password
+                </>
+              )}
             </Button>
 
             <div className="text-sm text-center text-muted-foreground">
-              {flow === "signIn" ? (
+              {flow === "signIn" && (
                 <>
                   Don't have an account?{" "}
                   <button
                     type="button"
                     className="text-primary hover:underline font-medium"
-                    onClick={() => {
-                      setFlow("signUp");
-                      setError(null);
-                      setConfirmPassword("");
-                    }}
+                    onClick={() => switchFlow("signUp")}
                   >
                     Sign up
                   </button>
                 </>
-              ) : (
+              )}
+              {flow === "signUp" && (
                 <>
                   Already have an account?{" "}
                   <button
                     type="button"
                     className="text-primary hover:underline font-medium"
-                    onClick={() => {
-                      setFlow("signIn");
-                      setError(null);
-                      setConfirmPassword("");
-                    }}
+                    onClick={() => switchFlow("signIn")}
                   >
                     Sign in
                   </button>
                 </>
               )}
+              {(flow === "forgot" || flow === "resetCode") && (
+                <>
+                  Remember your password?{" "}
+                  <button
+                    type="button"
+                    className="text-primary hover:underline font-medium"
+                    onClick={() => switchFlow("signIn")}
+                  >
+                    Back to sign in
+                  </button>
+                </>
+              )}
             </div>
+
+            {flow === "resetCode" && (
+              <div className="text-sm text-center text-muted-foreground">
+                Didn't receive the code?{" "}
+                <button
+                  type="button"
+                  className="text-primary hover:underline font-medium"
+                  onClick={() => switchFlow("forgot")}
+                >
+                  Resend code
+                </button>
+              </div>
+            )}
           </CardFooter>
         </form>
       </Card>
