@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as ResendOTPPasswordReset from "../ResendOTPPasswordReset.js";
 import type * as auth from "../auth.js";
 import type * as contracts_actions from "../contracts/actions.js";
 import type * as contracts_emailAction from "../contracts/emailAction.js";
@@ -50,6 +51,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ResendOTPPasswordReset: typeof ResendOTPPasswordReset;
   auth: typeof auth;
   "contracts/actions": typeof contracts_actions;
   "contracts/emailAction": typeof contracts_emailAction;
