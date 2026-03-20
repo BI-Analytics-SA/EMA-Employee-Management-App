@@ -56,16 +56,6 @@ const STATUS_COLORS = {
   expired: "text-muted-foreground bg-muted",
 };
 
-function formatLastLogin(ts: number | undefined): string {
-  if (!ts) return "Never";
-  const d = new Date(ts);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return d.toLocaleDateString();
-}
 
 export function TeamPage() {
   const { organizationId, isAdmin, isLoading: userLoading, profile: currentProfile } = useCurrentUser();
