@@ -84,6 +84,7 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     language: emp.language ?? "",
     cellNumber: emp.cellNumber ?? "",
     alternativeNumber: emp.alternativeNumber ?? "",
+    email: emp.email ?? "",
     resUnit: emp.resUnit ?? "",
     resComplex: emp.resComplex ?? "",
     resStreetNo: emp.resStreetNo ?? "",
@@ -275,6 +276,13 @@ export function EmployeeForm({
               <div className={wideFieldClass}>
                 <Label htmlFor="alternativeNumber" className="text-xs">Alternative Number</Label>
                 <Input id="alternativeNumber" {...form.register("alternativeNumber")} />
+              </div>
+              <div className={wideFieldClass}>
+                <Label htmlFor="email" className="text-xs">Email</Label>
+                <Input id="email" type="email" {...form.register("email")} placeholder="employee@example.com" />
+                {form.formState.errors.email && (
+                  <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+                )}
               </div>
             </div>
           </div>

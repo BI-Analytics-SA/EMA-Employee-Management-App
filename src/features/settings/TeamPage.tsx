@@ -56,16 +56,6 @@ const STATUS_COLORS = {
   expired: "text-muted-foreground bg-muted",
 };
 
-function formatLastLogin(ts: number | undefined): string {
-  if (!ts) return "Never";
-  const d = new Date(ts);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return d.toLocaleDateString();
-}
 
 export function TeamPage() {
   const { organizationId, isAdmin, isLoading: userLoading, profile: currentProfile } = useCurrentUser();
@@ -395,9 +385,6 @@ export function TeamPage() {
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground truncate">{member.email ?? "—"}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Last login: {formatLastLogin(member.lastLoginAt)}
-                          </div>
                         </div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           member.role === "admin" ? "bg-primary/15 text-primary" :

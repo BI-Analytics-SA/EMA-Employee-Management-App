@@ -64,6 +64,7 @@ export const employeeFormSchema = z.object({
   language: optionalString,
   cellNumber: optionalString,
   alternativeNumber: optionalString,
+  email: z.string().email("Invalid email address").optional().or(z.literal("")).transform((v) => (v === "" ? undefined : v)),
   resUnit: optionalString,
   resComplex: optionalString,
   resStreetNo: optionalString,
