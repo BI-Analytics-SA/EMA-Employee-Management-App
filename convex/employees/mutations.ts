@@ -575,7 +575,11 @@ export const remove = mutation({
 
     // Delete employee image
     if (employee.imageStorageId) {
-      await ctx.storage.delete(employee.imageStorageId);
+      try {
+        await ctx.storage.delete(employee.imageStorageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
     }
 
     await ctx.db.delete(args.id);

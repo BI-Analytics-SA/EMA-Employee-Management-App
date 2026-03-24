@@ -307,7 +307,7 @@ export function EmployeeDetailPage() {
       {employeeId && (
         <DeleteEmployeeDialog
           employeeId={employeeId}
-          employeeName={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
+          employeeName={[employee.firstName, employee.lastName].filter(Boolean).join(" ") || "Unknown"}
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onDeleted={() => navigate("/employees")}

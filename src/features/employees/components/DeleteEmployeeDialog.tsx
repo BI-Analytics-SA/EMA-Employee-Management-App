@@ -32,16 +32,21 @@ export function DeleteEmployeeDialog({
     open ? { employeeId } : "skip"
   );
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const hasAssociatedData =
     counts !== undefined && (counts.documents > 0 || counts.contracts > 0);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setError(null);
     try {
       await removeMutation({ id: employeeId });
       onOpenChange(false);
       onDeleted();
+    } catch (err) {
+      console.error("Failed to delete employee:", err);
+      setError("Failed to delete employee. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -54,10 +59,14 @@ export function DeleteEmployeeDialog({
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="delete-employee-dialog-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !isDeleting) onOpenChange(false);
+      }}
     >
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle id="delete-employee-dialog-title" className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Delete Employee
           </CardTitle>
@@ -66,6 +75,7 @@ export function DeleteEmployeeDialog({
             onClick={() => onOpenChange(false)}
             className="text-muted-foreground hover:text-foreground"
             disabled={isDeleting}
+            aria-label="Close"
           >
             ×
           </button>
@@ -107,6 +117,10 @@ export function DeleteEmployeeDialog({
               <Loader2 className="h-4 w-4 animate-spin" />
               Checking for associated data...
             </div>
+          )}
+
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
           )}
 
           <div className="flex flex-wrap gap-2 justify-end">
