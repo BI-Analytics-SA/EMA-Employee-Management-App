@@ -15,7 +15,7 @@ import {
   ACC_RELATIONSHIPS,
 } from "@/lib/constants/bankDetails";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms", DR: "Dr", PROF: "Prof", REV: "Rev" };
 const GENDERS: Record<string, string> = { M: "Male", F: "Female" };
@@ -68,22 +68,9 @@ export function EmployeeDetailPage() {
     api.documents.queries.listByEmployee,
     employeeId ? { employeeId } : "skip"
   );
-  const removeMutation = useMutation(api.employees.mutations.remove);
   const contractsEnabled = useModuleEnabled("contracts");
   const documentsEnabled = useModuleEnabled("documents");
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    if (!employeeId) return;
-    if (!window.confirm("Delete this employee? This cannot be undone.")) return;
-    setIsDeleting(true);
-    try {
-      await removeMutation({ id: employeeId });
-      navigate("/employees");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   if (userLoading) {
     return (
@@ -182,11 +169,10 @@ export function EmployeeDetailPage() {
               variant="outline"
               size="sm"
               className="text-destructive hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
+              onClick={() => setDeleteDialogOpen(true)}
             >
               <Trash2 className="h-4 w-4" />
-              {isDeleting ? "Deleting..." : "Delete"}
+              Delete
             </Button>
           </div>
         </div>
@@ -317,6 +303,16 @@ export function EmployeeDetailPage() {
           </section>
         )}
       </div>
+
+      {employeeId && (
+        <DeleteEmployeeDialog
+          employeeId={employeeId}
+          employeeName={[employee.firstName, employee.lastName].filter(Boolean).join(" ") || "Unknown"}
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onDeleted={() => navigate("/employees")}
+        />
+      )}
     </div>
   );
 }

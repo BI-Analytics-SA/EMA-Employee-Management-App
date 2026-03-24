@@ -529,8 +529,57 @@ export const remove = mutation({
       throw new Error("Access denied: You cannot delete employees");
     }
 
+    // Cascade-delete associated employee documents and their storage files
+    const documents = await ctx.db
+      .query("employeeDocuments")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.id))
+      .collect();
+    for (const doc of documents) {
+      try {
+        await ctx.storage.delete(doc.storageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
+      await ctx.db.delete(doc._id);
+    }
+
+    // Cascade-delete associated contracts and their storage files
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.id))
+      .collect();
+    for (const contract of contracts) {
+      if (contract.signatureStorageId) {
+        try {
+          await ctx.storage.delete(contract.signatureStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      if (contract.employerSignatureStorageId) {
+        try {
+          await ctx.storage.delete(contract.employerSignatureStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      if (contract.pdfStorageId) {
+        try {
+          await ctx.storage.delete(contract.pdfStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      await ctx.db.delete(contract._id);
+    }
+
+    // Delete employee image
     if (employee.imageStorageId) {
-      await ctx.storage.delete(employee.imageStorageId);
+      try {
+        await ctx.storage.delete(employee.imageStorageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
     }
 
     await ctx.db.delete(args.id);
