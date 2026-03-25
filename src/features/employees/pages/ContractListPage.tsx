@@ -152,7 +152,8 @@ export function ContractListPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive shrink-0"
+                      className="text-destructive hover:text-destructive shrink-0"
+                      aria-label="Delete"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
