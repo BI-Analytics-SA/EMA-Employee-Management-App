@@ -145,7 +145,10 @@ function SortableColumnRow({
   );
 
   useEffect(() => {
-    if (!isNew) return;
+    if (!isNew) {
+      setHighlight(false);
+      return;
+    }
     setHighlight(true);
     requestAnimationFrame(() => {
       rowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
