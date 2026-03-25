@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -114,10 +114,14 @@ function SortableColumnRow({
   column,
   onUpdate,
   onRemove,
+  isNew,
+  onNewHandled,
 }: {
   column: ExportColumn;
   onUpdate: (id: string, updates: Partial<ExportColumn>) => void;
   onRemove: (id: string) => void;
+  isNew?: boolean;
+  onNewHandled?: () => void;
 }) {
   const {
     attributes,
@@ -128,6 +132,36 @@ function SortableColumnRow({
     isDragging,
   } = useSortable({ id: column.id });
 
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
+  const [highlight, setHighlight] = useState(false);
+
+  const combinedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setNodeRef(node);
+      rowRef.current = node;
+    },
+    [setNodeRef]
+  );
+
+  useEffect(() => {
+    if (!isNew) {
+      setHighlight(false);
+      return;
+    }
+    setHighlight(true);
+    requestAnimationFrame(() => {
+      rowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      labelInputRef.current?.focus();
+      labelInputRef.current?.select();
+    });
+    const timer = setTimeout(() => {
+      setHighlight(false);
+      onNewHandled?.();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isNew, onNewHandled]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -135,11 +169,12 @@ function SortableColumnRow({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3",
-        isDragging && "opacity-50 shadow-md"
+        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 transition-shadow duration-700",
+        isDragging && "opacity-50 shadow-md",
+        highlight && "ring-2 ring-primary"
       )}
     >
       <button
@@ -162,6 +197,7 @@ function SortableColumnRow({
       </label>
       <div className="w-full min-w-0 sm:min-w-[140px] sm:flex-1">
         <Input
+          ref={labelInputRef}
           value={column.label}
           onChange={(e) => onUpdate(column.id, { label: e.target.value })}
           placeholder="Column label"
@@ -221,6 +257,8 @@ export function ExportConfigPage() {
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
   const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
 
+  const newlyAddedIdRef = useRef<string | null>(null);
+
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -265,6 +303,7 @@ export function ExportConfigPage() {
 
   const handleAddCustom = () => {
     const id = `custom-${Date.now()}`;
+    newlyAddedIdRef.current = id;
     setColumns((prev) => [
       ...prev,
       {
@@ -277,6 +316,10 @@ export function ExportConfigPage() {
       },
     ]);
   };
+
+  const handleNewHandled = useCallback(() => {
+    newlyAddedIdRef.current = null;
+  }, []);
 
   const handleSave = async () => {
     const orgId = organization?._id;
@@ -379,6 +422,8 @@ export function ExportConfigPage() {
                   column={col}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  isNew={col.id === newlyAddedIdRef.current}
+                  onNewHandled={handleNewHandled}
                 />
               ))}
             </div>
