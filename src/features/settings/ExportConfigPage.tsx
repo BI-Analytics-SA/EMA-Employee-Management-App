@@ -263,6 +263,7 @@ export function ExportConfigPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
   const [backfillError, setBackfillError] = useState<string | null>(null);
@@ -274,6 +275,12 @@ export function ExportConfigPage() {
   useEffect(() => {
     setColumns(mergeExportColumns(DEFAULT_DATABASE_COLUMNS, savedColumns));
   }, [savedColumns]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -334,7 +341,11 @@ export function ExportConfigPage() {
         columns,
       });
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => {
+        setSaveSuccess(false);
+        successTimeoutRef.current = null;
+      }, 3000);
     } catch (e) {
       setSaveError(extractConvexError(e, "Failed to save configuration."));
     } finally {
@@ -439,7 +450,7 @@ export function ExportConfigPage() {
         <p className="text-sm text-destructive">{saveError}</p>
       )}
       {saveSuccess && (
-        <p className="text-sm text-green-600">Configuration saved.</p>
+        <p className="text-sm text-success">Configuration saved.</p>
       )}
 
       <div className="flex items-center gap-2 pt-2">

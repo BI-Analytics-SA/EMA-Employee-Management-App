@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -47,6 +47,7 @@ export function ContractTemplatePage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [savingSignature, setSavingSignature] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -58,6 +59,12 @@ export function ContractTemplatePage() {
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   // Run migration when org has legacy-only template, or has no templates at all (migration creates default).
   useEffect(() => {
@@ -123,7 +130,11 @@ export function ContractTemplatePage() {
         });
       }
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => {
+        setSaveSuccess(false);
+        successTimeoutRef.current = null;
+      }, 3000);
     } catch (e) {
       setSaveError(extractConvexError(e, "Failed to save template."));
     } finally {
@@ -436,7 +447,7 @@ export function ContractTemplatePage() {
                 )}
               </Button>
               {saveError && <p className="text-sm text-destructive">{saveError}</p>}
-              {saveSuccess && <p className="text-sm text-green-600">Template saved.</p>}
+              {saveSuccess && <p className="text-sm text-success">Template saved.</p>}
             </div>
           </div>
         </section>
