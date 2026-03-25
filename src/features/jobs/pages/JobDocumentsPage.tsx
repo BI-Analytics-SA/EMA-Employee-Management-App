@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Plus, Trash2, FileText, Eye } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -78,7 +79,7 @@ export function JobDocumentsPage() {
     try {
       await removeMutation({ id: docId });
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
+      window.alert(extractConvexError(err, "Failed to delete document. Please try again."));
     } finally {
       setIsDeleting(null);
     }

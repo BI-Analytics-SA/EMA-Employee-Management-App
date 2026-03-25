@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { parseLocalDate } from "@/lib/dateUtils";
+import { extractConvexError } from "@/lib/convex-error";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,7 +73,7 @@ export function NewJobPage() {
       });
       navigate(`/jobs/${id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create job.");
+      setError(extractConvexError(err, "Failed to create job."));
       setIsSubmitting(false);
     }
   };

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,7 +140,7 @@ export function ContractDetailPage() {
       setEmailSuccess(true);
       setShowEmailForm(false);
     } catch (err) {
-      setEmailError(err instanceof Error ? err.message : "Failed to send email. Please try again.");
+      setEmailError(extractConvexError(err, "Failed to send email. Please try again."));
     } finally {
       setSendingEmail(false);
     }

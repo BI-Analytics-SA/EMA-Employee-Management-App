@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -112,7 +113,7 @@ export function EditJobPage() {
       });
       navigate(`/jobs/${jobId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update job.");
+      setError(extractConvexError(err, "Failed to update job."));
       setIsSubmitting(false);
     }
   };

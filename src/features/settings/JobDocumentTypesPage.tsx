@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { extractConvexError } from "@/lib/convex-error";
 
 type DocumentTypeRow = {
   id: string;
@@ -67,7 +68,7 @@ export function JobDocumentTypesPage() {
       setNewName("");
       setNewRequiresExpiry(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to add.");
+      setError(extractConvexError(e, "Failed to add."));
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +94,7 @@ export function JobDocumentTypesPage() {
       setTimeout(clearMessages, 3000);
       setEditingId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update.");
+      setError(extractConvexError(e, "Failed to update."));
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +110,7 @@ export function JobDocumentTypesPage() {
       setSuccess("Job document type removed.");
       setTimeout(clearMessages, 3000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to remove.");
+      setError(extractConvexError(e, "Failed to remove."));
     } finally {
       setIsSubmitting(false);
     }

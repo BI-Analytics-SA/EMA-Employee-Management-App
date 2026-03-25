@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,9 +84,7 @@ export function ClearColumnsDialog({ organizationId }: ClearColumnsDialogProps) 
         `Cleared ${result.updated} of ${result.total} employee record(s) for the selected columns.`
       );
     } catch (err) {
-      window.alert(
-        err instanceof Error ? err.message : "Failed to clear column data."
-      );
+      window.alert(extractConvexError(err, "Failed to clear column data."));
     } finally {
       setIsClearing(false);
     }

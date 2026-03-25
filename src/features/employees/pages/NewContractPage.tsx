@@ -4,6 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { getEffectiveTemplates, getDefaultTemplate } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { ContractForm } from "@/features/contracts/components/ContractForm";
@@ -80,7 +81,7 @@ export function NewContractPage() {
       navigate(`/employees/${employeeId}/contracts/${contractId}`);
     } catch (err) {
       console.error(err);
-      setSubmitError(err instanceof Error ? err.message : "Failed to create contract. Please try again.");
+      setSubmitError(extractConvexError(err, "Failed to create contract. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
