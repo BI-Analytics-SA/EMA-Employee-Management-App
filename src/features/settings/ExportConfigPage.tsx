@@ -6,6 +6,7 @@ import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowLeft, GripVertical, Plus, Trash2 } from "lucide-react";
+import { extractConvexError } from "@/lib/convex-error";
 import { Link } from "react-router-dom";
 import {
   DndContext,
@@ -288,7 +289,7 @@ export function ExportConfigPage() {
         columns,
       });
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : "Failed to save configuration.");
+      setSaveError(extractConvexError(e, "Failed to save configuration."));
     } finally {
       setSaving(false);
     }
@@ -305,7 +306,7 @@ export function ExportConfigPage() {
       setBackfillResult(result);
     } catch (e) {
       setBackfillResult(null);
-      setBackfillError(e instanceof Error ? e.message : String(e));
+      setBackfillError(extractConvexError(e, "Failed to run backfill."));
     } finally {
       setBackfilling(false);
     }

@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { getEffectiveTemplates } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, FileText, Plus, FileCheck, Trash2 } from "lucide-react";
@@ -159,7 +160,7 @@ export function ContractListPage() {
                           await removeContract({ id: c._id });
                         } catch (err) {
                           console.error("Failed to delete contract:", err);
-                          alert(err instanceof Error ? err.message : "Failed to delete contract. Please try again.");
+                          alert(extractConvexError(err, "Failed to delete contract. Please try again."));
                         } finally {
                           setDeletingId(null);
                         }

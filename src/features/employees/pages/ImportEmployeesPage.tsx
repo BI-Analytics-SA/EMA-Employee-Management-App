@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -90,7 +91,7 @@ export function ImportEmployeesPage() {
         setValidRows(valid);
         setValidationErrors(errors);
       } catch (err) {
-        setParseError(err instanceof Error ? err.message : "Failed to parse file");
+        setParseError(extractConvexError(err, "Failed to parse file"));
         setRawRows([]);
       }
     },

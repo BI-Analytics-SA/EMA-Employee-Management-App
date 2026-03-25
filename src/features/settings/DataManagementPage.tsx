@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { extractConvexError } from "@/lib/convex-error";
 
 type DataManagementField = "departments" | "deptGroups" | "shifts" | "shiftAllocations";
 
@@ -75,7 +76,7 @@ export function DataManagementPage() {
       scheduleClearMessages();
       setNewValue("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to add.");
+      setError(extractConvexError(e, "Failed to add."));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +92,7 @@ export function DataManagementPage() {
       setSuccess("Removed.");
       scheduleClearMessages();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to remove.");
+      setError(extractConvexError(e, "Failed to remove."));
     } finally {
       setIsSubmitting(false);
     }

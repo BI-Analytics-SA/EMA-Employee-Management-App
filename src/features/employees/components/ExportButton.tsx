@@ -3,6 +3,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { extractConvexError } from "@/lib/convex-error";
 import { FileDown, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import * as XLSX from "xlsx";
@@ -82,7 +83,7 @@ export function ExportButton({ className }: ExportButtonProps) {
       XLSX.writeFile(wb, "employees.xlsx");
     } catch (err) {
       console.error("Export failed:", err);
-      setExportError(err instanceof Error ? err.message : "Export failed. Please try again.");
+      setExportError(extractConvexError(err, "Export failed. Please try again."));
     } finally {
       setExporting(false);
     }

@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Pencil, Trash2, FileText, Plus, Eye } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -145,7 +146,7 @@ export function JobDetailPage() {
       await removeJob({ id: jobId });
       navigate("/jobs");
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Failed to delete job. Please try again.");
+      setDeleteError(extractConvexError(err, "Failed to delete job. Please try again."));
       setIsDeleting(false);
     }
   };
@@ -157,7 +158,7 @@ export function JobDetailPage() {
     try {
       await removeDoc({ id: docId });
     } catch (err) {
-      setDeleteDocError(err instanceof Error ? err.message : "Failed to delete document. Please try again.");
+      setDeleteDocError(extractConvexError(err, "Failed to delete document. Please try again."));
     } finally {
       setIsDeletingDoc(null);
     }

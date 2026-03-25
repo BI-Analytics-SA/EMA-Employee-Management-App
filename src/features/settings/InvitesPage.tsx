@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,7 +102,7 @@ export function InvitesPage() {
           setSuccess(`Invite created and email sent to ${newInviteEmail}`);
         } catch (emailErr) {
           setError(
-            `Invite created but email failed to send: ${emailErr instanceof Error ? emailErr.message : "Unknown error"}`
+            `Invite created but email failed to send: ${extractConvexError(emailErr, "Unknown error")}`
           );
         }
       } else {
@@ -113,7 +114,7 @@ export function InvitesPage() {
       setNewInviteRole("user");
       setSendEmail(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create invite");
+      setError(extractConvexError(err, "Failed to create invite"));
     } finally {
       setIsSubmitting(false);
     }
@@ -126,7 +127,7 @@ export function InvitesPage() {
       await sendInviteEmail({ inviteId });
       setSuccess("Email sent successfully");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send email");
+      setError(extractConvexError(err, "Failed to send email"));
     } finally {
       setSendingEmailFor(null);
     }
@@ -136,7 +137,7 @@ export function InvitesPage() {
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to revoke invite");
+      setError(extractConvexError(err, "Failed to revoke invite"));
     }
   };
 

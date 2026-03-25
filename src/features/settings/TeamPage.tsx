@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,7 +109,7 @@ export function TeamPage() {
       setSuccess("Role updated");
       setTimeout(clearMessages, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update role");
+      setError(extractConvexError(err, "Failed to update role"));
     }
   };
 
@@ -119,7 +120,7 @@ export function TeamPage() {
       setSuccess("User deactivated");
       setTimeout(clearMessages, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to deactivate user");
+      setError(extractConvexError(err, "Failed to deactivate user"));
     }
   };
 
@@ -129,7 +130,7 @@ export function TeamPage() {
       setSuccess("User reactivated");
       setTimeout(clearMessages, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reactivate user");
+      setError(extractConvexError(err, "Failed to reactivate user"));
     }
   };
 
@@ -148,7 +149,7 @@ export function TeamPage() {
       setDeleteConfirmName("");
       setTimeout(clearMessages, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete user");
+      setError(extractConvexError(err, "Failed to delete user"));
     } finally {
       setIsDeleting(false);
     }
@@ -176,7 +177,7 @@ export function TeamPage() {
           await sendInviteEmail({ inviteId });
           setSuccess(`Invite created and email sent to ${newInviteEmail}`);
         } catch (emailErr) {
-          setError(`Invite created but email failed: ${emailErr instanceof Error ? emailErr.message : "Unknown error"}`);
+          setError(`Invite created but email failed: ${extractConvexError(emailErr, "Unknown error")}`);
         }
       } else {
         setSuccess("Invite created successfully");
@@ -186,7 +187,7 @@ export function TeamPage() {
       setNewInviteRole("user");
       setSendEmail(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create invite");
+      setError(extractConvexError(err, "Failed to create invite"));
     } finally {
       setIsSubmitting(false);
     }
@@ -199,7 +200,7 @@ export function TeamPage() {
       await sendInviteEmail({ inviteId });
       setSuccess("Email sent successfully");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send email");
+      setError(extractConvexError(err, "Failed to send email"));
     } finally {
       setSendingEmailFor(null);
     }
@@ -209,7 +210,7 @@ export function TeamPage() {
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to revoke invite");
+      setError(extractConvexError(err, "Failed to revoke invite"));
     }
   };
 
