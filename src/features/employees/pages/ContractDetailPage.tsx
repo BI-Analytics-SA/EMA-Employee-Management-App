@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,8 +46,8 @@ export function ContractDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
-  const [confirmDeleteHeader, setConfirmDeleteHeader] = useState(false);
-  const [confirmDeleteFooter, setConfirmDeleteFooter] = useState(false);
+  const [showDeleteContractConfirm, setShowDeleteContractConfirm] = useState(false);
+  const [showDeletePdfConfirm, setShowDeletePdfConfirm] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -252,37 +253,15 @@ export function ContractDetailPage() {
             >
               Cancel
             </Button>
-            {confirmDeleteHeader ? (
-              <>
-                <span className="text-sm text-muted-foreground w-full basis-full">Delete?</span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteContract}
-                  className="flex-1 min-w-[100px]"
-                >
-                  Yes, delete
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setConfirmDeleteHeader(false)}
-                  className="flex-1 min-w-[100px]"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
-                onClick={() => setConfirmDeleteHeader(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete contract
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
+              onClick={() => setShowDeleteContractConfirm(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete contract
+            </Button>
           </div>
         )}
       </div>
@@ -334,7 +313,7 @@ export function ContractDetailPage() {
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
-                    onClick={handleDeletePdf}
+                    onClick={() => setShowDeletePdfConfirm(true)}
                     disabled={deletingPdf}
                   >
                     {deletingPdf ? (
@@ -447,39 +426,37 @@ export function ContractDetailPage() {
 
       {canManageContracts && (
         <div className="pt-4 border-t">
-          {confirmDeleteFooter ? (
-            <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
-              <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteContract}
-                className="flex-1 min-w-[100px]"
-              >
-                Yes, delete
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmDeleteFooter(false)}
-                className="flex-1 min-w-[100px]"
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive w-full"
-              onClick={() => setConfirmDeleteFooter(true)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete contract
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive w-full"
+            onClick={() => setShowDeleteContractConfirm(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete contract
+          </Button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showDeleteContractConfirm}
+        onOpenChange={setShowDeleteContractConfirm}
+        onConfirm={handleDeleteContract}
+        title="Delete contract"
+        description="Delete this contract and its signature/PDF files? This cannot be undone."
+      />
+
+      <ConfirmDialog
+        open={showDeletePdfConfirm}
+        onOpenChange={setShowDeletePdfConfirm}
+        onConfirm={async () => {
+          await handleDeletePdf();
+          setShowDeletePdfConfirm(false);
+        }}
+        title="Delete PDF"
+        description="Delete the generated PDF? You can regenerate it later."
+        loading={deletingPdf}
+      />
     </div>
   );
 }

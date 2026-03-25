@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 type DocumentTypeRow = {
   id: string;
@@ -33,6 +34,7 @@ export function JobDocumentTypesPage() {
   const [newName, setNewName] = useState("");
   const [newRequiresExpiry, setNewRequiresExpiry] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
   const documentTypes: DocumentTypeRow[] =
     organization?.settings?.jobDocumentTypes ?? [];
@@ -102,7 +104,6 @@ export function JobDocumentTypesPage() {
 
   const handleRemove = async (id: string) => {
     if (!organizationId) return;
-    if (!window.confirm("Remove this job document type? Existing documents of this type will not be deleted.")) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -113,6 +114,7 @@ export function JobDocumentTypesPage() {
       setError(extractConvexError(e, "Failed to remove."));
     } finally {
       setIsSubmitting(false);
+      setRemoveTarget(null);
     }
   };
 
@@ -268,7 +270,7 @@ export function JobDocumentTypesPage() {
                           size="sm"
                           variant="ghost"
                           className="text-destructive hover:text-destructive"
-                          onClick={() => handleRemove(row.id)}
+                          onClick={() => setRemoveTarget(row.id)}
                           disabled={isSubmitting}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
@@ -283,6 +285,15 @@ export function JobDocumentTypesPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={removeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRemoveTarget(null); }}
+        onConfirm={() => { if (removeTarget) handleRemove(removeTarget); }}
+        title="Remove job document type"
+        description="Remove this job document type? Existing documents of this type will not be deleted."
+        confirmLabel="Remove"
+      />
     </div>
   );
 }

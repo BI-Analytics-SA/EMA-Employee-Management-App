@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Plus, Trash2, FileText, Eye } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -33,6 +34,7 @@ export function JobDocumentsPage() {
 
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Id<"jobDocuments"> | null>(null);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
     fileName: string;
@@ -74,7 +76,6 @@ export function JobDocumentsPage() {
   }, [documents, jobDocumentTypes]);
 
   const handleDelete = async (docId: Id<"jobDocuments">) => {
-    if (!window.confirm("Delete this document? This cannot be undone.")) return;
     setIsDeleting(docId);
     try {
       await removeMutation({ id: docId });
@@ -82,6 +83,7 @@ export function JobDocumentsPage() {
       window.alert(extractConvexError(err, "Failed to delete document. Please try again."));
     } finally {
       setIsDeleting(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -166,7 +168,7 @@ export function JobDocumentsPage() {
           variant="ghost"
           size="sm"
           className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
-          onClick={() => handleDelete(doc._id)}
+          onClick={() => setDeleteTarget(doc._id)}
           disabled={isDeleting === doc._id}
         >
           {isDeleting === doc._id ? (
@@ -317,6 +319,14 @@ export function JobDocumentsPage() {
           onClose={() => setViewingDoc(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={() => { if (deleteTarget) handleDelete(deleteTarget); }}
+        title="Delete document"
+        description="Delete this document? This cannot be undone."
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { getEffectiveTemplates } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, FileText, Plus, FileCheck, Trash2 } from "lucide-react";
@@ -30,6 +31,7 @@ export function ContractListPage() {
   const templates = useMemo(() => getEffectiveTemplates(organization ?? undefined), [organization]);
   const removeContract = useMutation(api.contracts.mutations.remove);
   const [deletingId, setDeletingId] = useState<Id<"contracts"> | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Id<"contracts"> | null>(null);
 
   function getTemplateName(templateId: string | undefined): string {
     if (!templateId) return "Default";
@@ -151,19 +153,10 @@ export function ContractListPage() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                      onClick={async (e) => {
+                      onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (!confirm("Delete this contract?")) return;
-                        setDeletingId(c._id);
-                        try {
-                          await removeContract({ id: c._id });
-                        } catch (err) {
-                          console.error("Failed to delete contract:", err);
-                          alert(extractConvexError(err, "Failed to delete contract. Please try again."));
-                        } finally {
-                          setDeletingId(null);
-                        }
+                        setDeleteTarget(c._id);
                       }}
                       disabled={deletingId === c._id}
                     >
@@ -180,6 +173,26 @@ export function ContractListPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeletingId(deleteTarget);
+          try {
+            await removeContract({ id: deleteTarget });
+          } catch (err) {
+            console.error("Failed to delete contract:", err);
+            alert(extractConvexError(err, "Failed to delete contract. Please try again."));
+          } finally {
+            setDeletingId(null);
+            setDeleteTarget(null);
+          }
+        }}
+        title="Delete contract"
+        description="Delete this contract? This cannot be undone."
+      />
     </div>
   );
 }

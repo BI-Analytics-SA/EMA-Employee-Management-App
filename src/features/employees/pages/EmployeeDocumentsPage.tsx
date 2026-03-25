@@ -8,6 +8,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { ExpiryBadge } from "@/components/shared/ExpiryBadge";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
@@ -30,6 +31,7 @@ export function EmployeeDocumentsPage() {
   );
   const removeMutation = useMutation(api.documents.mutations.remove);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Id<"employeeDocuments"> | null>(null);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
     fileName: string;
@@ -37,12 +39,12 @@ export function EmployeeDocumentsPage() {
   } | null>(null);
 
   const handleDelete = async (docId: Id<"employeeDocuments">) => {
-    if (!window.confirm("Delete this document? This cannot be undone.")) return;
     setIsDeleting(docId);
     try {
       await removeMutation({ id: docId });
     } finally {
       setIsDeleting(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -161,7 +163,7 @@ export function EmployeeDocumentsPage() {
                       variant="ghost"
                       size="sm"
                       className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(doc._id)}
+                      onClick={() => setDeleteTarget(doc._id)}
                       disabled={isDeleting === doc._id}
                     >
                       {isDeleting === doc._id ? (
@@ -180,6 +182,14 @@ export function EmployeeDocumentsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={() => { if (deleteTarget) handleDelete(deleteTarget); }}
+        title="Delete document"
+        description="Delete this document? This cannot be undone."
+      />
 
       {viewingDoc && (
         <DocumentViewer
