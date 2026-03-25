@@ -13,6 +13,7 @@ import { Loader2, ArrowLeft, Plus, Trash2, Star, Maximize2, Minimize2 } from "lu
 import { Link } from "react-router-dom";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
 const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
@@ -47,6 +48,10 @@ export function ContractTemplatePage() {
   const [migrating, setMigrating] = useState(false);
   const [adding, setAdding] = useState(false);
   const [termsFullScreen, setTermsFullScreen] = useState(false);
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<string | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState(false);
+  const [showRemoveSignatureConfirm, setShowRemoveSignatureConfirm] = useState(false);
+  const [removingSignature, setRemovingSignature] = useState(false);
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
@@ -151,10 +156,14 @@ export function ContractTemplatePage() {
   const handleRemoveSignature = async () => {
     const orgId = organization?._id;
     if (!orgId || !selectedId) return;
+    setRemovingSignature(true);
     try {
       await deleteEmployerSignatureForTemplate({ organizationId: orgId, templateId: selectedId });
     } catch (err) {
       console.error(err);
+    } finally {
+      setRemovingSignature(false);
+      setShowRemoveSignatureConfirm(false);
     }
   };
 
@@ -175,11 +184,15 @@ export function ContractTemplatePage() {
     if (!orgId) return;
     const t = templates.find((x) => x.id === templateId);
     if (t?.isDefault) return;
+    setDeletingTemplate(true);
     try {
       await removeContractTemplate({ organizationId: orgId, templateId });
       if (selectedId === templateId) setSelectedId(templates[0]?.id ?? null);
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeletingTemplate(false);
+      setDeleteTemplateTarget(null);
     }
   };
 
@@ -278,7 +291,7 @@ export function ContractTemplatePage() {
                         variant="ghost"
                         size="sm"
                         className="h-7 text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteTemplate(t.id)}
+                        onClick={() => setDeleteTemplateTarget(t.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -399,7 +412,7 @@ export function ContractTemplatePage() {
                   label="Sign below"
                 />
                 {useNewApi && selected.employerSignatureUrl && (
-                  <Button variant="ghost" size="sm" className="text-destructive" onClick={handleRemoveSignature}>
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setShowRemoveSignatureConfirm(true)}>
                     Remove signature
                   </Button>
                 )}
@@ -463,6 +476,25 @@ export function ContractTemplatePage() {
       {templates.length === 0 && !hasLegacyOnly && (
         <p className="text-muted-foreground text-sm">No templates yet. Run migration or add a template.</p>
       )}
+
+      <ConfirmDialog
+        open={deleteTemplateTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTemplateTarget(null); }}
+        onConfirm={() => { if (deleteTemplateTarget) handleDeleteTemplate(deleteTemplateTarget); }}
+        title="Delete template"
+        description="Delete this contract template? This cannot be undone."
+        loading={deletingTemplate}
+      />
+
+      <ConfirmDialog
+        open={showRemoveSignatureConfirm}
+        onOpenChange={setShowRemoveSignatureConfirm}
+        onConfirm={handleRemoveSignature}
+        title="Remove signature"
+        description="Remove the employer signature? You can upload a new one."
+        confirmLabel="Remove"
+        loading={removingSignature}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { ImageCapture, compressImage } from "@/components/shared/ImageCapture";
 import { Loader2, ArrowLeft, Trash2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
@@ -24,6 +25,8 @@ export function CaptureImagePage() {
   const deleteEmployeeImage = useMutation(api.employees.actions.deleteEmployeeImage);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleCapture = async (file: File) => {
     if (!employeeId) return;
@@ -50,11 +53,15 @@ export function CaptureImagePage() {
 
   const handleDelete = async () => {
     if (!employeeId) return;
-    if (!window.confirm("Remove this photo? You can add a new one anytime.")) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteEmployeeImage({ employeeId });
+      setShowDeleteConfirm(false);
       navigate(`/employees/${employeeId}`);
+    } catch (err) {
+      console.error(err);
+      setDeleteError("Failed to remove photo. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -116,12 +123,13 @@ export function CaptureImagePage() {
               variant="outline"
               size="sm"
               className="text-destructive hover:text-destructive"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4 mr-1" />
               {isDeleting ? "Removing…" : "Delete photo"}
             </Button>
+            {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
           </div>
         </div>
       )}
@@ -143,6 +151,16 @@ export function CaptureImagePage() {
           />
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDelete}
+        title="Remove photo"
+        description="Remove this photo? You can add a new one anytime."
+        confirmLabel="Remove"
+        loading={isDeleting}
+      />
     </div>
   );
 }

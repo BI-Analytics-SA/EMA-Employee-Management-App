@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Pencil, Trash2, FileText, Plus, Eye } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -58,10 +59,12 @@ export function JobDetailPage() {
   const jobDocumentTypes = organization?.settings?.jobDocumentTypes ?? [];
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteJobConfirm, setShowDeleteJobConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [deleteDocError, setDeleteDocError] = useState<string | null>(null);
   const [isDeletingDoc, setIsDeletingDoc] = useState<Id<"jobDocuments"> | null>(null);
+  const [deleteDocTarget, setDeleteDocTarget] = useState<Id<"jobDocuments"> | null>(null);
   const [viewingDoc, setViewingDoc] = useState<{
     url: string;
     fileName: string;
@@ -139,7 +142,6 @@ export function JobDetailPage() {
   }
 
   const handleDeleteJob = async () => {
-    if (!window.confirm("Delete this job and all its documents? This cannot be undone.")) return;
     setIsDeleting(true);
     setDeleteError(null);
     try {
@@ -148,11 +150,12 @@ export function JobDetailPage() {
     } catch (err) {
       setDeleteError(extractConvexError(err, "Failed to delete job. Please try again."));
       setIsDeleting(false);
+    } finally {
+      setShowDeleteJobConfirm(false);
     }
   };
 
   const handleDeleteDoc = async (docId: Id<"jobDocuments">) => {
-    if (!window.confirm("Delete this document? This cannot be undone.")) return;
     setIsDeletingDoc(docId);
     setDeleteDocError(null);
     try {
@@ -161,6 +164,7 @@ export function JobDetailPage() {
       setDeleteDocError(extractConvexError(err, "Failed to delete document. Please try again."));
     } finally {
       setIsDeletingDoc(null);
+      setDeleteDocTarget(null);
     }
   };
 
@@ -210,7 +214,7 @@ export function JobDetailPage() {
           variant="ghost"
           size="sm"
           className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
-          onClick={() => handleDeleteDoc(doc._id)}
+          onClick={() => setDeleteDocTarget(doc._id)}
           disabled={isDeletingDoc === doc._id}
         >
           {isDeletingDoc === doc._id ? (
@@ -261,7 +265,7 @@ export function JobDetailPage() {
             size="sm"
             variant="outline"
             className="text-destructive hover:text-destructive"
-            onClick={handleDeleteJob}
+            onClick={() => setShowDeleteJobConfirm(true)}
             disabled={isDeleting}
           >
             {isDeleting ? (
@@ -417,6 +421,24 @@ export function JobDetailPage() {
           onClose={() => setViewingDoc(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={showDeleteJobConfirm}
+        onOpenChange={setShowDeleteJobConfirm}
+        onConfirm={handleDeleteJob}
+        title="Delete job"
+        description="Delete this job and all its documents? This cannot be undone."
+        loading={isDeleting}
+      />
+
+      <ConfirmDialog
+        open={deleteDocTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteDocTarget(null); }}
+        onConfirm={() => { if (deleteDocTarget) handleDeleteDoc(deleteDocTarget); }}
+        title="Delete document"
+        description="Delete this document? This cannot be undone."
+        loading={isDeletingDoc !== null}
+      />
     </div>
   );
 }

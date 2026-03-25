@@ -9,6 +9,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 type DataManagementField = "departments" | "deptGroups" | "shifts" | "shiftAllocations";
 
@@ -29,6 +30,7 @@ export function DataManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const items: string[] = organization?.settings?.[activeTab] ?? [];
@@ -84,7 +86,6 @@ export function DataManagementPage() {
 
   const handleRemove = async (value: string) => {
     if (!organizationId) return;
-    if (!window.confirm(`Remove "${value}"? This will not change employees already using this value.`)) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -95,6 +96,7 @@ export function DataManagementPage() {
       setError(extractConvexError(e, "Failed to remove."));
     } finally {
       setIsSubmitting(false);
+      setRemoveTarget(null);
     }
   };
 
@@ -203,7 +205,7 @@ export function DataManagementPage() {
                     size="sm"
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
-                    onClick={() => handleRemove(item)}
+                    onClick={() => setRemoveTarget(item)}
                     disabled={isSubmitting}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
@@ -215,6 +217,16 @@ export function DataManagementPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={removeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRemoveTarget(null); }}
+        onConfirm={() => { if (removeTarget) handleRemove(removeTarget); }}
+        title="Remove item"
+        description={`Remove "${removeTarget}"? This will not change employees already using this value.`}
+        confirmLabel="Remove"
+        loading={isSubmitting}
+      />
     </div>
   );
 }

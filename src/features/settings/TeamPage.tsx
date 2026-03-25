@@ -3,6 +3,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -97,6 +98,10 @@ export function TeamPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ profileId: Id<"userProfiles">; name: string } | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deactivateTarget, setDeactivateTarget] = useState<{ profileId: Id<"userProfiles">; name: string } | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [revokeTarget, setRevokeTarget] = useState<Id<"invites"> | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const clearMessages = () => {
     setError(null);
@@ -113,14 +118,17 @@ export function TeamPage() {
     }
   };
 
-  const handleDeactivate = async (profileId: Id<"userProfiles">, name: string) => {
-    if (!window.confirm(`Are you sure you want to deactivate ${name}? They will lose access.`)) return;
+  const handleDeactivate = async (profileId: Id<"userProfiles">) => {
+    setIsDeactivating(true);
     try {
       await deactivateUser({ profileId });
       setSuccess("User deactivated");
       setTimeout(clearMessages, 3000);
     } catch (err) {
       setError(extractConvexError(err, "Failed to deactivate user"));
+    } finally {
+      setIsDeactivating(false);
+      setDeactivateTarget(null);
     }
   };
 
@@ -207,10 +215,14 @@ export function TeamPage() {
   };
 
   const handleRevokeInvite = async (inviteId: Id<"invites">) => {
+    setIsRevoking(true);
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
       setError(extractConvexError(err, "Failed to revoke invite"));
+    } finally {
+      setIsRevoking(false);
+      setRevokeTarget(null);
     }
   };
 
@@ -413,7 +425,7 @@ export function TeamPage() {
                                 ))}
                               </select>
                               {member.isActive ? (
-                                <Button variant="outline" size="sm" onClick={() => handleDeactivate(member._id, member.name)} className="text-warning">
+                                <Button variant="outline" size="sm" onClick={() => setDeactivateTarget({ profileId: member._id, name: member.name })} className="text-warning">
                                   <UserX className="h-4 w-4 mr-1" />
                                   Deactivate
                                 </Button>
@@ -586,7 +598,7 @@ export function TeamPage() {
                               <Button variant="outline" size="sm" onClick={() => copyInviteCode(invite.code)} title="Copy code">
                                 {copiedCode === invite.code ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => handleRevokeInvite(invite._id)} className="text-destructive hover:text-destructive/80">
+                              <Button variant="outline" size="sm" onClick={() => setRevokeTarget(invite._id)} className="text-destructive hover:text-destructive/80">
                                 Revoke
                               </Button>
                             </>
@@ -601,6 +613,27 @@ export function TeamPage() {
           </Card>
         </>
       )}
+
+      <ConfirmDialog
+        open={deactivateTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeactivateTarget(null); }}
+        onConfirm={() => { if (deactivateTarget) handleDeactivate(deactivateTarget.profileId); }}
+        title="Deactivate user"
+        description={`Are you sure you want to deactivate ${deactivateTarget?.name ?? "this user"}? They will lose access.`}
+        confirmLabel="Deactivate"
+        loading={isDeactivating}
+      />
+
+      <ConfirmDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRevokeTarget(null); }}
+        onConfirm={() => { if (revokeTarget) handleRevokeInvite(revokeTarget); }}
+        title="Revoke invite"
+        description="Revoke this invite? The code will no longer work."
+        confirmLabel="Revoke"
+        variant="default"
+        loading={isRevoking}
+      />
     </div>
   );
 }

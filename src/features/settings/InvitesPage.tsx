@@ -3,6 +3,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,6 +73,8 @@ export function InvitesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [sendingEmailFor, setSendingEmailFor] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<Id<"invites"> | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const handleCreateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,10 +137,14 @@ export function InvitesPage() {
   };
 
   const handleRevokeInvite = async (inviteId: Id<"invites">) => {
+    setIsRevoking(true);
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
       setError(extractConvexError(err, "Failed to revoke invite"));
+    } finally {
+      setIsRevoking(false);
+      setRevokeTarget(null);
     }
   };
 
@@ -436,7 +443,7 @@ export function InvitesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleRevokeInvite(invite._id)}
+                            onClick={() => setRevokeTarget(invite._id)}
                             className="text-destructive hover:text-destructive/80"
                           >
                             Revoke
@@ -451,6 +458,17 @@ export function InvitesPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRevokeTarget(null); }}
+        onConfirm={() => { if (revokeTarget) handleRevokeInvite(revokeTarget); }}
+        title="Revoke invite"
+        description="Revoke this invite? The code will no longer work."
+        confirmLabel="Revoke"
+        variant="default"
+        loading={isRevoking}
+      />
     </div>
   );
 }
