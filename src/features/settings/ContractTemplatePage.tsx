@@ -13,6 +13,7 @@ import { Loader2, ArrowLeft, Plus, Trash2, Star, Maximize2, Minimize2 } from "lu
 import { Link } from "react-router-dom";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { cn } from "@/lib/utils";
+import { extractConvexError } from "@/lib/convex-error";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
@@ -44,6 +45,8 @@ export function ContractTemplatePage() {
   const [contractCategory, setContractCategory] = useState("");
   const [defaultTermsAndConditions, setDefaultTermsAndConditions] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [savingSignature, setSavingSignature] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -93,10 +96,12 @@ export function ContractTemplatePage() {
   const handleSave = async () => {
     const orgId = organization?._id;
     if (!orgId) return;
-    if (useNewApi) {
-      if (!selectedId) return;
-      setSaving(true);
-      try {
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+    try {
+      if (useNewApi) {
+        if (!selectedId) return;
         await updateContractTemplateById({
           organizationId: orgId,
           templateId: selectedId,
@@ -106,12 +111,7 @@ export function ContractTemplatePage() {
           contractCategory: contractCategory || undefined,
           defaultTermsAndConditions: defaultTermsAndConditions || undefined,
         });
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setSaving(true);
-      try {
+      } else {
         await updateContractTemplate({
           organizationId: orgId,
           contractTemplate: {
@@ -121,9 +121,13 @@ export function ContractTemplatePage() {
             defaultTermsAndConditions: defaultTermsAndConditions || undefined,
           },
         });
-      } finally {
-        setSaving(false);
       }
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e) {
+      setSaveError(extractConvexError(e, "Failed to save template."));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -431,6 +435,8 @@ export function ContractTemplatePage() {
                   "Save template"
                 )}
               </Button>
+              {saveError && <p className="text-sm text-destructive">{saveError}</p>}
+              {saveSuccess && <p className="text-sm text-green-600">Template saved.</p>}
             </div>
           </div>
         </section>
