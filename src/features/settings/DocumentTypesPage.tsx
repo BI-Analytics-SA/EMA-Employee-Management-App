@@ -258,9 +258,9 @@ export function DocumentTypesPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting}>
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Edit
+                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting} aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
                         <Button
                           size="sm"
@@ -268,9 +268,10 @@ export function DocumentTypesPage() {
                           className="text-destructive hover:text-destructive"
                           onClick={() => setRemoveTarget(row.id)}
                           disabled={isSubmitting}
+                          aria-label="Remove"
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
+                          <Trash2 className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-1">Remove</span>
                         </Button>
                       </div>
                     </>

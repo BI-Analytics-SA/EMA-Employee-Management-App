@@ -151,8 +151,9 @@ export function ContractListPage() {
                   {canManageContracts && (
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                      size="sm"
+                      className="text-destructive hover:text-destructive shrink-0"
+                      aria-label="Delete"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -165,6 +166,9 @@ export function ContractListPage() {
                       ) : (
                         <Trash2 className="h-4 w-4" />
                       )}
+                      <span className="hidden sm:inline ml-1">
+                        {deletingId === c._id ? "Deleting…" : "Delete"}
+                      </span>
                     </Button>
                   )}
                 </li>
