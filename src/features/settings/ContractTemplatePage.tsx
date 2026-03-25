@@ -272,14 +272,14 @@ export function ContractTemplatePage() {
             {templates.map((t) => (
               <div
                 key={t.id}
-                className={`flex w-full sm:w-auto sm:min-w-[280px] sm:flex-1 items-center gap-2 rounded-md border px-3 py-2 ${
+                className={`flex flex-wrap w-full sm:w-auto sm:min-w-[280px] sm:flex-1 items-center gap-2 rounded-md border px-3 py-2 ${
                   selectedId === t.id ? "border-primary bg-muted/50" : "border-border"
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setSelectedId(t.id)}
-                  className="font-medium text-left hover:underline"
+                  className="font-medium text-left hover:underline min-w-0 truncate"
                 >
                   {t.name}
                 </button>
@@ -295,6 +295,7 @@ export function ContractTemplatePage() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="h-7 text-xs"
                         onClick={() => handleSetDefault(t.id)}
                       >
                         Set default
@@ -304,11 +305,11 @@ export function ContractTemplatePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-destructive hover:text-destructive"
+                        className="h-7 text-xs text-destructive hover:text-destructive"
                         onClick={() => setDeleteTemplateTarget(t.id)}
                         aria-label="Delete"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                         <span className="hidden sm:inline ml-1">Delete</span>
                       </Button>
                     )}
@@ -428,9 +429,9 @@ export function ContractTemplatePage() {
                   label="Sign below"
                 />
                 {useNewApi && selected.employerSignatureUrl && (
-                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setShowRemoveSignatureConfirm(true)} aria-label="Remove signature">
+                  <Button variant="destructive-outline" size="sm" onClick={() => setShowRemoveSignatureConfirm(true)} aria-label="Remove signature">
                     <Trash2 className="h-4 w-4" />
-                    <span className="hidden sm:inline ml-1">Remove signature</span>
+                    Remove signature
                   </Button>
                 )}
               </div>

@@ -263,8 +263,7 @@ export function JobDetailPage() {
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            className="text-destructive hover:text-destructive"
+            variant="destructive-outline"
             onClick={() => setShowDeleteJobConfirm(true)}
             disabled={isDeleting}
           >
