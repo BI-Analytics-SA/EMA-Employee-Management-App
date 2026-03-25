@@ -265,12 +265,12 @@ export function DocumentTypesPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-destructive hover:text-destructive"
+                          className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
                           onClick={() => setRemoveTarget(row.id)}
                           disabled={isSubmitting}
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
+                          <Trash2 className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-1">Remove</span>
                         </Button>
                       </div>
                     </>

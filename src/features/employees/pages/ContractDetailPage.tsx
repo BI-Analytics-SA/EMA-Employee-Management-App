@@ -259,7 +259,7 @@ export function ContractDetailPage() {
               Cancel
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
               onClick={() => setShowDeleteContractConfirm(true)}
@@ -315,7 +315,7 @@ export function ContractDetailPage() {
                     Email Contract
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
                     onClick={() => setShowDeletePdfConfirm(true)}
@@ -427,20 +427,6 @@ export function ContractDetailPage() {
           signatureUrl={contract.signatureUrl}
           employerSignatureUrl={employerSignatureUrl}
         />
-      )}
-
-      {canManageContracts && (
-        <div className="pt-4 border-t">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive w-full"
-            onClick={() => setShowDeleteContractConfirm(true)}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete contract
-          </Button>
-        </div>
       )}
 
       <ConfirmDialog

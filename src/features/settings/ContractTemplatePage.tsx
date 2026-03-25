@@ -305,10 +305,11 @@ export function ContractTemplatePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-destructive hover:text-destructive"
+                        className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive"
                         onClick={() => setDeleteTemplateTarget(t.id)}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-1">Delete</span>
                       </Button>
                     )}
                   </>
@@ -427,8 +428,9 @@ export function ContractTemplatePage() {
                   label="Sign below"
                 />
                 {useNewApi && selected.employerSignatureUrl && (
-                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setShowRemoveSignatureConfirm(true)}>
-                    Remove signature
+                  <Button variant="ghost" size="sm" className="h-8 px-2 sm:px-3 text-destructive hover:text-destructive" onClick={() => setShowRemoveSignatureConfirm(true)}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="hidden sm:inline ml-1">Remove signature</span>
                   </Button>
                 )}
               </div>
