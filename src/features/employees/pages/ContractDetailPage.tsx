@@ -259,9 +259,8 @@ export function ContractDetailPage() {
               Cancel
             </Button>
             <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
+              variant="destructive-outline"
+              className="flex-1 min-w-[120px]"
               onClick={() => setShowDeleteContractConfirm(true)}
             >
               <Trash2 className="h-4 w-4 mr-1" />
@@ -315,9 +314,9 @@ export function ContractDetailPage() {
                     Email Contract
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="destructive-outline"
                     size="sm"
-                    className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
+                    className="flex-1 min-w-[100px]"
                     onClick={() => setShowDeletePdfConfirm(true)}
                     disabled={deletingPdf}
                   >

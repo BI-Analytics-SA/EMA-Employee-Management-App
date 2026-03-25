@@ -166,9 +166,8 @@ export function EmployeeDetailPage() {
               </Link>
             )}
             <Button
-              variant="outline"
+              variant="destructive-outline"
               size="sm"
-              className="text-destructive hover:text-destructive"
               onClick={() => setDeleteDialogOpen(true)}
             >
               <Trash2 className="h-4 w-4" />

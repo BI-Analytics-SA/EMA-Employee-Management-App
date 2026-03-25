@@ -441,10 +441,9 @@ export function InvitesPage() {
                             )}
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="destructive-outline"
                             size="sm"
                             onClick={() => setRevokeTarget(invite._id)}
-                            className="text-destructive hover:text-destructive/80"
                           >
                             Revoke
                           </Button>

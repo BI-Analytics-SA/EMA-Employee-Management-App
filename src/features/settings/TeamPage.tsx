@@ -435,7 +435,7 @@ export function TeamPage() {
                                   Reactivate
                                 </Button>
                               )}
-                              <Button variant="outline" size="sm" onClick={() => handleDeleteClick(member._id, member.name)} className="text-destructive hover:text-destructive/80">
+                              <Button variant="destructive-outline" size="sm" onClick={() => handleDeleteClick(member._id, member.name)}>
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
                               </Button>
@@ -598,7 +598,7 @@ export function TeamPage() {
                               <Button variant="outline" size="sm" onClick={() => copyInviteCode(invite.code)} title="Copy code">
                                 {copiedCode === invite.code ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => setRevokeTarget(invite._id)} className="text-destructive hover:text-destructive/80">
+                              <Button variant="destructive-outline" size="sm" onClick={() => setRevokeTarget(invite._id)}>
                                 Revoke
                               </Button>
                             </>
