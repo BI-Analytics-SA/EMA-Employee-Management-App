@@ -437,6 +437,7 @@ export function JobDetailPage() {
         onConfirm={() => { if (deleteDocTarget) handleDeleteDoc(deleteDocTarget); }}
         title="Delete document"
         description="Delete this document? This cannot be undone."
+        loading={isDeletingDoc !== null}
       />
     </div>
   );

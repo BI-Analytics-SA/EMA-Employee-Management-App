@@ -225,6 +225,7 @@ export function DataManagementPage() {
         title="Remove item"
         description={`Remove "${removeTarget}"? This will not change employees already using this value.`}
         confirmLabel="Remove"
+        loading={isSubmitting}
       />
     </div>
   );

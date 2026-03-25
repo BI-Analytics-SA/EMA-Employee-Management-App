@@ -189,6 +189,7 @@ export function EmployeeDocumentsPage() {
         onConfirm={() => { if (deleteTarget) handleDelete(deleteTarget); }}
         title="Delete document"
         description="Delete this document? This cannot be undone."
+        loading={isDeleting !== null}
       />
 
       {viewingDoc && (

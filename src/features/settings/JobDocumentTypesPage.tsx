@@ -293,6 +293,7 @@ export function JobDocumentTypesPage() {
         title="Remove job document type"
         description="Remove this job document type? Existing documents of this type will not be deleted."
         confirmLabel="Remove"
+        loading={isSubmitting}
       />
     </div>
   );

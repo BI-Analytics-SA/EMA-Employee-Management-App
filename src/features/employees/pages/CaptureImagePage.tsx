@@ -25,6 +25,7 @@ export function CaptureImagePage() {
   const deleteEmployeeImage = useMutation(api.employees.actions.deleteEmployeeImage);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleCapture = async (file: File) => {
@@ -53,12 +54,16 @@ export function CaptureImagePage() {
   const handleDelete = async () => {
     if (!employeeId) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteEmployeeImage({ employeeId });
+      setShowDeleteConfirm(false);
       navigate(`/employees/${employeeId}`);
+    } catch (err) {
+      console.error(err);
+      setDeleteError("Failed to remove photo. Please try again.");
     } finally {
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -124,6 +129,7 @@ export function CaptureImagePage() {
               <Trash2 className="h-4 w-4 mr-1" />
               {isDeleting ? "Removing…" : "Delete photo"}
             </Button>
+            {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
           </div>
         </div>
       )}

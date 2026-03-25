@@ -74,6 +74,7 @@ export function InvitesPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [sendingEmailFor, setSendingEmailFor] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<Id<"invites"> | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const handleCreateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,11 +137,13 @@ export function InvitesPage() {
   };
 
   const handleRevokeInvite = async (inviteId: Id<"invites">) => {
+    setIsRevoking(true);
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
       setError(extractConvexError(err, "Failed to revoke invite"));
     } finally {
+      setIsRevoking(false);
       setRevokeTarget(null);
     }
   };
@@ -464,6 +467,7 @@ export function InvitesPage() {
         description="Revoke this invite? The code will no longer work."
         confirmLabel="Revoke"
         variant="default"
+        loading={isRevoking}
       />
     </div>
   );

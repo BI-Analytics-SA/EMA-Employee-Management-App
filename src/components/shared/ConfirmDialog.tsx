@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,21 +31,31 @@ export function ConfirmDialog({
   variant = "destructive",
   loading = false,
 }: ConfirmDialogProps) {
+  const titleId = useId();
+
   if (!open) return null;
+
+  const handleConfirm = async () => {
+    try {
+      await onConfirm();
+    } catch (err) {
+      console.error("ConfirmDialog action failed:", err);
+    }
+  };
 
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
+      aria-labelledby={titleId}
       onKeyDown={(e) => {
         if (e.key === "Escape" && !loading) onOpenChange(false);
       }}
     >
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle id="confirm-dialog-title" className="flex items-center gap-2">
+          <CardTitle id={titleId} className="flex items-center gap-2">
             <AlertTriangle className={`h-5 w-5 ${variant === "destructive" ? "text-destructive" : "text-muted-foreground"}`} />
             {title}
           </CardTitle>
@@ -61,30 +72,26 @@ export function ConfirmDialog({
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">{description}</p>
           <div className="flex flex-wrap gap-2 justify-end">
-            <div className="w-full min-w-0 sm:w-auto">
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
-              >
-                {cancelLabel}
-              </Button>
-            </div>
-            <div className="w-full min-w-0 sm:w-auto">
-              <Button
-                variant={variant}
-                className="w-full sm:w-auto"
-                onClick={onConfirm}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  confirmLabel
-                )}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              className="w-full min-w-0 sm:w-auto"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              variant={variant}
+              className="w-full min-w-0 sm:w-auto"
+              onClick={handleConfirm}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                confirmLabel
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>

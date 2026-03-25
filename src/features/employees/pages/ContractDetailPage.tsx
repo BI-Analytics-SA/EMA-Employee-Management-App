@@ -47,6 +47,7 @@ export function ContractDetailPage() {
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [showDeleteContractConfirm, setShowDeleteContractConfirm] = useState(false);
+  const [deletingContract, setDeletingContract] = useState(false);
   const [showDeletePdfConfirm, setShowDeletePdfConfirm] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
@@ -110,6 +111,7 @@ export function ContractDetailPage() {
     setDeletingPdf(true);
     try {
       await deleteContractPdf({ contractId: contractIdTyped });
+      setShowDeletePdfConfirm(false);
     } catch (err) {
       console.error(err);
     } finally {
@@ -149,11 +151,14 @@ export function ContractDetailPage() {
 
   const handleDeleteContract = async () => {
     if (!contractIdTyped || !employeeId) return;
+    setDeletingContract(true);
     try {
       await removeContract({ id: contractIdTyped });
       navigate(`/employees/${employeeId}/contracts`);
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeletingContract(false);
     }
   };
 
@@ -444,15 +449,13 @@ export function ContractDetailPage() {
         onConfirm={handleDeleteContract}
         title="Delete contract"
         description="Delete this contract and its signature/PDF files? This cannot be undone."
+        loading={deletingContract}
       />
 
       <ConfirmDialog
         open={showDeletePdfConfirm}
         onOpenChange={setShowDeletePdfConfirm}
-        onConfirm={async () => {
-          await handleDeletePdf();
-          setShowDeletePdfConfirm(false);
-        }}
+        onConfirm={handleDeletePdf}
         title="Delete PDF"
         description="Delete the generated PDF? You can regenerate it later."
         loading={deletingPdf}

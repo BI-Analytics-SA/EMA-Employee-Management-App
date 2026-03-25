@@ -49,7 +49,9 @@ export function ContractTemplatePage() {
   const [adding, setAdding] = useState(false);
   const [termsFullScreen, setTermsFullScreen] = useState(false);
   const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<string | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState(false);
   const [showRemoveSignatureConfirm, setShowRemoveSignatureConfirm] = useState(false);
+  const [removingSignature, setRemovingSignature] = useState(false);
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
@@ -154,11 +156,13 @@ export function ContractTemplatePage() {
   const handleRemoveSignature = async () => {
     const orgId = organization?._id;
     if (!orgId || !selectedId) return;
+    setRemovingSignature(true);
     try {
       await deleteEmployerSignatureForTemplate({ organizationId: orgId, templateId: selectedId });
     } catch (err) {
       console.error(err);
     } finally {
+      setRemovingSignature(false);
       setShowRemoveSignatureConfirm(false);
     }
   };
@@ -180,12 +184,14 @@ export function ContractTemplatePage() {
     if (!orgId) return;
     const t = templates.find((x) => x.id === templateId);
     if (t?.isDefault) return;
+    setDeletingTemplate(true);
     try {
       await removeContractTemplate({ organizationId: orgId, templateId });
       if (selectedId === templateId) setSelectedId(templates[0]?.id ?? null);
     } catch (err) {
       console.error(err);
     } finally {
+      setDeletingTemplate(false);
       setDeleteTemplateTarget(null);
     }
   };
@@ -477,6 +483,7 @@ export function ContractTemplatePage() {
         onConfirm={() => { if (deleteTemplateTarget) handleDeleteTemplate(deleteTemplateTarget); }}
         title="Delete template"
         description="Delete this contract template? This cannot be undone."
+        loading={deletingTemplate}
       />
 
       <ConfirmDialog
@@ -486,6 +493,7 @@ export function ContractTemplatePage() {
         title="Remove signature"
         description="Remove the employer signature? You can upload a new one."
         confirmLabel="Remove"
+        loading={removingSignature}
       />
     </div>
   );

@@ -99,7 +99,9 @@ export function TeamPage() {
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState<{ profileId: Id<"userProfiles">; name: string } | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<Id<"invites"> | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const clearMessages = () => {
     setError(null);
@@ -117,6 +119,7 @@ export function TeamPage() {
   };
 
   const handleDeactivate = async (profileId: Id<"userProfiles">) => {
+    setIsDeactivating(true);
     try {
       await deactivateUser({ profileId });
       setSuccess("User deactivated");
@@ -124,6 +127,7 @@ export function TeamPage() {
     } catch (err) {
       setError(extractConvexError(err, "Failed to deactivate user"));
     } finally {
+      setIsDeactivating(false);
       setDeactivateTarget(null);
     }
   };
@@ -211,11 +215,13 @@ export function TeamPage() {
   };
 
   const handleRevokeInvite = async (inviteId: Id<"invites">) => {
+    setIsRevoking(true);
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
       setError(extractConvexError(err, "Failed to revoke invite"));
     } finally {
+      setIsRevoking(false);
       setRevokeTarget(null);
     }
   };
@@ -615,6 +621,7 @@ export function TeamPage() {
         title="Deactivate user"
         description={`Are you sure you want to deactivate ${deactivateTarget?.name ?? "this user"}? They will lose access.`}
         confirmLabel="Deactivate"
+        loading={isDeactivating}
       />
 
       <ConfirmDialog
@@ -625,6 +632,7 @@ export function TeamPage() {
         description="Revoke this invite? The code will no longer work."
         confirmLabel="Revoke"
         variant="default"
+        loading={isRevoking}
       />
     </div>
   );

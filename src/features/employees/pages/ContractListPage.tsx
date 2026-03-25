@@ -192,6 +192,7 @@ export function ContractListPage() {
         }}
         title="Delete contract"
         description="Delete this contract? This cannot be undone."
+        loading={deletingId !== null}
       />
     </div>
   );

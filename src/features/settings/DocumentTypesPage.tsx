@@ -289,6 +289,7 @@ export function DocumentTypesPage() {
         title="Remove document type"
         description="Remove this document type? Existing documents of this type will not be deleted."
         confirmLabel="Remove"
+        loading={isSubmitting}
       />
     </div>
   );
