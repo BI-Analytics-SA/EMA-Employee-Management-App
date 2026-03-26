@@ -61,11 +61,24 @@ export function ContractDetailPage() {
     (contract?.companyName !== undefined && contract.companyName !== "")
       ? contract.companyName
       : (defaultTemplate?.companyName ?? organization?.settings?.contractTemplate?.companyName ?? "");
-  const employerSignatureUrl =
+  // Resolve a fresh URL from the first available storageId to avoid stale/invalid stored URLs
+  const employerSignatureStorageId =
+    contract?.employerSignatureStorageId ??
+    defaultTemplate?.employerSignatureStorageId ??
+    (organization?.settings?.contractTemplate as Record<string, unknown> | undefined)?.employerSignatureStorageId as string | undefined;
+  const freshEmployerSigUrl = useQuery(
+    api.lib.storage.getStorageUrl,
+    employerSignatureStorageId
+      ? { storageId: employerSignatureStorageId as Id<"_storage"> }
+      : "skip"
+  );
+  const storedEmployerSigUrl =
     contract?.employerSignatureUrl ??
     defaultTemplate?.employerSignatureUrl ??
     organization?.settings?.contractTemplate?.employerSignatureUrl ??
     undefined;
+  const employerSignatureUrl = freshEmployerSigUrl
+    ?? (storedEmployerSigUrl?.startsWith("http") ? storedEmployerSigUrl : undefined);
 
   const handleSubmit = async (
     values: ContractFormValues,
