@@ -206,6 +206,7 @@ export function DocumentTypesPage() {
                 <Button
                   size="sm"
                   variant="ghost"
+                  disabled={isSubmitting}
                   onClick={() => {
                     setIsAdding(false);
                     setNewId("");
@@ -248,7 +249,7 @@ export function DocumentTypesPage() {
                       <Button size="sm" onClick={handleUpdate} disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                      <Button size="sm" variant="ghost" disabled={isSubmitting} onClick={() => setEditingId(null)}>
                         Cancel
                       </Button>
                     </div>
