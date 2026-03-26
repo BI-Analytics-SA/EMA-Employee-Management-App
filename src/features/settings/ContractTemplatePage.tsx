@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { getEffectiveTemplates } from "@/lib/contractTemplates";
 import { RichTextEditor } from "@/components/shared/RichTextEditor";
 import { SignatureCapture } from "@/components/shared/SignatureCapture";
@@ -59,6 +60,14 @@ export function ContractTemplatePage() {
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
+
+  // Resolve a fresh URL from the storageId so we don't rely on a potentially stale stored URL
+  const freshSignatureUrl = useQuery(
+    api.lib.storage.getStorageUrl,
+    selected?.employerSignatureStorageId
+      ? { storageId: selected.employerSignatureStorageId as Id<"_storage"> }
+      : "skip"
+  );
 
   useEffect(() => {
     return () => {
@@ -424,11 +433,11 @@ export function ContractTemplatePage() {
               ) : (
                 <div className="space-y-2">
                 <SignatureCapture
-                  existingSignatureUrl={selected.employerSignatureUrl ?? undefined}
+                  existingSignatureUrl={freshSignatureUrl ?? selected.employerSignatureUrl ?? undefined}
                   onSave={handleEmployerSignatureSave}
                   label="Sign below"
                 />
-                {useNewApi && selected.employerSignatureUrl && (
+                {useNewApi && (freshSignatureUrl || selected.employerSignatureUrl) && (
                   <Button variant="destructive-outline" size="sm" onClick={() => setShowRemoveSignatureConfirm(true)} aria-label="Remove signature">
                     <Trash2 className="h-4 w-4" />
                     Remove signature
