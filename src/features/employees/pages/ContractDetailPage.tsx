@@ -65,7 +65,7 @@ export function ContractDetailPage() {
   const employerSignatureStorageId =
     contract?.employerSignatureStorageId ??
     defaultTemplate?.employerSignatureStorageId ??
-    (organization?.settings?.contractTemplate as Record<string, unknown> | undefined)?.employerSignatureStorageId as string | undefined;
+    organization?.settings?.contractTemplate?.employerSignatureStorageId;
   const freshEmployerSigUrl = useQuery(
     api.lib.storage.getStorageUrl,
     employerSignatureStorageId
