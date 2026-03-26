@@ -61,13 +61,19 @@ export function ContractTemplatePage() {
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
 
-  // Resolve a fresh URL from the storageId so we don't rely on a potentially stale stored URL
+  // Resolve a fresh URL from the storageId so we don't rely on a potentially stale stored URL.
   const freshSignatureUrl = useQuery(
     api.lib.storage.getStorageUrl,
     selected?.employerSignatureStorageId
       ? { storageId: selected.employerSignatureStorageId as Id<"_storage"> }
       : "skip"
   );
+
+  // Use fresh URL when available; fall back to stored URL only if it's a valid URL.
+  // The Default template's stored value is a raw storageId, not a URL — skip it to avoid a broken image race.
+  const storedUrl = selected?.employerSignatureUrl;
+  const effectiveSignatureUrl = freshSignatureUrl
+    ?? (storedUrl?.startsWith("http") ? storedUrl : undefined);
 
   useEffect(() => {
     return () => {
@@ -433,11 +439,11 @@ export function ContractTemplatePage() {
               ) : (
                 <div className="space-y-2">
                 <SignatureCapture
-                  existingSignatureUrl={freshSignatureUrl ?? selected.employerSignatureUrl ?? undefined}
+                  existingSignatureUrl={effectiveSignatureUrl}
                   onSave={handleEmployerSignatureSave}
                   label="Sign below"
                 />
-                {useNewApi && (freshSignatureUrl || selected.employerSignatureUrl) && (
+                {useNewApi && effectiveSignatureUrl && (
                   <Button variant="destructive-outline" size="sm" onClick={() => setShowRemoveSignatureConfirm(true)} aria-label="Remove signature">
                     <Trash2 className="h-4 w-4" />
                     Remove signature
