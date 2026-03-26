@@ -255,7 +255,6 @@ export function ExportConfigPage() {
   const { organization, isAdmin, isLoading: userLoading } = useCurrentUser();
   const exportingEnabled = useModuleEnabled("exporting");
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
-  const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
 
   const newlyAddedIdRef = useRef<string | null>(null);
 
@@ -264,9 +263,6 @@ export function ExportConfigPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
-  const [backfillError, setBackfillError] = useState<string | null>(null);
 
   const savedColumns = organization?.settings?.exportConfig?.columns as
     | ExportColumn[]
@@ -353,22 +349,6 @@ export function ExportConfigPage() {
     }
   };
 
-  const handleBackfillBankDefaults = async () => {
-    const orgId = organization?._id;
-    if (!orgId) return;
-    setBackfilling(true);
-    setBackfillResult(null);
-    setBackfillError(null);
-    try {
-      const result = await backfillBankDefaults({ organizationId: orgId });
-      setBackfillResult(result);
-    } catch (e) {
-      setBackfillResult(null);
-      setBackfillError(extractConvexError(e, "Failed to run backfill."));
-    } finally {
-      setBackfilling(false);
-    }
-  };
 
   if (userLoading || organization === undefined) {
     return (
@@ -466,39 +446,6 @@ export function ExportConfigPage() {
         </Button>
       </div>
 
-      <div className="rounded-lg border bg-card p-4 space-y-2">
-        <h2 className="text-sm font-semibold">Bank details defaults</h2>
-        <p className="text-sm text-muted-foreground">
-          Set Pay Method to Electronic Payment, Account Type to Savings, and Relationship to Own for all employees
-          who currently have these fields empty. Existing values are left unchanged.
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleBackfillBankDefaults}
-          disabled={backfilling || !organization?._id}
-        >
-          {backfilling ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Updating…
-            </>
-          ) : (
-            "Set default bank fields for all employees"
-          )}
-        </Button>
-        {backfillError && (
-          <p className="text-sm text-destructive">
-            {backfillError}
-          </p>
-        )}
-        {backfillResult !== null && !backfillError && (
-          <p className="text-sm text-muted-foreground">
-            Updated {backfillResult.updated} of {backfillResult.total} employees.
-          </p>
-        )}
-      </div>
     </div>
   );
 }
