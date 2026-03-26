@@ -287,57 +287,48 @@ export const update = mutation({
   },
 });
 
-const BACKFILL_BATCH_SIZE = 100;
-
 async function runRecalcDerivedFieldsForOrg(
   ctx: MutationCtx,
   organizationId: Id<"organizations">
 ): Promise<{ updated: number; total: number }> {
   const now = Date.now();
-  let total = 0;
   let updated = 0;
-  let cursor: string | null = null;
 
-  while (true) {
-    const result = await ctx.db
-      .query("employees")
-      .withIndex("by_organization_createdAt", (q) =>
-        q.eq("organizationId", organizationId)
-      )
-      .order("desc")
-      .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+  const allEmployees = await ctx.db
+    .query("employees")
+    .withIndex("by_organization_createdAt", (q) =>
+      q.eq("organizationId", organizationId)
+    )
+    .order("desc")
+    .collect();
 
-    for (const emp of result.page) {
-      const derived = computeDerivedFields({
-        dateEngaged: emp.dateEngaged,
-        resStreetNo: emp.resStreetNo,
-        resStreetName: emp.resStreetName,
-        resCity: emp.resCity,
-        resPostCode: emp.resPostCode,
-        firstName: emp.firstName,
-        lastName: emp.lastName,
+  for (const emp of allEmployees) {
+    const derived = computeDerivedFields({
+      dateEngaged: emp.dateEngaged,
+      resStreetNo: emp.resStreetNo,
+      resStreetName: emp.resStreetName,
+      resCity: emp.resCity,
+      resPostCode: emp.resPostCode,
+      firstName: emp.firstName,
+      lastName: emp.lastName,
+    });
+    const changed =
+      emp.taxYearStart !== derived.taxYearStart ||
+      emp.newUifStartDate !== derived.newUifStartDate ||
+      emp.repAddr1 !== derived.repAddr1 ||
+      emp.repAddr2 !== derived.repAddr2 ||
+      emp.repAddr3 !== derived.repAddr3 ||
+      emp.repPostCode !== derived.repPostCode ||
+      emp.fullNames !== derived.fullNames;
+    if (changed) {
+      await ctx.db.patch(emp._id, {
+        ...derived,
+        updatedAt: now,
       });
-      const changed =
-        emp.taxYearStart !== derived.taxYearStart ||
-        emp.newUifStartDate !== derived.newUifStartDate ||
-        emp.repAddr1 !== derived.repAddr1 ||
-        emp.repAddr2 !== derived.repAddr2 ||
-        emp.repAddr3 !== derived.repAddr3 ||
-        emp.repPostCode !== derived.repPostCode ||
-        emp.fullNames !== derived.fullNames;
-      if (changed) {
-        await ctx.db.patch(emp._id, {
-          ...derived,
-          updatedAt: now,
-        });
-        updated++;
-      }
+      updated++;
     }
-    total += result.page.length;
-    if (result.isDone) break;
-    cursor = result.continueCursor;
   }
-  return { updated, total };
+  return { updated, total: allEmployees.length };
 }
 
 /**
@@ -379,7 +370,7 @@ export const backfillDerivedFields = recalcDerivedFields;
  * Backfill bank detail defaults for existing employees in an organization.
  * Sets payMethod="03", bankAccType="S", accRelationship="O" only where currently null/undefined.
  * Run once per organization after deploying bank details; leaves existing values unchanged.
- * Uses paginated reads and batched patches to avoid OOM/timeout for large orgs.
+ * Loads all org employees in one query (same pattern as listAll); Convex allows only one paginate per mutation.
  */
 export const backfillBankDefaults = mutation({
   args: { organizationId: v.id("organizations") },
@@ -393,34 +384,27 @@ export const backfillBankDefaults = mutation({
       throw new Error("Access denied: You cannot run this action");
     }
     const now = Date.now();
-    let total = 0;
     let updated = 0;
-    let cursor: string | null = null;
 
-    while (true) {
-      const result = await ctx.db
-        .query("employees")
-        .withIndex("by_organization_createdAt", (q) =>
-          q.eq("organizationId", args.organizationId)
-        )
-        .order("desc")
-        .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+    const allEmployees = await ctx.db
+      .query("employees")
+      .withIndex("by_organization_createdAt", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .order("desc")
+      .collect();
 
-      for (const emp of result.page) {
-        const patch: Record<string, unknown> = { updatedAt: now };
-        if (emp.payMethod === undefined) patch.payMethod = "03";
-        if (emp.bankAccType === undefined) patch.bankAccType = "S";
-        if (emp.accRelationship === undefined) patch.accRelationship = "O";
-        if (Object.keys(patch).length > 1) {
-          await ctx.db.patch(emp._id, patch as Record<string, never>);
-          updated++;
-        }
+    for (const emp of allEmployees) {
+      const patch: Record<string, unknown> = { updatedAt: now };
+      if (emp.payMethod === undefined) patch.payMethod = "03";
+      if (emp.bankAccType === undefined) patch.bankAccType = "S";
+      if (emp.accRelationship === undefined) patch.accRelationship = "O";
+      if (Object.keys(patch).length > 1) {
+        await ctx.db.patch(emp._id, patch as Record<string, never>);
+        updated++;
       }
-      total += result.page.length;
-      if (result.isDone) break;
-      cursor = result.continueCursor;
     }
-    return { updated, total };
+    return { updated, total: allEmployees.length };
   },
 });
 
@@ -461,51 +445,44 @@ export const bulkClearColumns = mutation({
       throw new Error(`Invalid or protected columns: ${invalid.join(", ")}`);
     }
     const now = Date.now();
-    let total = 0;
     let updated = 0;
-    let cursor: string | null = null;
 
-    while (true) {
-      const result = await ctx.db
-        .query("employees")
-        .withIndex("by_organization_createdAt", (q) =>
-          q.eq("organizationId", args.organizationId)
-        )
-        .order("desc")
-        .paginate({ numItems: BACKFILL_BATCH_SIZE, cursor });
+    const allEmployees = await ctx.db
+      .query("employees")
+      .withIndex("by_organization_createdAt", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .order("desc")
+      .collect();
 
-      for (const emp of result.page) {
-        const patch: Record<string, unknown> = {};
-        for (const col of args.columns) {
-          patch[col] = undefined;
-        }
-        const merged = { ...emp, ...patch } as typeof emp & Record<string, unknown>;
-        const derived = computeDerivedFields({
-          dateEngaged: merged.dateEngaged,
-          resStreetNo: merged.resStreetNo,
-          resStreetName: merged.resStreetName,
-          resCity: merged.resCity,
-          resPostCode: merged.resPostCode,
-          firstName: merged.firstName,
-          lastName: merged.lastName,
-        });
-        Object.assign(patch, derived);
-
-        const empRecord = emp as Record<string, unknown>;
-        const hasChanges = Object.keys(patch).some(
-          (key) => empRecord[key] !== patch[key]
-        );
-        if (hasChanges) {
-          patch.updatedAt = now;
-          await ctx.db.patch(emp._id, patch as Record<string, never>);
-          updated++;
-        }
+    for (const emp of allEmployees) {
+      const patch: Record<string, unknown> = {};
+      for (const col of args.columns) {
+        patch[col] = undefined;
       }
-      total += result.page.length;
-      if (result.isDone) break;
-      cursor = result.continueCursor;
+      const merged = { ...emp, ...patch } as typeof emp & Record<string, unknown>;
+      const derived = computeDerivedFields({
+        dateEngaged: merged.dateEngaged,
+        resStreetNo: merged.resStreetNo,
+        resStreetName: merged.resStreetName,
+        resCity: merged.resCity,
+        resPostCode: merged.resPostCode,
+        firstName: merged.firstName,
+        lastName: merged.lastName,
+      });
+      Object.assign(patch, derived);
+
+      const empRecord = emp as Record<string, unknown>;
+      const hasChanges = Object.keys(patch).some(
+        (key) => empRecord[key] !== patch[key]
+      );
+      if (hasChanges) {
+        patch.updatedAt = now;
+        await ctx.db.patch(emp._id, patch as Record<string, never>);
+        updated++;
+      }
     }
-    return { updated, total };
+    return { updated, total: allEmployees.length };
   },
 });
 
