@@ -170,26 +170,28 @@ export function DocumentTypesPage() {
         </div>
         <div className="p-4 space-y-3">
           {isAdding && (
-            <div className="flex flex-wrap gap-3 items-end p-3 rounded-lg border bg-muted/30">
-              <div className="space-y-1 w-full min-w-0 sm:w-auto">
-                <Label>ID (e.g. id_book)</Label>
-                <Input
-                  value={newId}
-                  onChange={(e) => setNewId(e.target.value)}
-                  placeholder="id_book"
-                  className="h-9 w-full sm:w-40"
-                />
+            <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>ID (e.g. id_book)</Label>
+                  <Input
+                    value={newId}
+                    onChange={(e) => setNewId(e.target.value)}
+                    placeholder="id_book"
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Name</Label>
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="ID Book"
+                    className="h-9"
+                  />
+                </div>
               </div>
-              <div className="space-y-1 w-full min-w-0 sm:w-auto">
-                <Label>Name</Label>
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="ID Book"
-                  className="h-9 w-full sm:w-40"
-                />
-              </div>
-              <label className="flex w-full min-w-0 sm:w-auto items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={newRequiresExpiry}
@@ -197,21 +199,23 @@ export function DocumentTypesPage() {
                 />
                 <span className="text-sm">Requires expiry date</span>
               </label>
-              <Button size="sm" onClick={handleAdd} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewId("");
-                  setNewName("");
-                  setNewRequiresExpiry(false);
-                }}
-              >
-                Cancel
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleAdd} disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewId("");
+                    setNewName("");
+                    setNewRequiresExpiry(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
 

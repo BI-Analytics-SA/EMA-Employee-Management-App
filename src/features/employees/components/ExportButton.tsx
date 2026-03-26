@@ -98,7 +98,7 @@ export function ExportButton({ className }: ExportButtonProps) {
       <Button
         type="button"
         variant="outline"
-        size="sm"
+        size="default"
         onClick={handleExport}
         disabled={!canExport || exporting}
         className={cn(className)}
