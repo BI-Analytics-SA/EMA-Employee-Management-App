@@ -366,48 +366,6 @@ export const recalcDerivedFieldsInternal = internalMutation({
  */
 export const backfillDerivedFields = recalcDerivedFields;
 
-/**
- * Backfill bank detail defaults for existing employees in an organization.
- * Sets payMethod="03", bankAccType="S", accRelationship="O" only where currently null/undefined.
- * Run once per organization after deploying bank details; leaves existing values unchanged.
- * Loads all org employees in one query (same pattern as listAll); Convex allows only one paginate per mutation.
- */
-export const backfillBankDefaults = mutation({
-  args: { organizationId: v.id("organizations") },
-  handler: async (ctx, args) => {
-    const profile = await requireRoleInOrganization(
-      ctx,
-      args.organizationId,
-      "user"
-    );
-    if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot run this action");
-    }
-    const now = Date.now();
-    let updated = 0;
-
-    const allEmployees = await ctx.db
-      .query("employees")
-      .withIndex("by_organization_createdAt", (q) =>
-        q.eq("organizationId", args.organizationId)
-      )
-      .order("desc")
-      .collect();
-
-    for (const emp of allEmployees) {
-      const patch: Record<string, unknown> = { updatedAt: now };
-      if (emp.payMethod === undefined) patch.payMethod = "03";
-      if (emp.bankAccType === undefined) patch.bankAccType = "S";
-      if (emp.accRelationship === undefined) patch.accRelationship = "O";
-      if (Object.keys(patch).length > 1) {
-        await ctx.db.patch(emp._id, patch as Record<string, never>);
-        updated++;
-      }
-    }
-    return { updated, total: allEmployees.length };
-  },
-});
-
 /** Allowlist of column IDs that can be bulk-cleared. Must match frontend clearableColumns. */
 const CLEARABLE_COLUMNS = [
   "employeeNo", "title", "initials", "firstName", "secondName", "lastName",
