@@ -22,16 +22,27 @@ const DATE_FIELDS = [
   "uifEndDate",
 ] as const;
 
+/** Format a UTC Date as YYYY-MM-DD using UTC getters (avoids timezone day-shift) */
+function formatUTCDate(d: Date): string {
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 /** Excel serial date to YYYY-MM-DD string */
 function excelDateToString(val: unknown): string | undefined {
   if (val === undefined || val === null || val === "") return undefined;
   if (typeof val === "string") {
-    const t = new Date(val).getTime();
-    return isNaN(t) ? undefined : new Date(t).toISOString().slice(0, 10);
+    const isoMatch = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) return val;
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return undefined;
+    return formatUTCDate(d);
   }
   if (typeof val === "number" && !Number.isNaN(val)) {
     const date = XLSXSerialToDate(val);
-    return date ? date.toISOString().slice(0, 10) : undefined;
+    return date ? formatUTCDate(date) : undefined;
   }
   return undefined;
 }

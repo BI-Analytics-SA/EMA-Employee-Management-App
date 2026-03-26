@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseLocalDate, formatDateInput } from "@/lib/dateUtils";
 
 /** South African ID number: 13 digits */
 const idNumberSchema = z
@@ -28,8 +29,7 @@ const optionalDateTimestamp = z
   .optional()
   .transform((s) => {
     if (!s) return undefined;
-    const t = new Date(s).getTime();
-    return isNaN(t) ? undefined : t;
+    return parseLocalDate(s);
   });
 
 export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS", "DR", "PROF", "REV"]);
@@ -124,13 +124,11 @@ export type EmployeeFormInput = z.input<typeof employeeFormSchema>;
 
 /** Parse a date string (YYYY-MM-DD) to timestamp for storage */
 export function dateStringToTimestamp(value: string): number {
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? 0 : d.getTime();
+  return parseLocalDate(value) ?? 0;
 }
 
 /** Format a stored timestamp to YYYY-MM-DD for input[type="date"] */
 export function timestampToDateString(ts: number | undefined): string {
   if (ts == null || ts === 0) return "";
-  const d = new Date(ts);
-  return d.toISOString().slice(0, 10);
+  return formatDateInput(ts);
 }
