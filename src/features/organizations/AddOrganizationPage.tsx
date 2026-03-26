@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, AlertCircle, Building2, CheckCircle2, UserPlus } from "lucide-react";
 import { useOrganizationContext } from "@/contexts/OrganizationContext";
+import { extractConvexError } from "@/lib/convex-error";
 
 /**
  * Generate a URL-safe slug from text
@@ -105,7 +106,7 @@ export function AddOrganizationPage() {
       setActiveOrganization(organizationId);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create organization. Please try again.");
+      setError(extractConvexError(err, "Failed to create organization. Please try again."));
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +140,7 @@ export function AddOrganizationPage() {
       setActiveOrganization(organizationId);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join organization. Please try again.");
+      setError(extractConvexError(err, "Failed to join organization. Please try again."));
     } finally {
       setIsLoading(false);
     }

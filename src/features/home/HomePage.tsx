@@ -28,6 +28,7 @@ export function HomePage() {
   const documentsEnabled = useModuleEnabled("documents");
   const contractsEnabled = useModuleEnabled("contracts");
   const exportingEnabled = useModuleEnabled("exporting");
+  const jobsEnabled = useModuleEnabled("jobs");
 
   const stats = useQuery(
     api.dashboard.queries.getDashboardStats,
@@ -105,14 +106,14 @@ export function HomePage() {
           />
         )}
 
-        {/* Expiring Documents -- only when documents module enabled */}
-        {documentsEnabled && (
+        {/* Expiring Items -- when any expiry-capable module is enabled */}
+        {(documentsEnabled || jobsEnabled) && (
           <StatCard
             icon={<AlertTriangle className="h-5 w-5 text-warning" />}
             value={
-              isStatsLoading ? null : (stats.expiringDocumentsCount ?? 0)
+              isStatsLoading ? null : (stats.expiringDocumentsCount ?? 0) + (stats.expiringJobDocumentsCount ?? 0)
             }
-            label="Expiring Documents"
+            label="Expiring Items"
             subtitle="Next 90 days"
           />
         )}
@@ -150,12 +151,12 @@ export function HomePage() {
               </Button>
             </div>
           )}
-          {documentsEnabled && (
+          {(documentsEnabled || jobsEnabled) && (
             <div className="w-full min-w-0 sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <Link to="/documents/expiring">
+                <Link to="/expiring-items">
                   <AlertTriangle className="h-4 w-4" />
-                  Expiring Documents
+                  Expiring Items
                 </Link>
               </Button>
             </div>

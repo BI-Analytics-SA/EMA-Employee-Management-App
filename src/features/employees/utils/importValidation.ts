@@ -47,9 +47,25 @@ function XLSXSerialToDate(serial: number): Date | null {
   return date;
 }
 
-/** Prepare a raw row for Zod: coerce date-like values to strings, ensure strings where needed */
+/** Fields whose values are validated against uppercase enums */
+const UPPERCASE_ENUM_FIELDS = [
+  "title",
+  "gender",
+  "ethnicGroup",
+  "maritalStatus",
+  "bankAccType",
+  "accRelationship",
+] as const;
+
+/** Prepare a raw row for Zod: coerce date-like values to strings, normalise enum casing */
 function prepareRow(raw: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...raw };
+  // Ensure idNumber is always a string so Zod's custom messages apply
+  if (out.idNumber === undefined || out.idNumber === null) {
+    out.idNumber = "";
+  } else if (typeof out.idNumber === "number") {
+    out.idNumber = String(out.idNumber);
+  }
   for (const field of DATE_FIELDS) {
     const v = out[field];
     if (v !== undefined && v !== null && v !== "") {
@@ -60,6 +76,12 @@ function prepareRow(raw: Record<string, unknown>): Record<string, unknown> {
   if (typeof out.dateOfBirth === "number") {
     const str = excelDateToString(out.dateOfBirth);
     if (str) out.dateOfBirth = str;
+  }
+  for (const field of UPPERCASE_ENUM_FIELDS) {
+    const v = out[field];
+    if (typeof v === "string" && v !== "") {
+      out[field] = v.toUpperCase();
+    }
   }
   return out;
 }

@@ -27,11 +27,22 @@ export default defineSchema({
             })
           )
         ),
+        jobDocumentTypes: v.optional(
+          v.array(
+            v.object({
+              id: v.string(),
+              name: v.string(),
+              requiresExpiry: v.boolean(),
+              color: v.optional(v.string()),
+            })
+          )
+        ),
         enabledModules: v.optional(
           v.object({
             contracts: v.optional(v.boolean()),
             documents: v.optional(v.boolean()),
             exporting: v.optional(v.boolean()),
+            jobs: v.optional(v.boolean()),
           })
         ),
         contractTemplate: v.optional(
@@ -172,6 +183,7 @@ export default defineSchema({
     // Contact
     cellNumber: v.optional(v.string()),
     alternativeNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
 
     // Address
     resUnit: v.optional(v.string()),
@@ -282,12 +294,17 @@ export default defineSchema({
     pdfStorageId: v.optional(v.id("_storage")),
     pdfUrl: v.optional(v.string()),
 
+    // Email tracking
+    emailSentAt: v.optional(v.number()),
+    emailSentTo: v.optional(v.string()),
+
     createdAt: v.number(),
     createdBy: v.optional(v.id("userProfiles")),
   })
     .index("by_organization", ["organizationId"])
     .index("by_employee", ["employeeId"])
-    .index("by_organization_employee", ["organizationId", "employeeId"]),
+    .index("by_organization_employee", ["organizationId", "employeeId"])
+    .index("by_organization_emailSentAt", ["organizationId", "emailSentAt"]),
 
   // Employee Documents
   employeeDocuments: defineTable({
@@ -314,6 +331,53 @@ export default defineSchema({
     .index("by_organization", ["organizationId"])
     .index("by_employee", ["employeeId"])
     .index("by_organization_employee", ["organizationId", "employeeId"])
+    .index("by_organization_expiry", ["organizationId", "expiryDate"]),
+
+  // Jobs
+  jobs: defineTable({
+    organizationId: v.id("organizations"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(
+      v.literal("open"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("cancelled")
+    ),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    createdBy: v.optional(v.id("userProfiles")),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_status", ["organizationId", "status"]),
+
+  // Job Documents
+  jobDocuments: defineTable({
+    organizationId: v.id("organizations"),
+    jobId: v.id("jobs"),
+
+    documentType: v.string(),
+
+    storageId: v.id("_storage"),
+    fileUrl: v.string(),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSizeBytes: v.number(),
+
+    title: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    issuedBy: v.optional(v.string()),
+    issuedDate: v.optional(v.number()),
+    expiryDate: v.optional(v.number()),
+
+    createdAt: v.number(),
+    createdBy: v.id("userProfiles"),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_job", ["jobId"])
+    .index("by_organization_job", ["organizationId", "jobId"])
     .index("by_organization_expiry", ["organizationId", "expiryDate"]),
 
   // Report column preferences (per user, per report type)

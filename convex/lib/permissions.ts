@@ -4,7 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export type Role = "admin" | "manager" | "user";
 
-export type ModuleName = "contracts" | "documents" | "exporting";
+export type ModuleName = "contracts" | "documents" | "exporting" | "jobs";
 
 /**
  * Require that the given module is enabled for the organization.

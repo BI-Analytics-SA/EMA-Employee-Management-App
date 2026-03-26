@@ -89,6 +89,12 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     defaultVisible: false,
   },
   {
+    id: "email",
+    label: "Email",
+    getValue: (emp) => emp.email ?? undefined,
+    defaultVisible: false,
+  },
+  {
     id: "dateOfBirth",
     label: "Date of Birth",
     getValue: (emp) => formatDate(emp.dateOfBirth),

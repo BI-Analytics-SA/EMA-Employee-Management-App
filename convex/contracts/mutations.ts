@@ -1,4 +1,4 @@
-import { mutation } from "../_generated/server";
+import { mutation, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import {
   requireRoleInOrganization,
@@ -172,5 +172,26 @@ export const remove = mutation({
       }
     }
     await ctx.db.delete(args.id);
+  },
+});
+
+/**
+ * Internal: record the email sent timestamp and recipient on the contract.
+ * Called from the sendContractEmail action after a successful send.
+ */
+export const recordEmailSent = internalMutation({
+  args: {
+    contractId: v.id("contracts"),
+    sentTo: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) {
+      throw new Error("Contract not found when recording email sent");
+    }
+    await ctx.db.patch(args.contractId, {
+      emailSentAt: Date.now(),
+      emailSentTo: args.sentTo,
+    });
   },
 });

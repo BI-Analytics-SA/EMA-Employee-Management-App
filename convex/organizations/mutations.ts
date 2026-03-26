@@ -1,6 +1,6 @@
 import { mutation } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireRoleInOrganization } from "../lib/permissions";
 
@@ -98,6 +98,7 @@ export const updateSettings = mutation({
       settings: {
         ...args.settings,
         documentTypes: s?.documentTypes,
+        jobDocumentTypes: s?.jobDocumentTypes,
         enabledModules: s?.enabledModules,
         contractTemplate: s?.contractTemplate,
         contractTemplates: s?.contractTemplates,
@@ -131,6 +132,7 @@ function mergeSettingsWithDataArray(
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
     documentTypes: existing?.documentTypes,
+    jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -156,10 +158,10 @@ export const addSettingsItem = mutation({
     const current = org.settings?.[args.field] ?? [];
     const trimmed = args.value.trim();
     if (!trimmed) {
-      throw new Error("Value cannot be empty");
+      throw new ConvexError("Value cannot be empty");
     }
     if (current.includes(trimmed)) {
-      throw new Error("This value already exists");
+      throw new ConvexError("This value already exists");
     }
     const newArray = [...current, trimmed];
     await ctx.db.patch(args.organizationId, {
@@ -186,12 +188,12 @@ export const removeSettingsItem = mutation({
     }
     const trimmedValue = args.value.trim();
     if (!trimmedValue) {
-      throw new Error("Value cannot be empty");
+      throw new ConvexError("Value cannot be empty");
     }
     const current = org.settings?.[args.field] ?? [];
     const newArray = current.filter((item) => item !== trimmedValue);
     if (newArray.length === current.length) {
-      throw new Error("Item not found");
+      throw new ConvexError("Item not found");
     }
     await ctx.db.patch(args.organizationId, {
       settings: mergeSettingsWithDataArray(org.settings, args.field, newArray),
@@ -213,7 +215,7 @@ type ContractTemplatesArray = NonNullable<NonNullable<OrgSettings>["contractTemp
 /** Build full settings object so required arrays are never undefined when patching. */
 function mergeSettings(
   existing: OrgSettings | undefined,
-  override: { documentTypes: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
+  override: { documentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[]; jobDocumentTypes?: { id: string; name: string; requiresExpiry: boolean; color?: string }[] }
 ) {
   return {
     departments: existing?.departments ?? [],
@@ -223,7 +225,8 @@ function mergeSettings(
     suburbs: existing?.suburbs ?? [],
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
-    documentTypes: override.documentTypes,
+    documentTypes: override.documentTypes ?? existing?.documentTypes,
+    jobDocumentTypes: override.jobDocumentTypes ?? existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -264,7 +267,7 @@ export const addDocumentType = mutation({
     const currentTypes = org.settings?.documentTypes ?? [];
     const existing = currentTypes.find((t) => t.id === args.documentType.id);
     if (existing) {
-      throw new Error("A document type with this ID already exists");
+      throw new ConvexError("A document type with this ID already exists");
     }
 
     const newTypes = [...currentTypes, args.documentType];
@@ -312,7 +315,7 @@ export const updateDocumentType = mutation({
     const currentTypes = org.settings?.documentTypes ?? [];
     const index = currentTypes.findIndex((t) => t.id === args.id);
     if (index === -1) {
-      throw new Error("Document type not found");
+      throw new ConvexError("Document type not found");
     }
 
     const updated = { ...currentTypes[index] };
@@ -366,13 +369,101 @@ export const removeDocumentType = mutation({
     const newTypes = currentTypes.filter((t) => t.id !== args.id);
 
     if (newTypes.length === currentTypes.length) {
-      throw new Error("Document type not found");
+      throw new ConvexError("Document type not found");
     }
 
     await ctx.db.patch(args.organizationId, {
       settings: mergeSettings(org.settings, { documentTypes: newTypes }),
     });
 
+    return { success: true };
+  },
+});
+
+/**
+ * Add a job document type to organization settings (admin only).
+ */
+export const addJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    documentType: documentTypeValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    if (currentTypes.some((t) => t.id === args.documentType.id)) {
+      throw new ConvexError("A job document type with this ID already exists");
+    }
+
+    const newTypes = [...currentTypes, args.documentType];
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Update an existing job document type (admin only).
+ */
+export const updateJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    id: v.string(),
+    name: v.optional(v.string()),
+    requiresExpiry: v.optional(v.boolean()),
+    color: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    const index = currentTypes.findIndex((t) => t.id === args.id);
+    if (index === -1) throw new ConvexError("Job document type not found");
+
+    const updated = { ...currentTypes[index] };
+    if (args.name !== undefined) updated.name = args.name;
+    if (args.requiresExpiry !== undefined) updated.requiresExpiry = args.requiresExpiry;
+    if (args.color !== undefined) updated.color = args.color;
+
+    const newTypes = [...currentTypes];
+    newTypes[index] = updated;
+
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Remove a job document type from organization settings (admin only).
+ * Does not delete existing job documents of that type.
+ */
+export const removeJobDocumentType = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRoleInOrganization(ctx, args.organizationId, "admin");
+    const org = await ctx.db.get(args.organizationId);
+    if (!org) throw new Error("Organization not found");
+
+    const currentTypes = org.settings?.jobDocumentTypes ?? [];
+    const newTypes = currentTypes.filter((t) => t.id !== args.id);
+    if (newTypes.length === currentTypes.length) {
+      throw new ConvexError("Job document type not found");
+    }
+
+    await ctx.db.patch(args.organizationId, {
+      settings: mergeSettings(org.settings, { jobDocumentTypes: newTypes }),
+    });
     return { success: true };
   },
 });
@@ -391,6 +482,7 @@ function mergeSettingsWithModules(
     cities: existing?.cities ?? [],
     postCodes: existing?.postCodes ?? [],
     documentTypes: existing?.documentTypes,
+    jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
@@ -404,7 +496,7 @@ function mergeSettingsWithModules(
 export const toggleModule = mutation({
   args: {
     organizationId: v.id("organizations"),
-    moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting")),
+    moduleName: v.union(v.literal("contracts"), v.literal("documents"), v.literal("exporting"), v.literal("jobs")),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -413,7 +505,7 @@ export const toggleModule = mutation({
     if (!org) {
       throw new Error("Organization not found");
     }
-    const allowedKeys = ["contracts", "documents", "exporting"] as const;
+    const allowedKeys = ["contracts", "documents", "exporting", "jobs"] as const;
     const current = org.settings?.enabledModules ?? {};
     const newEnabledModules: NonNullable<NonNullable<OrgSettings>["enabledModules"]> = {};
     for (const key of allowedKeys) {
@@ -497,6 +589,7 @@ export const updateContractTemplate = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       exportConfig: s?.exportConfig,
@@ -560,6 +653,7 @@ export const updateExportConfig = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: s?.contractTemplate,
       contractTemplates: s?.contractTemplates,
@@ -636,6 +730,7 @@ export const migrateContractTemplates = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplates: templates,
       exportConfig: s?.exportConfig,
@@ -723,6 +818,7 @@ export const saveEmployerSignature = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
@@ -791,6 +887,7 @@ export const deleteEmployerSignature = mutation({
       cities: s?.cities ?? [],
       postCodes: s?.postCodes ?? [],
       documentTypes: s?.documentTypes,
+      jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
@@ -818,6 +915,7 @@ function buildFullSettings(
     cities: s?.cities ?? [],
     postCodes: s?.postCodes ?? [],
     documentTypes: s?.documentTypes,
+    jobDocumentTypes: s?.jobDocumentTypes,
     enabledModules: s?.enabledModules,
     contractTemplate: s?.contractTemplate,
     contractTemplates: override.contractTemplates,

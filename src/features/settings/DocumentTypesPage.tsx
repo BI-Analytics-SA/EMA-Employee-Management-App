@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 type DocumentTypeRow = {
   id: string;
@@ -32,6 +34,7 @@ export function DocumentTypesPage() {
   const [newName, setNewName] = useState("");
   const [newRequiresExpiry, setNewRequiresExpiry] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
   const documentTypes: DocumentTypeRow[] =
     organization?.settings?.documentTypes ?? [];
@@ -67,7 +70,7 @@ export function DocumentTypesPage() {
       setNewName("");
       setNewRequiresExpiry(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to add.");
+      setError(extractConvexError(e, "Failed to add."));
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +96,7 @@ export function DocumentTypesPage() {
       setTimeout(clearMessages, 3000);
       setEditingId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update.");
+      setError(extractConvexError(e, "Failed to update."));
     } finally {
       setIsSubmitting(false);
     }
@@ -101,7 +104,6 @@ export function DocumentTypesPage() {
 
   const handleRemove = async (id: string) => {
     if (!organizationId) return;
-    if (!window.confirm("Remove this document type? Existing documents of this type will not be deleted.")) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -109,9 +111,10 @@ export function DocumentTypesPage() {
       setSuccess("Document type removed.");
       setTimeout(clearMessages, 3000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to remove.");
+      setError(extractConvexError(e, "Failed to remove."));
     } finally {
       setIsSubmitting(false);
+      setRemoveTarget(null);
     }
   };
 
@@ -255,19 +258,20 @@ export function DocumentTypesPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting}>
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Edit
+                        <Button size="sm" variant="ghost" onClick={() => startEdit(row)} disabled={isSubmitting} aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           className="text-destructive hover:text-destructive"
-                          onClick={() => handleRemove(row.id)}
+                          onClick={() => setRemoveTarget(row.id)}
                           disabled={isSubmitting}
+                          aria-label="Remove"
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
+                          <Trash2 className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-1">Remove</span>
                         </Button>
                       </div>
                     </>
@@ -278,6 +282,16 @@ export function DocumentTypesPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={removeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRemoveTarget(null); }}
+        onConfirm={() => { if (removeTarget) handleRemove(removeTarget); }}
+        title="Remove document type"
+        description="Remove this document type? Existing documents of this type will not be deleted."
+        confirmLabel="Remove"
+        loading={isSubmitting}
+      />
     </div>
   );
 }

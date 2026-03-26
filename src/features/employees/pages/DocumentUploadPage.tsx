@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { extractConvexError } from "@/lib/convex-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,7 +130,7 @@ export function DocumentUploadPage() {
       });
       navigate(`/employees/${employeeId}/documents`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(extractConvexError(err, "Upload failed"));
       setIsUploading(false);
     }
   };

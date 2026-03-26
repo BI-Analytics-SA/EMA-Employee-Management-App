@@ -4,6 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { getEffectiveTemplates, getDefaultTemplate } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { ContractForm } from "@/features/contracts/components/ContractForm";
@@ -45,10 +46,6 @@ export function NewContractPage() {
     html: { termsAndConditionsHtml: string }
   ) => {
     if (!organizationId || !employeeId) return;
-    if (!signatureFile) {
-      setSubmitError("Please draw or upload a signature before submitting.");
-      return;
-    }
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -70,19 +67,21 @@ export function NewContractPage() {
         employerSignatureUrl: selectedTemplate?.employerSignatureUrl,
         employerSignatureStorageId: selectedTemplate?.employerSignatureStorageId as Id<"_storage"> | undefined,
       });
-      const uploadUrl = await generateUploadUrl();
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": signatureFile.type },
-        body: signatureFile,
-      });
-      if (!response.ok) throw new Error("Upload failed");
-      const { storageId } = await response.json();
-      await saveContractSignature({ contractId, storageId });
+      if (signatureFile) {
+        const uploadUrl = await generateUploadUrl();
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": signatureFile.type },
+          body: signatureFile,
+        });
+        if (!response.ok) throw new Error("Upload failed");
+        const { storageId } = await response.json();
+        await saveContractSignature({ contractId, storageId });
+      }
       navigate(`/employees/${employeeId}/contracts/${contractId}`);
     } catch (err) {
       console.error(err);
-      setSubmitError(err instanceof Error ? err.message : "Failed to create contract. Please try again.");
+      setSubmitError(extractConvexError(err, "Failed to create contract. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

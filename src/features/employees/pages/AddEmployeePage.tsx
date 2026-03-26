@@ -5,16 +5,19 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { EmployeeForm } from "../components/EmployeeForm";
 import type { EmployeeFormValues } from "@/lib/validations/employee";
 import { useState } from "react";
+import { extractConvexError } from "@/lib/convex-error";
 
 export function AddEmployeePage() {
   const navigate = useNavigate();
   const { organizationId, isLoading: userLoading } = useCurrentUser();
   const createMutation = useMutation(api.employees.mutations.create);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (values: EmployeeFormValues) => {
     if (!organizationId) return;
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const id = await createMutation({
         organizationId,
@@ -32,6 +35,7 @@ export function AddEmployeePage() {
         language: values.language || undefined,
         cellNumber: values.cellNumber || undefined,
         alternativeNumber: values.alternativeNumber || undefined,
+        email: values.email || undefined,
         resUnit: values.resUnit || undefined,
         resComplex: values.resComplex || undefined,
         resStreetNo: values.resStreetNo || undefined,
@@ -66,6 +70,9 @@ export function AddEmployeePage() {
         accRelationship: values.accRelationship || undefined,
       });
       navigate(`/employees/${id}`);
+    } catch (err) {
+      console.error(err);
+      setSubmitError(extractConvexError(err, "Failed to add employee. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
@@ -78,6 +85,9 @@ export function AddEmployeePage() {
   return (
     <div className="p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-4">Add Employee</h1>
+      {submitError && (
+        <p className="text-sm text-destructive mb-4">{submitError}</p>
+      )}
       <EmployeeForm
         organizationId={organizationId}
         onSubmit={handleSubmit}

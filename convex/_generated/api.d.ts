@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as ResendOTPPasswordReset from "../ResendOTPPasswordReset.js";
 import type * as auth from "../auth.js";
 import type * as contracts_actions from "../contracts/actions.js";
+import type * as contracts_emailAction from "../contracts/emailAction.js";
 import type * as contracts_mutations from "../contracts/mutations.js";
 import type * as contracts_queries from "../contracts/queries.js";
 import type * as crons from "../crons.js";
@@ -25,6 +27,11 @@ import type * as http from "../http.js";
 import type * as invites_actions from "../invites/actions.js";
 import type * as invites_mutations from "../invites/mutations.js";
 import type * as invites_queries from "../invites/queries.js";
+import type * as jobDocuments_actions from "../jobDocuments/actions.js";
+import type * as jobDocuments_mutations from "../jobDocuments/mutations.js";
+import type * as jobDocuments_queries from "../jobDocuments/queries.js";
+import type * as jobs_mutations from "../jobs/mutations.js";
+import type * as jobs_queries from "../jobs/queries.js";
 import type * as lib_permissions from "../lib/permissions.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as migrations_stripContractFields from "../migrations/stripContractFields.js";
@@ -44,8 +51,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ResendOTPPasswordReset: typeof ResendOTPPasswordReset;
   auth: typeof auth;
   "contracts/actions": typeof contracts_actions;
+  "contracts/emailAction": typeof contracts_emailAction;
   "contracts/mutations": typeof contracts_mutations;
   "contracts/queries": typeof contracts_queries;
   crons: typeof crons;
@@ -61,6 +70,11 @@ declare const fullApi: ApiFromModules<{
   "invites/actions": typeof invites_actions;
   "invites/mutations": typeof invites_mutations;
   "invites/queries": typeof invites_queries;
+  "jobDocuments/actions": typeof jobDocuments_actions;
+  "jobDocuments/mutations": typeof jobDocuments_mutations;
+  "jobDocuments/queries": typeof jobDocuments_queries;
+  "jobs/mutations": typeof jobs_mutations;
+  "jobs/queries": typeof jobs_queries;
   "lib/permissions": typeof lib_permissions;
   "lib/storage": typeof lib_storage;
   "migrations/stripContractFields": typeof migrations_stripContractFields;

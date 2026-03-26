@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -6,6 +6,7 @@ import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowLeft, GripVertical, Plus, Trash2 } from "lucide-react";
+import { extractConvexError } from "@/lib/convex-error";
 import { Link } from "react-router-dom";
 import {
   DndContext,
@@ -49,6 +50,7 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "gender", source: "database", dbField: "gender", label: "Gender", dataType: "text", enabled: true },
   { id: "ethnicGroup", source: "database", dbField: "ethnicGroup", label: "Ethnic Group", dataType: "text", enabled: true },
   { id: "cellNumber", source: "database", dbField: "cellNumber", label: "Cell Number", dataType: "text", enabled: true },
+  { id: "email", source: "database", dbField: "email", label: "Email", dataType: "text", enabled: false },
   { id: "resStreetNo", source: "database", dbField: "resStreetNo", label: "Street No", dataType: "text", enabled: true },
   { id: "resStreetName", source: "database", dbField: "resStreetName", label: "Street Name", dataType: "text", enabled: true },
   { id: "resSuburb", source: "database", dbField: "resSuburb", label: "Suburb", dataType: "text", enabled: true },
@@ -112,10 +114,14 @@ function SortableColumnRow({
   column,
   onUpdate,
   onRemove,
+  isNew,
+  onNewHandled,
 }: {
   column: ExportColumn;
   onUpdate: (id: string, updates: Partial<ExportColumn>) => void;
   onRemove: (id: string) => void;
+  isNew?: boolean;
+  onNewHandled?: () => void;
 }) {
   const {
     attributes,
@@ -126,6 +132,36 @@ function SortableColumnRow({
     isDragging,
   } = useSortable({ id: column.id });
 
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
+  const [highlight, setHighlight] = useState(false);
+
+  const combinedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setNodeRef(node);
+      rowRef.current = node;
+    },
+    [setNodeRef]
+  );
+
+  useEffect(() => {
+    if (!isNew) {
+      setHighlight(false);
+      return;
+    }
+    setHighlight(true);
+    requestAnimationFrame(() => {
+      rowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      labelInputRef.current?.focus();
+      labelInputRef.current?.select();
+    });
+    const timer = setTimeout(() => {
+      setHighlight(false);
+      onNewHandled?.();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isNew, onNewHandled]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -133,11 +169,12 @@ function SortableColumnRow({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3",
-        isDragging && "opacity-50 shadow-md"
+        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 transition-shadow duration-700",
+        isDragging && "opacity-50 shadow-md",
+        highlight && "ring-2 ring-primary"
       )}
     >
       <button
@@ -160,6 +197,7 @@ function SortableColumnRow({
       </label>
       <div className="w-full min-w-0 sm:min-w-[140px] sm:flex-1">
         <Input
+          ref={labelInputRef}
           value={column.label}
           onChange={(e) => onUpdate(column.id, { label: e.target.value })}
           placeholder="Column label"
@@ -219,9 +257,13 @@ export function ExportConfigPage() {
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
   const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
 
+  const newlyAddedIdRef = useRef<string | null>(null);
+
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
   const [backfillError, setBackfillError] = useState<string | null>(null);
@@ -233,6 +275,12 @@ export function ExportConfigPage() {
   useEffect(() => {
     setColumns(mergeExportColumns(DEFAULT_DATABASE_COLUMNS, savedColumns));
   }, [savedColumns]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -263,6 +311,7 @@ export function ExportConfigPage() {
 
   const handleAddCustom = () => {
     const id = `custom-${Date.now()}`;
+    newlyAddedIdRef.current = id;
     setColumns((prev) => [
       ...prev,
       {
@@ -276,18 +325,29 @@ export function ExportConfigPage() {
     ]);
   };
 
+  const handleNewHandled = useCallback(() => {
+    newlyAddedIdRef.current = null;
+  }, []);
+
   const handleSave = async () => {
     const orgId = organization?._id;
     if (!orgId) return;
     setSaving(true);
     setSaveError(null);
+    setSaveSuccess(false);
     try {
       await updateExportConfig({
         organizationId: orgId,
         columns,
       });
+      setSaveSuccess(true);
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => {
+        setSaveSuccess(false);
+        successTimeoutRef.current = null;
+      }, 3000);
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : "Failed to save configuration.");
+      setSaveError(extractConvexError(e, "Failed to save configuration."));
     } finally {
       setSaving(false);
     }
@@ -304,7 +364,7 @@ export function ExportConfigPage() {
       setBackfillResult(result);
     } catch (e) {
       setBackfillResult(null);
-      setBackfillError(e instanceof Error ? e.message : String(e));
+      setBackfillError(extractConvexError(e, "Failed to run backfill."));
     } finally {
       setBackfilling(false);
     }
@@ -377,6 +437,8 @@ export function ExportConfigPage() {
                   column={col}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  isNew={col.id === newlyAddedIdRef.current}
+                  onNewHandled={handleNewHandled}
                 />
               ))}
             </div>
@@ -386,6 +448,9 @@ export function ExportConfigPage() {
 
       {saveError && (
         <p className="text-sm text-destructive">{saveError}</p>
+      )}
+      {saveSuccess && (
+        <p className="text-sm text-success">Configuration saved.</p>
       )}
 
       <div className="flex items-center gap-2 pt-2">

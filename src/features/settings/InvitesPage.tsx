@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,6 +73,8 @@ export function InvitesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [sendingEmailFor, setSendingEmailFor] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<Id<"invites"> | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const handleCreateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +105,7 @@ export function InvitesPage() {
           setSuccess(`Invite created and email sent to ${newInviteEmail}`);
         } catch (emailErr) {
           setError(
-            `Invite created but email failed to send: ${emailErr instanceof Error ? emailErr.message : "Unknown error"}`
+            `Invite created but email failed to send: ${extractConvexError(emailErr, "Unknown error")}`
           );
         }
       } else {
@@ -113,7 +117,7 @@ export function InvitesPage() {
       setNewInviteRole("user");
       setSendEmail(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create invite");
+      setError(extractConvexError(err, "Failed to create invite"));
     } finally {
       setIsSubmitting(false);
     }
@@ -126,17 +130,21 @@ export function InvitesPage() {
       await sendInviteEmail({ inviteId });
       setSuccess("Email sent successfully");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send email");
+      setError(extractConvexError(err, "Failed to send email"));
     } finally {
       setSendingEmailFor(null);
     }
   };
 
   const handleRevokeInvite = async (inviteId: Id<"invites">) => {
+    setIsRevoking(true);
     try {
       await revokeInvite({ inviteId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to revoke invite");
+      setError(extractConvexError(err, "Failed to revoke invite"));
+    } finally {
+      setIsRevoking(false);
+      setRevokeTarget(null);
     }
   };
 
@@ -433,10 +441,9 @@ export function InvitesPage() {
                             )}
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="destructive-outline"
                             size="sm"
-                            onClick={() => handleRevokeInvite(invite._id)}
-                            className="text-destructive hover:text-destructive/80"
+                            onClick={() => setRevokeTarget(invite._id)}
                           >
                             Revoke
                           </Button>
@@ -450,6 +457,17 @@ export function InvitesPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => { if (!open) setRevokeTarget(null); }}
+        onConfirm={() => { if (revokeTarget) handleRevokeInvite(revokeTarget); }}
+        title="Revoke invite"
+        description="Revoke this invite? The code will no longer work."
+        confirmLabel="Revoke"
+        variant="default"
+        loading={isRevoking}
+      />
     </div>
   );
 }

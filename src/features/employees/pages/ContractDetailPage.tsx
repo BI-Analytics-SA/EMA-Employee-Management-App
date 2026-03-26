@@ -1,14 +1,18 @@
 import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser, useHasRole } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ContractForm, type ContractFormHandle } from "@/features/contracts/components/ContractForm";
 import type { ContractFormValues } from "@/lib/validations/contract";
 import { timestampToDateString } from "@/lib/validations/contract";
-import { Loader2, ArrowLeft, FileText, FileDown, Trash2, ExternalLink } from "lucide-react";
+import { Loader2, ArrowLeft, FileText, FileDown, Trash2, ExternalLink, Mail } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { getDefaultTemplate } from "@/lib/contractTemplates";
 
@@ -37,12 +41,19 @@ export function ContractDetailPage() {
   const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
   const removeContract = useMutation(api.contracts.mutations.remove);
   const deleteContractPdf = useMutation(api.contracts.actions.deleteContractPdf);
+  const sendContractEmail = useAction(api.contracts.emailAction.sendContractEmail);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
-  const [confirmDeleteHeader, setConfirmDeleteHeader] = useState(false);
-  const [confirmDeleteFooter, setConfirmDeleteFooter] = useState(false);
+  const [showDeleteContractConfirm, setShowDeleteContractConfirm] = useState(false);
+  const [deletingContract, setDeletingContract] = useState(false);
+  const [showDeletePdfConfirm, setShowDeletePdfConfirm] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuccess, setEmailSuccess] = useState(false);
   const contractFormRef = useRef<ContractFormHandle>(null);
 
   const defaultTemplate = contract ? getDefaultTemplate(organization ?? undefined) : null;
@@ -100,6 +111,7 @@ export function ContractDetailPage() {
     setDeletingPdf(true);
     try {
       await deleteContractPdf({ contractId: contractIdTyped });
+      setShowDeletePdfConfirm(false);
     } catch (err) {
       console.error(err);
     } finally {
@@ -107,13 +119,46 @@ export function ContractDetailPage() {
     }
   };
 
+  const handleOpenEmailForm = () => {
+    setEmailAddress(employee?.email ?? "");
+    setEmailError(null);
+    setEmailSuccess(false);
+    setShowEmailForm(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!contractIdTyped || !emailAddress.trim()) return;
+    if (!/^\S+@\S+\.\S+$/.test(emailAddress.trim())) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setSendingEmail(true);
+    setEmailError(null);
+    setEmailSuccess(false);
+    try {
+      await sendContractEmail({
+        contractId: contractIdTyped,
+        recipientEmail: emailAddress.trim(),
+      });
+      setEmailSuccess(true);
+      setShowEmailForm(false);
+    } catch (err) {
+      setEmailError(extractConvexError(err, "Failed to send email. Please try again."));
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const handleDeleteContract = async () => {
     if (!contractIdTyped || !employeeId) return;
+    setDeletingContract(true);
     try {
       await removeContract({ id: contractIdTyped });
       navigate(`/employees/${employeeId}/contracts`);
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeletingContract(false);
     }
   };
 
@@ -213,37 +258,14 @@ export function ContractDetailPage() {
             >
               Cancel
             </Button>
-            {confirmDeleteHeader ? (
-              <>
-                <span className="text-sm text-muted-foreground w-full basis-full">Delete?</span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteContract}
-                  className="flex-1 min-w-[100px]"
-                >
-                  Yes, delete
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setConfirmDeleteHeader(false)}
-                  className="flex-1 min-w-[100px]"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive flex-1 min-w-[120px]"
-                onClick={() => setConfirmDeleteHeader(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete contract
-              </Button>
-            )}
+            <Button
+              variant="destructive-outline"
+              className="flex-1 min-w-[120px]"
+              onClick={() => setShowDeleteContractConfirm(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete contract
+            </Button>
           </div>
         )}
       </div>
@@ -280,22 +302,95 @@ export function ContractDetailPage() {
                 </a>
               </Button>
               {canManageContracts && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive flex-1 min-w-[100px]"
-                  onClick={handleDeletePdf}
-                  disabled={deletingPdf}
-                >
-                  {deletingPdf ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete PDF
-                    </>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 min-w-[100px]"
+                    onClick={handleOpenEmailForm}
+                    disabled={sendingEmail}
+                  >
+                    <Mail className="h-4 w-4 mr-1" />
+                    Email Contract
+                  </Button>
+                  <Button
+                    variant="destructive-outline"
+                    size="sm"
+                    className="flex-1 min-w-[100px]"
+                    onClick={() => setShowDeletePdfConfirm(true)}
+                    disabled={deletingPdf}
+                  >
+                    {deletingPdf ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete PDF
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+              {emailSuccess && (
+                <p className="text-sm text-green-600 w-full basis-full">
+                  Contract emailed successfully.
+                  <span className="text-muted-foreground"> Sent to {emailAddress || contract.emailSentTo}.</span>
+                </p>
+              )}
+              {showEmailForm && (
+                <div className="w-full basis-full flex flex-col gap-2 pt-1">
+                  <Label htmlFor="contractEmailRecipient" className="text-xs">
+                    Send to email address
+                  </Label>
+                  <Input
+                    id="contractEmailRecipient"
+                    type="email"
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    placeholder="employee@example.com"
+                    className="max-w-xs"
+                    disabled={sendingEmail}
+                  />
+                  {emailError && (
+                    <p className="text-xs text-destructive">{emailError}</p>
                   )}
-                </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSendEmail}
+                      disabled={sendingEmail || !emailAddress.trim()}
+                    >
+                      {sendingEmail ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                          Sending…
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="h-4 w-4 mr-1" />
+                          Send
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setShowEmailForm(false);
+                        setEmailError(null);
+                      }}
+                      disabled={sendingEmail}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {!showEmailForm && !emailSuccess && contract.emailSentAt && (
+                <p className="text-xs text-muted-foreground w-full basis-full">
+                  Last emailed {new Date(contract.emailSentAt).toLocaleDateString()}
+                  {contract.emailSentTo && ` to ${contract.emailSentTo}`}.
+                </p>
               )}
             </div>
           ) : (
@@ -333,41 +428,23 @@ export function ContractDetailPage() {
         />
       )}
 
-      {canManageContracts && (
-        <div className="pt-4 border-t">
-          {confirmDeleteFooter ? (
-            <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
-              <span className="text-sm text-muted-foreground w-full basis-full">Delete this contract?</span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteContract}
-                className="flex-1 min-w-[100px]"
-              >
-                Yes, delete
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmDeleteFooter(false)}
-                className="flex-1 min-w-[100px]"
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive w-full"
-              onClick={() => setConfirmDeleteFooter(true)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete contract
-            </Button>
-          )}
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDeleteContractConfirm}
+        onOpenChange={setShowDeleteContractConfirm}
+        onConfirm={handleDeleteContract}
+        title="Delete contract"
+        description="Delete this contract and its signature/PDF files? This cannot be undone."
+        loading={deletingContract}
+      />
+
+      <ConfirmDialog
+        open={showDeletePdfConfirm}
+        onOpenChange={setShowDeletePdfConfirm}
+        onConfirm={handleDeletePdf}
+        title="Delete PDF"
+        description="Delete the generated PDF? You can regenerate it later."
+        loading={deletingPdf}
+      />
     </div>
   );
 }

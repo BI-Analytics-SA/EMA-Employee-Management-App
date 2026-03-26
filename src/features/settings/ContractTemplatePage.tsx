@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -13,6 +13,8 @@ import { Loader2, ArrowLeft, Plus, Trash2, Star, Maximize2, Minimize2 } from "lu
 import { Link } from "react-router-dom";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { cn } from "@/lib/utils";
+import { extractConvexError } from "@/lib/convex-error";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 const sectionClass = "rounded-lg border bg-card overflow-hidden";
 const sectionHeaderClass = "bg-muted/70 px-3 py-2 border-b";
@@ -43,13 +45,26 @@ export function ContractTemplatePage() {
   const [contractCategory, setContractCategory] = useState("");
   const [defaultTermsAndConditions, setDefaultTermsAndConditions] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [savingSignature, setSavingSignature] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [adding, setAdding] = useState(false);
   const [termsFullScreen, setTermsFullScreen] = useState(false);
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<string | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState(false);
+  const [showRemoveSignatureConfirm, setShowRemoveSignatureConfirm] = useState(false);
+  const [removingSignature, setRemovingSignature] = useState(false);
 
   const selected = selectedId ? templates.find((t) => t.id === selectedId) : null;
   const useNewApi = (organization?.settings?.contractTemplates?.length ?? 0) > 0;
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   // Run migration when org has legacy-only template, or has no templates at all (migration creates default).
   useEffect(() => {
@@ -88,10 +103,12 @@ export function ContractTemplatePage() {
   const handleSave = async () => {
     const orgId = organization?._id;
     if (!orgId) return;
-    if (useNewApi) {
-      if (!selectedId) return;
-      setSaving(true);
-      try {
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+    try {
+      if (useNewApi) {
+        if (!selectedId) return;
         await updateContractTemplateById({
           organizationId: orgId,
           templateId: selectedId,
@@ -101,12 +118,7 @@ export function ContractTemplatePage() {
           contractCategory: contractCategory || undefined,
           defaultTermsAndConditions: defaultTermsAndConditions || undefined,
         });
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setSaving(true);
-      try {
+      } else {
         await updateContractTemplate({
           organizationId: orgId,
           contractTemplate: {
@@ -116,9 +128,17 @@ export function ContractTemplatePage() {
             defaultTermsAndConditions: defaultTermsAndConditions || undefined,
           },
         });
-      } finally {
-        setSaving(false);
       }
+      setSaveSuccess(true);
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => {
+        setSaveSuccess(false);
+        successTimeoutRef.current = null;
+      }, 3000);
+    } catch (e) {
+      setSaveError(extractConvexError(e, "Failed to save template."));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -151,10 +171,14 @@ export function ContractTemplatePage() {
   const handleRemoveSignature = async () => {
     const orgId = organization?._id;
     if (!orgId || !selectedId) return;
+    setRemovingSignature(true);
     try {
       await deleteEmployerSignatureForTemplate({ organizationId: orgId, templateId: selectedId });
     } catch (err) {
       console.error(err);
+    } finally {
+      setRemovingSignature(false);
+      setShowRemoveSignatureConfirm(false);
     }
   };
 
@@ -175,11 +199,15 @@ export function ContractTemplatePage() {
     if (!orgId) return;
     const t = templates.find((x) => x.id === templateId);
     if (t?.isDefault) return;
+    setDeletingTemplate(true);
     try {
       await removeContractTemplate({ organizationId: orgId, templateId });
       if (selectedId === templateId) setSelectedId(templates[0]?.id ?? null);
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeletingTemplate(false);
+      setDeleteTemplateTarget(null);
     }
   };
 
@@ -244,14 +272,14 @@ export function ContractTemplatePage() {
             {templates.map((t) => (
               <div
                 key={t.id}
-                className={`flex w-full sm:w-auto sm:min-w-[280px] sm:flex-1 items-center gap-2 rounded-md border px-3 py-2 ${
+                className={`flex flex-wrap w-full sm:w-auto sm:min-w-[280px] sm:flex-1 items-center gap-2 rounded-md border px-3 py-2 ${
                   selectedId === t.id ? "border-primary bg-muted/50" : "border-border"
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setSelectedId(t.id)}
-                  className="font-medium text-left hover:underline"
+                  className="font-medium text-left hover:underline min-w-0 truncate"
                 >
                   {t.name}
                 </button>
@@ -277,10 +305,12 @@ export function ContractTemplatePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteTemplate(t.id)}
+                        className="h-7 text-xs text-destructive hover:text-destructive"
+                        onClick={() => setDeleteTemplateTarget(t.id)}
+                        aria-label="Delete"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline ml-1">Delete</span>
                       </Button>
                     )}
                   </>
@@ -399,7 +429,8 @@ export function ContractTemplatePage() {
                   label="Sign below"
                 />
                 {useNewApi && selected.employerSignatureUrl && (
-                  <Button variant="ghost" size="sm" className="text-destructive" onClick={handleRemoveSignature}>
+                  <Button variant="destructive-outline" size="sm" onClick={() => setShowRemoveSignatureConfirm(true)} aria-label="Remove signature">
+                    <Trash2 className="h-4 w-4" />
                     Remove signature
                   </Button>
                 )}
@@ -418,6 +449,8 @@ export function ContractTemplatePage() {
                   "Save template"
                 )}
               </Button>
+              {saveError && <p className="text-sm text-destructive">{saveError}</p>}
+              {saveSuccess && <p className="text-sm text-success">Template saved.</p>}
             </div>
           </div>
         </section>
@@ -463,6 +496,25 @@ export function ContractTemplatePage() {
       {templates.length === 0 && !hasLegacyOnly && (
         <p className="text-muted-foreground text-sm">No templates yet. Run migration or add a template.</p>
       )}
+
+      <ConfirmDialog
+        open={deleteTemplateTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTemplateTarget(null); }}
+        onConfirm={() => { if (deleteTemplateTarget) handleDeleteTemplate(deleteTemplateTarget); }}
+        title="Delete template"
+        description="Delete this contract template? This cannot be undone."
+        loading={deletingTemplate}
+      />
+
+      <ConfirmDialog
+        open={showRemoveSignatureConfirm}
+        onOpenChange={setShowRemoveSignatureConfirm}
+        onConfirm={handleRemoveSignature}
+        title="Remove signature"
+        description="Remove the employer signature? You can upload a new one."
+        confirmLabel="Remove"
+        loading={removingSignature}
+      />
     </div>
   );
 }
