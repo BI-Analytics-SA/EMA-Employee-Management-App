@@ -84,10 +84,6 @@ function prepareRow(raw: Record<string, unknown>): Record<string, unknown> {
       if (str) out[field] = str;
     }
   }
-  if (typeof out.dateOfBirth === "number") {
-    const str = excelDateToString(out.dateOfBirth);
-    if (str) out.dateOfBirth = str;
-  }
   for (const field of UPPERCASE_ENUM_FIELDS) {
     const v = out[field];
     if (typeof v === "string" && v !== "") {
