@@ -340,6 +340,7 @@ export function SignatureCapture({
               // If the image fails to load (e.g. storage file deleted), fall back to the drawing canvas
               setShowExisting(false);
               setUserDismissedExisting(true);
+              setHasDrawn(false);
             }}
           />
         </div>
