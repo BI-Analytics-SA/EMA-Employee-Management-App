@@ -136,3 +136,15 @@ Convex production is **not** deployed on git push. Deploy when you’re ready:
   ```
 
 Deploy **before** merging to main when you add new functions or schema; deploy **after** when removing functions.
+
+---
+
+## After this release (PEPL-50)
+
+PEPL-50 renamed "Work Address Code" to "Company Number". After deploying, run this once to copy existing values into the new field:
+
+```bash
+npx convex run --prod employees/mutations:migrateWorkAddressCodeToCompanyNumber
+```
+
+Returns `{ migrated, total }`. Remove this section once done.
