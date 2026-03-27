@@ -170,19 +170,21 @@ export function EmployeeForm({
   const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1"; // Wider for date picker icon
   const wideFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1";
   const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Title, Initials
+  const nameFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]"; // Names, illness condition
+  const emailFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[220px] sm:flex-[2]"; // Email
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       {/* Fluid flex container - sections wrap naturally */}
       <div className="flex flex-wrap gap-3">
         {/* Identification - small section */}
-        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[340px] sm:flex-1")}>
+        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[280px] sm:flex-1")}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Identification</h3>
           </div>
           <div className={sectionContentClass}>
-            <div className="flex flex-wrap gap-2">
-              <div className={wideFieldClass}>
+            <div className="flex flex-col gap-2">
+              <div className="space-y-1">
                 <Label htmlFor="idNumber" className="text-xs">ID Number (13 digits)</Label>
                 <Input
                   id="idNumber"
@@ -194,7 +196,7 @@ export function EmployeeForm({
                   <p className="text-xs text-destructive">{form.formState.errors.idNumber.message}</p>
                 )}
               </div>
-              <div className={fieldClass}>
+              <div className="space-y-1">
                 <Label htmlFor="employeeNo" className="text-xs">Employee No</Label>
                 <Input id="employeeNo" {...form.register("employeeNo")} />
               </div>
@@ -278,7 +280,7 @@ export function EmployeeForm({
                 <Label htmlFor="alternativeNumber" className="text-xs">Alternative Number</Label>
                 <Input id="alternativeNumber" {...form.register("alternativeNumber")} />
               </div>
-              <div className={wideFieldClass}>
+              <div className={emailFieldClass}>
                 <Label htmlFor="email" className="text-xs">Email</Label>
                 <Input id="email" type="email" {...form.register("email")} placeholder="employee@example.com" />
                 {form.formState.errors.email && (
@@ -295,102 +297,114 @@ export function EmployeeForm({
             <h3 className={sectionTitleClass}>Personal</h3>
           </div>
           <div className={sectionContentClass}>
-            <div className="flex flex-wrap gap-2">
-              <div className={narrowFieldClass}>
-                <Label htmlFor="title" className="text-xs">Title</Label>
-                <select id="title" className={selectClass} {...form.register("title")}>
-                  <option value="">— Select —</option>
-                  {TITLES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
+            <div className="flex flex-col gap-2">
+              {/* Row 1: Title, Initials, First Name, Second Name */}
+              <div className="flex flex-wrap gap-2">
+                <div className={narrowFieldClass}>
+                  <Label htmlFor="title" className="text-xs">Title</Label>
+                  <select id="title" className={selectClass} {...form.register("title")}>
+                    <option value="">— Select —</option>
+                    {TITLES.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={narrowFieldClass}>
+                  <Label htmlFor="initials" className="text-xs">Initials</Label>
+                  <Input id="initials" {...form.register("initials")} />
+                  {form.formState.errors.initials && (
+                    <p className="text-xs text-destructive">{form.formState.errors.initials.message}</p>
+                  )}
+                </div>
+                <div className={nameFieldClass}>
+                  <Label htmlFor="firstName" className="text-xs">First Name</Label>
+                  <Input id="firstName" {...form.register("firstName")} />
+                  {form.formState.errors.firstName && (
+                    <p className="text-xs text-destructive">{form.formState.errors.firstName.message}</p>
+                  )}
+                </div>
+                <div className={nameFieldClass}>
+                  <Label htmlFor="secondName" className="text-xs">Second Name</Label>
+                  <Input id="secondName" {...form.register("secondName")} />
+                </div>
               </div>
-              <div className={narrowFieldClass}>
-                <Label htmlFor="initials" className="text-xs">Initials</Label>
-                <Input id="initials" {...form.register("initials")} />
-                {form.formState.errors.initials && (
-                  <p className="text-xs text-destructive">{form.formState.errors.initials.message}</p>
-                )}
+              {/* Row 2: Last Name, Known As */}
+              <div className="flex flex-wrap gap-2">
+                <div className={nameFieldClass}>
+                  <Label htmlFor="lastName" className="text-xs">Last Name</Label>
+                  <Input id="lastName" {...form.register("lastName")} />
+                  {form.formState.errors.lastName && (
+                    <p className="text-xs text-destructive">{form.formState.errors.lastName.message}</p>
+                  )}
+                </div>
+                <div className={nameFieldClass}>
+                  <Label htmlFor="knownAs" className="text-xs">Known As</Label>
+                  <Input id="knownAs" {...form.register("knownAs")} />
+                  {form.formState.errors.knownAs && (
+                    <p className="text-xs text-destructive">{form.formState.errors.knownAs.message}</p>
+                  )}
+                </div>
               </div>
-              <div className={fieldClass}>
-                <Label htmlFor="firstName" className="text-xs">First Name</Label>
-                <Input id="firstName" {...form.register("firstName")} />
-                {form.formState.errors.firstName && (
-                  <p className="text-xs text-destructive">{form.formState.errors.firstName.message}</p>
-                )}
+              {/* Row 3: Date of Birth, Gender, Ethnic Group, Marital Status */}
+              <div className="flex flex-wrap gap-2">
+                <div className={dateFieldClass}>
+                  <Label htmlFor="dateOfBirth" className="text-xs">Date of Birth</Label>
+                  <Input id="dateOfBirth" type="date" {...form.register("dateOfBirth")} />
+                  {form.formState.errors.dateOfBirth && (
+                    <p className="text-xs text-destructive">{form.formState.errors.dateOfBirth.message}</p>
+                  )}
+                </div>
+                <div className={narrowFieldClass}>
+                  <Label htmlFor="gender" className="text-xs">Gender</Label>
+                  <select id="gender" className={selectClass} {...form.register("gender")}>
+                    <option value="">— Select —</option>
+                    {GENDERS.map((g) => (
+                      <option key={g.value} value={g.value}>{g.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="ethnicGroup" className="text-xs">Ethnic Group</Label>
+                  <select id="ethnicGroup" className={selectClass} {...form.register("ethnicGroup")}>
+                    <option value="">— Select —</option>
+                    {ETHNIC_GROUPS.map((e) => (
+                      <option key={e.value} value={e.value}>{e.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="maritalStatus" className="text-xs">Marital Status</Label>
+                  <select id="maritalStatus" className={selectClass} {...form.register("maritalStatus")}>
+                    <option value="">— Select —</option>
+                    {MARITAL_STATUSES.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className={fieldClass}>
-                <Label htmlFor="secondName" className="text-xs">Second Name</Label>
-                <Input id="secondName" {...form.register("secondName")} />
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="lastName" className="text-xs">Last Name</Label>
-                <Input id="lastName" {...form.register("lastName")} />
-                {form.formState.errors.lastName && (
-                  <p className="text-xs text-destructive">{form.formState.errors.lastName.message}</p>
-                )}
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="knownAs" className="text-xs">Known As</Label>
-                <Input id="knownAs" {...form.register("knownAs")} />
-                {form.formState.errors.knownAs && (
-                  <p className="text-xs text-destructive">{form.formState.errors.knownAs.message}</p>
-                )}
-              </div>
-              <div className={dateFieldClass}>
-                <Label htmlFor="dateOfBirth" className="text-xs">Date of Birth</Label>
-                <Input id="dateOfBirth" type="date" {...form.register("dateOfBirth")} />
-                {form.formState.errors.dateOfBirth && (
-                  <p className="text-xs text-destructive">{form.formState.errors.dateOfBirth.message}</p>
-                )}
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="gender" className="text-xs">Gender</Label>
-                <select id="gender" className={selectClass} {...form.register("gender")}>
-                  <option value="">— Select —</option>
-                  {GENDERS.map((g) => (
-                    <option key={g.value} value={g.value}>{g.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={wideFieldClass}>
-                <Label htmlFor="ethnicGroup" className="text-xs">Ethnic Group</Label>
-                <select id="ethnicGroup" className={selectClass} {...form.register("ethnicGroup")}>
-                  <option value="">— Select —</option>
-                  {ETHNIC_GROUPS.map((e) => (
-                    <option key={e.value} value={e.value}>{e.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="language" className="text-xs">Language</Label>
-                <Input id="language" {...form.register("language")} />
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="illnessCondition" className="text-xs">Illness Condition</Label>
-                <Input id="illnessCondition" {...form.register("illnessCondition")} placeholder="e.g. ASTHMA" />
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="maritalStatus" className="text-xs">Marital Status</Label>
-                <select id="maritalStatus" className={selectClass} {...form.register("maritalStatus")}>
-                  <option value="">— Select —</option>
-                  {MARITAL_STATUSES.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
+              {/* Row 4: Language, Illness Condition */}
+              <div className="flex flex-wrap gap-2">
+                <div className={fieldClass}>
+                  <Label htmlFor="language" className="text-xs">Language</Label>
+                  <Input id="language" {...form.register("language")} />
+                </div>
+                <div className={nameFieldClass}>
+                  <Label htmlFor="illnessCondition" className="text-xs">Illness Condition</Label>
+                  <Input id="illnessCondition" {...form.register("illnessCondition")} placeholder="e.g. ASTHMA" />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Dates */}
-        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[520px] sm:flex-[2]")}>
+        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[400px] sm:flex-1")}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Dates</h3>
           </div>
           <div className={sectionContentClass}>
             <div className="flex flex-wrap gap-2">
-              <div className={fieldClass}>
+              <div className={wideFieldClass}>
                 <Label htmlFor="taxNumber" className="text-xs">Tax Number</Label>
                 <Input id="taxNumber" {...form.register("taxNumber")} />
               </div>
@@ -419,86 +433,98 @@ export function EmployeeForm({
         </section>
 
         {/* Work */}
-        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[340px] sm:flex-1")}>
+        <section className={cn(sectionClass, "w-full sm:w-auto sm:min-w-[400px] sm:flex-1")}>
           <div className={sectionHeaderClass}>
             <h3 className={sectionTitleClass}>Work</h3>
           </div>
           <div className={sectionContentClass}>
-            <div className="flex flex-wrap gap-2">
-              <div className={wideFieldClass}>
-                <Label htmlFor="hrsPerPeriod" className="text-xs">Hours per Period</Label>
-                <Input id="hrsPerPeriod" type="number" step="0.01" {...form.register("hrsPerPeriod")} />
-                {form.formState.errors.hrsPerPeriod && (
-                  <p className="text-xs text-destructive">{form.formState.errors.hrsPerPeriod.message}</p>
-                )}
+            <div className="flex flex-col gap-2">
+              {/* Row 1: Hours, Company Number */}
+              <div className="flex flex-wrap gap-2">
+                <div className={fieldClass}>
+                  <Label htmlFor="hrsPerPeriod" className="text-xs">Hours per Period</Label>
+                  <Input id="hrsPerPeriod" type="number" step="0.01" {...form.register("hrsPerPeriod")} />
+                  {form.formState.errors.hrsPerPeriod && (
+                    <p className="text-xs text-destructive">{form.formState.errors.hrsPerPeriod.message}</p>
+                  )}
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="hoursPerDay" className="text-xs">Hours per Day</Label>
+                  <Input id="hoursPerDay" type="number" {...form.register("hoursPerDay")} />
+                  {form.formState.errors.hoursPerDay && (
+                    <p className="text-xs text-destructive">{form.formState.errors.hoursPerDay.message}</p>
+                  )}
+                </div>
+                <div className={wideFieldClass}>
+                  <Label htmlFor="companyNumber" className="text-xs">Company Number</Label>
+                  <Input id="companyNumber" type="text" {...form.register("companyNumber")} />
+                  {form.formState.errors.companyNumber && (
+                    <p className="text-xs text-destructive">{form.formState.errors.companyNumber.message}</p>
+                  )}
+                </div>
               </div>
-              <div className={fieldClass}>
-                <Label htmlFor="hoursPerDay" className="text-xs">Hours per Day</Label>
-                <Input id="hoursPerDay" type="number" {...form.register("hoursPerDay")} />
-                {form.formState.errors.hoursPerDay && (
-                  <p className="text-xs text-destructive">{form.formState.errors.hoursPerDay.message}</p>
-                )}
+              {/* Row 2: Training, Shift, Shift Allocation */}
+              <div className="flex flex-wrap gap-2">
+                <div className={fieldClass}>
+                  <Label htmlFor="training" className="text-xs">Training</Label>
+                  <select id="training" className={selectClass} {...form.register("training")}>
+                    <option value="">— Select —</option>
+                    {TRAINING_OPTIONS.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="shift" className="text-xs">Shift</Label>
+                  <select id="shift" className={selectClass} {...form.register("shift")}>
+                    <option value="">— Select —</option>
+                    {shifts.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="shiftAllocation" className="text-xs">Shift Allocation</Label>
+                  <select id="shiftAllocation" className={selectClass} {...form.register("shiftAllocation")}>
+                    <option value="">— Select —</option>
+                    {shiftAllocations.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className={wideFieldClass}>
-                <Label htmlFor="companyNumber" className="text-xs">Company Number</Label>
-                <Input id="companyNumber" type="text" {...form.register("companyNumber")} />
-                {form.formState.errors.companyNumber && (
-                  <p className="text-xs text-destructive">{form.formState.errors.companyNumber.message}</p>
-                )}
+              {/* Row 3: Department Group */}
+              <div className="flex flex-wrap gap-2">
+                <div className={fieldClass}>
+                  <Label htmlFor="deptGroup" className="text-xs">Department Group</Label>
+                  <select id="deptGroup" className={selectClass} {...form.register("deptGroup")}>
+                    <option value="">— Select —</option>
+                    {deptGroups.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className={fieldClass}>
-                <Label htmlFor="training" className="text-xs">Training</Label>
-                <select id="training" className={selectClass} {...form.register("training")}>
-                  <option value="">— Select —</option>
-                  {TRAINING_OPTIONS.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="shift" className="text-xs">Shift</Label>
-                <select id="shift" className={selectClass} {...form.register("shift")}>
-                  <option value="">— Select —</option>
-                  {shifts.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="shiftAllocation" className="text-xs">Shift Allocation</Label>
-                <select id="shiftAllocation" className={selectClass} {...form.register("shiftAllocation")}>
-                  <option value="">— Select —</option>
-                  {shiftAllocations.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="deptGroup" className="text-xs">Department Group</Label>
-                <select id="deptGroup" className={selectClass} {...form.register("deptGroup")}>
-                  <option value="">— Select —</option>
-                  {deptGroups.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="departmentWorked" className="text-xs">Department Worked</Label>
-                <select id="departmentWorked" className={selectClass} {...form.register("departmentWorked")}>
-                  <option value="">— Select —</option>
-                  {departments.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={fieldClass}>
-                <Label htmlFor="department" className="text-xs">Department</Label>
-                <select id="department" className={selectClass} {...form.register("department")}>
-                  <option value="">— Select —</option>
-                  {departments.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
+              {/* Row 4: Department, Department Worked */}
+              <div className="flex flex-wrap gap-2">
+                <div className={fieldClass}>
+                  <Label htmlFor="department" className="text-xs">Department</Label>
+                  <select id="department" className={selectClass} {...form.register("department")}>
+                    <option value="">— Select —</option>
+                    {departments.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={fieldClass}>
+                  <Label htmlFor="departmentWorked" className="text-xs">Department Worked</Label>
+                  <select id="departmentWorked" className={selectClass} {...form.register("departmentWorked")}>
+                    <option value="">— Select —</option>
+                    {departments.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -547,11 +573,11 @@ export function EmployeeForm({
                   {...form.register("branchCode")}
                 />
               </div>
-              <div className={fieldClass}>
+              <div className={wideFieldClass}>
                 <Label htmlFor="bankAccNo" className="text-xs">Account Number</Label>
                 <Input id="bankAccNo" {...form.register("bankAccNo")} />
               </div>
-              <div className={fieldClass}>
+              <div className={wideFieldClass}>
                 <Label htmlFor="accHolder" className="text-xs">Account Holder</Label>
                 <Input id="accHolder" {...form.register("accHolder")} />
               </div>
