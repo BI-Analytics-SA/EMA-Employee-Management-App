@@ -7,6 +7,7 @@ import type { EmployeeFormValues } from "@/lib/validations/employee";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { extractConvexError } from "@/lib/convex-error";
 
 /** Allow only same-origin paths (no protocol, no //). Exported for tests. */
 export function getSafeReturnTo(searchParams: URLSearchParams): string | null {
@@ -71,6 +72,7 @@ export function EditEmployeePage() {
         hrsPerPeriod: values.hrsPerPeriod,
         hoursPerDay: values.hoursPerDay,
         workAddressCode: values.workAddressCode,
+        companyNumber: values.companyNumber || undefined,
         training: values.training,
         shift: values.shift || undefined,
         shiftAllocation: values.shiftAllocation || undefined,
@@ -90,7 +92,7 @@ export function EditEmployeePage() {
       navigate(returnTo ?? `/employees/${employeeId}`);
     } catch (err) {
       console.error(err);
-      setSubmitError(err instanceof Error ? err.message : "Failed to save changes. Please try again.");
+      setSubmitError(extractConvexError(err, "Failed to save changes. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

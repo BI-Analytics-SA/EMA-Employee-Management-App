@@ -104,6 +104,7 @@ const createArgs = {
   hrsPerPeriod: v.optional(v.number()),
   hoursPerDay: v.optional(v.number()),
   workAddressCode: v.optional(v.number()),
+  companyNumber: v.optional(v.string()),
   training: v.optional(v.boolean()),
   shift: v.optional(v.string()),
   shiftAllocation: v.optional(v.string()),
@@ -206,6 +207,7 @@ export const update = mutation({
     hrsPerPeriod: v.optional(v.number()),
     hoursPerDay: v.optional(v.number()),
     workAddressCode: v.optional(v.number()),
+    companyNumber: v.optional(v.string()),
     training: v.optional(v.boolean()),
     shift: v.optional(v.string()),
     shiftAllocation: v.optional(v.string()),
@@ -261,7 +263,7 @@ export const update = mutation({
       "resSuburb", "resCity", "resPostCode", "residentialCountry",
       "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
       "taxNumber", "certificate",
-      "hrsPerPeriod", "hoursPerDay", "workAddressCode",
+      "hrsPerPeriod", "hoursPerDay", "workAddressCode", "companyNumber",
       "training", "shift", "shiftAllocation", "deptGroup", "departmentWorked", "department", "maritalStatus",
       "illnessCondition",
       "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode", "accHolder", "accRelationship",
@@ -366,48 +368,6 @@ export const recalcDerivedFieldsInternal = internalMutation({
  */
 export const backfillDerivedFields = recalcDerivedFields;
 
-/**
- * Backfill bank detail defaults for existing employees in an organization.
- * Sets payMethod="03", bankAccType="S", accRelationship="O" only where currently null/undefined.
- * Run once per organization after deploying bank details; leaves existing values unchanged.
- * Loads all org employees in one query (same pattern as listAll); Convex allows only one paginate per mutation.
- */
-export const backfillBankDefaults = mutation({
-  args: { organizationId: v.id("organizations") },
-  handler: async (ctx, args) => {
-    const profile = await requireRoleInOrganization(
-      ctx,
-      args.organizationId,
-      "user"
-    );
-    if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot run this action");
-    }
-    const now = Date.now();
-    let updated = 0;
-
-    const allEmployees = await ctx.db
-      .query("employees")
-      .withIndex("by_organization_createdAt", (q) =>
-        q.eq("organizationId", args.organizationId)
-      )
-      .order("desc")
-      .collect();
-
-    for (const emp of allEmployees) {
-      const patch: Record<string, unknown> = { updatedAt: now };
-      if (emp.payMethod === undefined) patch.payMethod = "03";
-      if (emp.bankAccType === undefined) patch.bankAccType = "S";
-      if (emp.accRelationship === undefined) patch.accRelationship = "O";
-      if (Object.keys(patch).length > 1) {
-        await ctx.db.patch(emp._id, patch as Record<string, never>);
-        updated++;
-      }
-    }
-    return { updated, total: allEmployees.length };
-  },
-});
-
 /** Allowlist of column IDs that can be bulk-cleared. Must match frontend clearableColumns. */
 const CLEARABLE_COLUMNS = [
   "employeeNo", "title", "initials", "firstName", "secondName", "lastName",
@@ -417,7 +377,7 @@ const CLEARABLE_COLUMNS = [
   "resCity", "resPostCode", "residentialCountry",
   "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
   "taxNumber", "certificate",
-  "hrsPerPeriod", "hoursPerDay", "workAddressCode", "training",
+  "hrsPerPeriod", "hoursPerDay", "workAddressCode", "companyNumber", "training",
   "shift", "shiftAllocation", "deptGroup", "departmentWorked", "department",
   "maritalStatus", "illnessCondition",
   "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode",
@@ -506,8 +466,57 @@ export const remove = mutation({
       throw new Error("Access denied: You cannot delete employees");
     }
 
+    // Cascade-delete associated employee documents and their storage files
+    const documents = await ctx.db
+      .query("employeeDocuments")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.id))
+      .collect();
+    for (const doc of documents) {
+      try {
+        await ctx.storage.delete(doc.storageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
+      await ctx.db.delete(doc._id);
+    }
+
+    // Cascade-delete associated contracts and their storage files
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.id))
+      .collect();
+    for (const contract of contracts) {
+      if (contract.signatureStorageId) {
+        try {
+          await ctx.storage.delete(contract.signatureStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      if (contract.employerSignatureStorageId) {
+        try {
+          await ctx.storage.delete(contract.employerSignatureStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      if (contract.pdfStorageId) {
+        try {
+          await ctx.storage.delete(contract.pdfStorageId);
+        } catch {
+          // Storage file already deleted – ignore
+        }
+      }
+      await ctx.db.delete(contract._id);
+    }
+
+    // Delete employee image
     if (employee.imageStorageId) {
-      await ctx.storage.delete(employee.imageStorageId);
+      try {
+        await ctx.storage.delete(employee.imageStorageId);
+      } catch {
+        // Storage file already deleted – ignore
+      }
     }
 
     await ctx.db.delete(args.id);
@@ -531,5 +540,27 @@ export const recalcAllOrgs = internalMutation({
       );
     }
     return { scheduled: orgs.length };
+  },
+});
+
+/**
+ * One-time migration: copy workAddressCode values into the new companyNumber field.
+ * Safe/idempotent — only fills companyNumber where it is empty and workAddressCode is set.
+ * Run once after deploy via CLI: npx convex run --prod employees/mutations:migrateWorkAddressCodeToCompanyNumber
+ */
+export const migrateWorkAddressCodeToCompanyNumber = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allEmployees = await ctx.db.query("employees").collect();
+    let migrated = 0;
+    for (const emp of allEmployees) {
+      if (emp.workAddressCode != null && !emp.companyNumber) {
+        await ctx.db.patch(emp._id, {
+          companyNumber: String(emp.workAddressCode),
+        });
+        migrated++;
+      }
+    }
+    return { migrated, total: allEmployees.length };
   },
 });

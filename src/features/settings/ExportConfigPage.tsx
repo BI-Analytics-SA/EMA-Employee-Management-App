@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -6,6 +6,7 @@ import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowLeft, GripVertical, Plus, Trash2 } from "lucide-react";
+import { extractConvexError } from "@/lib/convex-error";
 import { Link } from "react-router-dom";
 import {
   DndContext,
@@ -65,7 +66,7 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "alternativeNumber", source: "database", dbField: "alternativeNumber", label: "Alternative Number", dataType: "text", enabled: false },
   { id: "hrsPerPeriod", source: "database", dbField: "hrsPerPeriod", label: "Hours per Period", dataType: "number", enabled: false },
   { id: "hoursPerDay", source: "database", dbField: "hoursPerDay", label: "Hours per Day", dataType: "number", enabled: false },
-  { id: "workAddressCode", source: "database", dbField: "workAddressCode", label: "Work Address Code", dataType: "number", enabled: false },
+  { id: "companyNumber", source: "database", dbField: "companyNumber", label: "Company Number", dataType: "text", enabled: false },
   { id: "resUnit", source: "database", dbField: "resUnit", label: "Res Unit", dataType: "text", enabled: false },
   { id: "resComplex", source: "database", dbField: "resComplex", label: "Res Complex", dataType: "text", enabled: false },
   { id: "residentialCountry", source: "database", dbField: "residentialCountry", label: "Residential Country", dataType: "text", enabled: false },
@@ -113,10 +114,14 @@ function SortableColumnRow({
   column,
   onUpdate,
   onRemove,
+  isNew,
+  onNewHandled,
 }: {
   column: ExportColumn;
   onUpdate: (id: string, updates: Partial<ExportColumn>) => void;
   onRemove: (id: string) => void;
+  isNew?: boolean;
+  onNewHandled?: () => void;
 }) {
   const {
     attributes,
@@ -127,6 +132,36 @@ function SortableColumnRow({
     isDragging,
   } = useSortable({ id: column.id });
 
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
+  const [highlight, setHighlight] = useState(false);
+
+  const combinedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setNodeRef(node);
+      rowRef.current = node;
+    },
+    [setNodeRef]
+  );
+
+  useEffect(() => {
+    if (!isNew) {
+      setHighlight(false);
+      return;
+    }
+    setHighlight(true);
+    requestAnimationFrame(() => {
+      rowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      labelInputRef.current?.focus();
+      labelInputRef.current?.select();
+    });
+    const timer = setTimeout(() => {
+      setHighlight(false);
+      onNewHandled?.();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isNew, onNewHandled]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -134,11 +169,12 @@ function SortableColumnRow({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3",
-        isDragging && "opacity-50 shadow-md"
+        "flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 transition-shadow duration-700",
+        isDragging && "opacity-50 shadow-md",
+        highlight && "ring-2 ring-primary"
       )}
     >
       <button
@@ -161,6 +197,7 @@ function SortableColumnRow({
       </label>
       <div className="w-full min-w-0 sm:min-w-[140px] sm:flex-1">
         <Input
+          ref={labelInputRef}
           value={column.label}
           onChange={(e) => onUpdate(column.id, { label: e.target.value })}
           placeholder="Column label"
@@ -218,14 +255,14 @@ export function ExportConfigPage() {
   const { organization, isAdmin, isLoading: userLoading } = useCurrentUser();
   const exportingEnabled = useModuleEnabled("exporting");
   const updateExportConfig = useMutation(api.organizations.mutations.updateExportConfig);
-  const backfillBankDefaults = useMutation(api.employees.mutations.backfillBankDefaults);
+
+  const newlyAddedIdRef = useRef<string | null>(null);
 
   const [columns, setColumns] = useState<ExportColumn[]>(DEFAULT_DATABASE_COLUMNS);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillResult, setBackfillResult] = useState<{ updated: number; total: number } | null>(null);
-  const [backfillError, setBackfillError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const savedColumns = organization?.settings?.exportConfig?.columns as
     | ExportColumn[]
@@ -234,6 +271,12 @@ export function ExportConfigPage() {
   useEffect(() => {
     setColumns(mergeExportColumns(DEFAULT_DATABASE_COLUMNS, savedColumns));
   }, [savedColumns]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -264,6 +307,7 @@ export function ExportConfigPage() {
 
   const handleAddCustom = () => {
     const id = `custom-${Date.now()}`;
+    newlyAddedIdRef.current = id;
     setColumns((prev) => [
       ...prev,
       {
@@ -277,39 +321,34 @@ export function ExportConfigPage() {
     ]);
   };
 
+  const handleNewHandled = useCallback(() => {
+    newlyAddedIdRef.current = null;
+  }, []);
+
   const handleSave = async () => {
     const orgId = organization?._id;
     if (!orgId) return;
     setSaving(true);
     setSaveError(null);
+    setSaveSuccess(false);
     try {
       await updateExportConfig({
         organizationId: orgId,
         columns,
       });
+      setSaveSuccess(true);
+      if (successTimeoutRef.current != null) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => {
+        setSaveSuccess(false);
+        successTimeoutRef.current = null;
+      }, 3000);
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : "Failed to save configuration.");
+      setSaveError(extractConvexError(e, "Failed to save configuration."));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleBackfillBankDefaults = async () => {
-    const orgId = organization?._id;
-    if (!orgId) return;
-    setBackfilling(true);
-    setBackfillResult(null);
-    setBackfillError(null);
-    try {
-      const result = await backfillBankDefaults({ organizationId: orgId });
-      setBackfillResult(result);
-    } catch (e) {
-      setBackfillResult(null);
-      setBackfillError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBackfilling(false);
-    }
-  };
 
   if (userLoading || organization === undefined) {
     return (
@@ -378,6 +417,8 @@ export function ExportConfigPage() {
                   column={col}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  isNew={col.id === newlyAddedIdRef.current}
+                  onNewHandled={handleNewHandled}
                 />
               ))}
             </div>
@@ -387,6 +428,9 @@ export function ExportConfigPage() {
 
       {saveError && (
         <p className="text-sm text-destructive">{saveError}</p>
+      )}
+      {saveSuccess && (
+        <p className="text-sm text-success">Configuration saved.</p>
       )}
 
       <div className="flex items-center gap-2 pt-2">
@@ -402,39 +446,6 @@ export function ExportConfigPage() {
         </Button>
       </div>
 
-      <div className="rounded-lg border bg-card p-4 space-y-2">
-        <h2 className="text-sm font-semibold">Bank details defaults</h2>
-        <p className="text-sm text-muted-foreground">
-          Set Pay Method to Electronic Payment, Account Type to Savings, and Relationship to Own for all employees
-          who currently have these fields empty. Existing values are left unchanged.
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleBackfillBankDefaults}
-          disabled={backfilling || !organization?._id}
-        >
-          {backfilling ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Updating…
-            </>
-          ) : (
-            "Set default bank fields for all employees"
-          )}
-        </Button>
-        {backfillError && (
-          <p className="text-sm text-destructive">
-            {backfillError}
-          </p>
-        )}
-        {backfillResult !== null && !backfillError && (
-          <p className="text-sm text-muted-foreground">
-            Updated {backfillResult.updated} of {backfillResult.total} employees.
-          </p>
-        )}
-      </div>
     </div>
   );
 }

@@ -336,6 +336,12 @@ export function SignatureCapture({
             src={visibleSignatureUrl}
             alt="Existing signature"
             className="w-full h-auto max-h-[200px] object-contain bg-white"
+            onError={() => {
+              // If the image fails to load (e.g. storage file deleted), fall back to the drawing canvas
+              setShowExisting(false);
+              setUserDismissedExisting(true);
+              setHasDrawn(false);
+            }}
           />
         </div>
         <div className="flex flex-wrap gap-2">

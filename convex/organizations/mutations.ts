@@ -1,6 +1,6 @@
 import { mutation } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireRoleInOrganization } from "../lib/permissions";
 
@@ -158,10 +158,10 @@ export const addSettingsItem = mutation({
     const current = org.settings?.[args.field] ?? [];
     const trimmed = args.value.trim();
     if (!trimmed) {
-      throw new Error("Value cannot be empty");
+      throw new ConvexError("Value cannot be empty");
     }
     if (current.includes(trimmed)) {
-      throw new Error("This value already exists");
+      throw new ConvexError("This value already exists");
     }
     const newArray = [...current, trimmed];
     await ctx.db.patch(args.organizationId, {
@@ -188,12 +188,12 @@ export const removeSettingsItem = mutation({
     }
     const trimmedValue = args.value.trim();
     if (!trimmedValue) {
-      throw new Error("Value cannot be empty");
+      throw new ConvexError("Value cannot be empty");
     }
     const current = org.settings?.[args.field] ?? [];
     const newArray = current.filter((item) => item !== trimmedValue);
     if (newArray.length === current.length) {
-      throw new Error("Item not found");
+      throw new ConvexError("Item not found");
     }
     await ctx.db.patch(args.organizationId, {
       settings: mergeSettingsWithDataArray(org.settings, args.field, newArray),
@@ -267,7 +267,7 @@ export const addDocumentType = mutation({
     const currentTypes = org.settings?.documentTypes ?? [];
     const existing = currentTypes.find((t) => t.id === args.documentType.id);
     if (existing) {
-      throw new Error("A document type with this ID already exists");
+      throw new ConvexError("A document type with this ID already exists");
     }
 
     const newTypes = [...currentTypes, args.documentType];
@@ -315,7 +315,7 @@ export const updateDocumentType = mutation({
     const currentTypes = org.settings?.documentTypes ?? [];
     const index = currentTypes.findIndex((t) => t.id === args.id);
     if (index === -1) {
-      throw new Error("Document type not found");
+      throw new ConvexError("Document type not found");
     }
 
     const updated = { ...currentTypes[index] };
@@ -369,7 +369,7 @@ export const removeDocumentType = mutation({
     const newTypes = currentTypes.filter((t) => t.id !== args.id);
 
     if (newTypes.length === currentTypes.length) {
-      throw new Error("Document type not found");
+      throw new ConvexError("Document type not found");
     }
 
     await ctx.db.patch(args.organizationId, {
@@ -395,7 +395,7 @@ export const addJobDocumentType = mutation({
 
     const currentTypes = org.settings?.jobDocumentTypes ?? [];
     if (currentTypes.some((t) => t.id === args.documentType.id)) {
-      throw new Error("A job document type with this ID already exists");
+      throw new ConvexError("A job document type with this ID already exists");
     }
 
     const newTypes = [...currentTypes, args.documentType];
@@ -424,7 +424,7 @@ export const updateJobDocumentType = mutation({
 
     const currentTypes = org.settings?.jobDocumentTypes ?? [];
     const index = currentTypes.findIndex((t) => t.id === args.id);
-    if (index === -1) throw new Error("Job document type not found");
+    if (index === -1) throw new ConvexError("Job document type not found");
 
     const updated = { ...currentTypes[index] };
     if (args.name !== undefined) updated.name = args.name;
@@ -458,7 +458,7 @@ export const removeJobDocumentType = mutation({
     const currentTypes = org.settings?.jobDocumentTypes ?? [];
     const newTypes = currentTypes.filter((t) => t.id !== args.id);
     if (newTypes.length === currentTypes.length) {
-      throw new Error("Job document type not found");
+      throw new ConvexError("Job document type not found");
     }
 
     await ctx.db.patch(args.organizationId, {

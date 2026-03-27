@@ -106,3 +106,28 @@ export const getByOrganizationAndIdNumber = query({
       .unique();
   },
 });
+
+/**
+ * Get counts of associated data for an employee (documents, contracts).
+ * Used by the delete confirmation dialog.
+ */
+export const getAssociatedCounts = query({
+  args: { employeeId: v.id("employees") },
+  handler: async (ctx, args) => {
+    const employee = await ctx.db.get(args.employeeId);
+    if (!employee) return { documents: 0, contracts: 0 };
+    await requireOrganizationAccess(ctx, employee.organizationId);
+
+    const documents = await ctx.db
+      .query("employeeDocuments")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.employeeId))
+      .collect();
+
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_employee", (q) => q.eq("employeeId", args.employeeId))
+      .collect();
+
+    return { documents: documents.length, contracts: contracts.length };
+  },
+});

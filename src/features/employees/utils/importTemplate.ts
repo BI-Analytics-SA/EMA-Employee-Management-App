@@ -33,7 +33,7 @@ export const IMPORT_COLUMNS = [
   { label: "Certificate", field: "certificate" as const, required: false },
   { label: "Hours per Period", field: "hrsPerPeriod" as const, required: false },
   { label: "Hours per Day", field: "hoursPerDay" as const, required: false },
-  { label: "Work Address Code", field: "workAddressCode" as const, required: false },
+  { label: "Company Number", field: "companyNumber" as const, required: false },
   { label: "Training", field: "training" as const, required: false },
   { label: "Shift", field: "shift" as const, required: false },
   { label: "Shift Allocation", field: "shiftAllocation" as const, required: false },

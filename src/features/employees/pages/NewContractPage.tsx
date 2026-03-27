@@ -4,6 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
+import { extractConvexError } from "@/lib/convex-error";
 import { getEffectiveTemplates, getDefaultTemplate } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { ContractForm } from "@/features/contracts/components/ContractForm";
@@ -39,6 +40,18 @@ export function NewContractPage() {
     templates[0] ??
     null;
 
+  // Resolve a fresh URL from the storageId to avoid stale/invalid stored URLs
+  const freshTemplateSigUrl = useQuery(
+    api.lib.storage.getStorageUrl,
+    selectedTemplate?.employerSignatureStorageId
+      ? { storageId: selectedTemplate.employerSignatureStorageId as Id<"_storage"> }
+      : "skip"
+  );
+  const effectiveTemplateSigUrl = freshTemplateSigUrl
+    ?? (selectedTemplate?.employerSignatureUrl?.startsWith("http")
+      ? selectedTemplate.employerSignatureUrl
+      : undefined);
+
   const handleSubmit = async (
     values: ContractFormValues,
     signatureFile: File | null,
@@ -63,7 +76,7 @@ export function NewContractPage() {
         termsAndConditionsHtml: html.termsAndConditionsHtml || undefined,
         templateId: selectedTemplate?.id,
         companyName: selectedTemplate?.companyName,
-        employerSignatureUrl: selectedTemplate?.employerSignatureUrl,
+        employerSignatureUrl: effectiveTemplateSigUrl,
         employerSignatureStorageId: selectedTemplate?.employerSignatureStorageId as Id<"_storage"> | undefined,
       });
       if (signatureFile) {
@@ -80,7 +93,7 @@ export function NewContractPage() {
       navigate(`/employees/${employeeId}/contracts/${contractId}`);
     } catch (err) {
       console.error(err);
-      setSubmitError(err instanceof Error ? err.message : "Failed to create contract. Please try again.");
+      setSubmitError(extractConvexError(err, "Failed to create contract. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +190,7 @@ export function NewContractPage() {
         isSubmitting={isSubmitting}
         submitLabel="Create contract"
         companyName={selectedTemplate?.companyName ?? ""}
-        employerSignatureUrl={selectedTemplate?.employerSignatureUrl ?? undefined}
+        employerSignatureUrl={effectiveTemplateSigUrl}
       />
     </div>
   );

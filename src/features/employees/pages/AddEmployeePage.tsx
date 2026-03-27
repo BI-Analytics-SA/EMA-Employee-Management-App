@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { EmployeeForm } from "../components/EmployeeForm";
 import type { EmployeeFormValues } from "@/lib/validations/employee";
 import { useState } from "react";
+import { extractConvexError } from "@/lib/convex-error";
 
 export function AddEmployeePage() {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export function AddEmployeePage() {
         hrsPerPeriod: values.hrsPerPeriod,
         hoursPerDay: values.hoursPerDay,
         workAddressCode: values.workAddressCode,
+        companyNumber: values.companyNumber || undefined,
         training: values.training,
         shift: values.shift || undefined,
         shiftAllocation: values.shiftAllocation || undefined,
@@ -71,7 +73,7 @@ export function AddEmployeePage() {
       navigate(`/employees/${id}`);
     } catch (err) {
       console.error(err);
-      setSubmitError(err instanceof Error ? err.message : "Failed to add employee. Please try again.");
+      setSubmitError(extractConvexError(err, "Failed to add employee. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
