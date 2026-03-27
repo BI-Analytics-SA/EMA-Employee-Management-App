@@ -66,7 +66,7 @@ export const CLEARABLE_COLUMNS: ClearableColumnDef[] = [
   // Work
   { id: "hrsPerPeriod", label: "Hours per Period", category: "work" },
   { id: "hoursPerDay", label: "Hours per Day", category: "work" },
-  { id: "workAddressCode", label: "Work Address Code", category: "work" },
+  { id: "companyNumber", label: "Company Number", category: "work" },
   { id: "training", label: "Training", category: "work" },
   { id: "shift", label: "Shift", category: "work" },
   { id: "shiftAllocation", label: "Shift Allocation", category: "work" },

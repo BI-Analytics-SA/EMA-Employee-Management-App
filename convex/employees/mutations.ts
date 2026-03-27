@@ -104,6 +104,7 @@ const createArgs = {
   hrsPerPeriod: v.optional(v.number()),
   hoursPerDay: v.optional(v.number()),
   workAddressCode: v.optional(v.number()),
+  companyNumber: v.optional(v.string()),
   training: v.optional(v.boolean()),
   shift: v.optional(v.string()),
   shiftAllocation: v.optional(v.string()),
@@ -206,6 +207,7 @@ export const update = mutation({
     hrsPerPeriod: v.optional(v.number()),
     hoursPerDay: v.optional(v.number()),
     workAddressCode: v.optional(v.number()),
+    companyNumber: v.optional(v.string()),
     training: v.optional(v.boolean()),
     shift: v.optional(v.string()),
     shiftAllocation: v.optional(v.string()),
@@ -261,7 +263,7 @@ export const update = mutation({
       "resSuburb", "resCity", "resPostCode", "residentialCountry",
       "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
       "taxNumber", "certificate",
-      "hrsPerPeriod", "hoursPerDay", "workAddressCode",
+      "hrsPerPeriod", "hoursPerDay", "workAddressCode", "companyNumber",
       "training", "shift", "shiftAllocation", "deptGroup", "departmentWorked", "department", "maritalStatus",
       "illnessCondition",
       "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode", "accHolder", "accRelationship",
@@ -375,7 +377,7 @@ const CLEARABLE_COLUMNS = [
   "resCity", "resPostCode", "residentialCountry",
   "dateRegistered", "dateEngaged", "lastDateWorked", "uifEndDate",
   "taxNumber", "certificate",
-  "hrsPerPeriod", "hoursPerDay", "workAddressCode", "training",
+  "hrsPerPeriod", "hoursPerDay", "workAddressCode", "companyNumber", "training",
   "shift", "shiftAllocation", "deptGroup", "departmentWorked", "department",
   "maritalStatus", "illnessCondition",
   "payMethod", "bankAccType", "bankAccNo", "bankName", "branchCode",
@@ -538,5 +540,27 @@ export const recalcAllOrgs = internalMutation({
       );
     }
     return { scheduled: orgs.length };
+  },
+});
+
+/**
+ * One-time migration: copy workAddressCode values into the new companyNumber field.
+ * Safe/idempotent — only fills companyNumber where it is empty and workAddressCode is set.
+ * Run once after deploy via CLI: npx convex run --prod employees/mutations:migrateWorkAddressCodeToCompanyNumber
+ */
+export const migrateWorkAddressCodeToCompanyNumber = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const allEmployees = await ctx.db.query("employees").collect();
+    let migrated = 0;
+    for (const emp of allEmployees) {
+      if (emp.workAddressCode != null && !emp.companyNumber) {
+        await ctx.db.patch(emp._id, {
+          companyNumber: String(emp.workAddressCode),
+        });
+        migrated++;
+      }
+    }
+    return { migrated, total: allEmployees.length };
   },
 });

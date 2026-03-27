@@ -179,9 +179,9 @@ export const EMPLOYEE_REPORT_COLUMNS: EmployeeReportColumnDef[] = [
     defaultVisible: false,
   },
   {
-    id: "workAddressCode",
-    label: "Work Address Code",
-    getValue: (emp) => emp.workAddressCode ?? undefined,
+    id: "companyNumber",
+    label: "Company Number",
+    getValue: (emp) => emp.companyNumber ?? undefined,
     defaultVisible: false,
   },
   {

@@ -82,6 +82,7 @@ export const employeeFormSchema = z.object({
   hrsPerPeriod: optionalNumeric,
   hoursPerDay: optionalNumeric,
   workAddressCode: optionalNumeric,
+  companyNumber: optionalString,
   training: z
     .union([z.boolean(), z.enum(["true", "false"]), z.literal("")])
     .optional()

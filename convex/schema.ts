@@ -207,6 +207,7 @@ export default defineSchema({
     hrsPerPeriod: v.optional(v.number()),
     hoursPerDay: v.optional(v.number()),
     workAddressCode: v.optional(v.number()),
+    companyNumber: v.optional(v.string()),
     training: v.optional(v.boolean()),
     shift: v.optional(v.string()),
     shiftAllocation: v.optional(v.string()),
