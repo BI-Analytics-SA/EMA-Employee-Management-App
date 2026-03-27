@@ -170,6 +170,8 @@ export function EmployeeForm({
   const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1"; // Wider for date picker icon
   const wideFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1";
   const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Title, Initials
+  const nameFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]"; // Names, illness condition
+  const emailFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[220px] sm:flex-[2]"; // Email
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -278,7 +280,7 @@ export function EmployeeForm({
                 <Label htmlFor="alternativeNumber" className="text-xs">Alternative Number</Label>
                 <Input id="alternativeNumber" {...form.register("alternativeNumber")} />
               </div>
-              <div className="space-y-1 w-full min-w-0 sm:min-w-[220px] sm:flex-[2]">
+              <div className={emailFieldClass}>
                 <Label htmlFor="email" className="text-xs">Email</Label>
                 <Input id="email" type="email" {...form.register("email")} placeholder="employee@example.com" />
                 {form.formState.errors.email && (
@@ -314,28 +316,28 @@ export function EmployeeForm({
                     <p className="text-xs text-destructive">{form.formState.errors.initials.message}</p>
                   )}
                 </div>
-                <div className="space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]">
+                <div className={nameFieldClass}>
                   <Label htmlFor="firstName" className="text-xs">First Name</Label>
                   <Input id="firstName" {...form.register("firstName")} />
                   {form.formState.errors.firstName && (
                     <p className="text-xs text-destructive">{form.formState.errors.firstName.message}</p>
                   )}
                 </div>
-                <div className="space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]">
+                <div className={nameFieldClass}>
                   <Label htmlFor="secondName" className="text-xs">Second Name</Label>
                   <Input id="secondName" {...form.register("secondName")} />
                 </div>
               </div>
               {/* Row 2: Last Name, Known As */}
               <div className="flex flex-wrap gap-2">
-                <div className="space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1">
+                <div className={nameFieldClass}>
                   <Label htmlFor="lastName" className="text-xs">Last Name</Label>
                   <Input id="lastName" {...form.register("lastName")} />
                   {form.formState.errors.lastName && (
                     <p className="text-xs text-destructive">{form.formState.errors.lastName.message}</p>
                   )}
                 </div>
-                <div className="space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1">
+                <div className={nameFieldClass}>
                   <Label htmlFor="knownAs" className="text-xs">Known As</Label>
                   <Input id="knownAs" {...form.register("knownAs")} />
                   {form.formState.errors.knownAs && (
@@ -386,7 +388,7 @@ export function EmployeeForm({
                   <Label htmlFor="language" className="text-xs">Language</Label>
                   <Input id="language" {...form.register("language")} />
                 </div>
-                <div className="space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]">
+                <div className={nameFieldClass}>
                   <Label htmlFor="illnessCondition" className="text-xs">Illness Condition</Label>
                   <Input id="illnessCondition" {...form.register("illnessCondition")} placeholder="e.g. ASTHMA" />
                 </div>
