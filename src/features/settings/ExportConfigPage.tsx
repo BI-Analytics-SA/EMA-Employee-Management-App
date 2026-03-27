@@ -66,7 +66,7 @@ export const DEFAULT_DATABASE_COLUMNS: ExportColumn[] = [
   { id: "alternativeNumber", source: "database", dbField: "alternativeNumber", label: "Alternative Number", dataType: "text", enabled: false },
   { id: "hrsPerPeriod", source: "database", dbField: "hrsPerPeriod", label: "Hours per Period", dataType: "number", enabled: false },
   { id: "hoursPerDay", source: "database", dbField: "hoursPerDay", label: "Hours per Day", dataType: "number", enabled: false },
-  { id: "workAddressCode", source: "database", dbField: "workAddressCode", label: "Work Address Code", dataType: "number", enabled: false },
+  { id: "companyNumber", source: "database", dbField: "companyNumber", label: "Company Number", dataType: "text", enabled: false },
   { id: "resUnit", source: "database", dbField: "resUnit", label: "Res Unit", dataType: "text", enabled: false },
   { id: "resComplex", source: "database", dbField: "resComplex", label: "Res Complex", dataType: "text", enabled: false },
   { id: "residentialCountry", source: "database", dbField: "residentialCountry", label: "Residential Country", dataType: "text", enabled: false },

@@ -102,6 +102,7 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     hrsPerPeriod: emp.hrsPerPeriod ?? "",
     hoursPerDay: emp.hoursPerDay ?? "",
     workAddressCode: emp.workAddressCode ?? "",
+    companyNumber: emp.companyNumber ?? "",
     training: (emp.training != null ? String(emp.training) : "") as "" | "true" | "false",
     shift: emp.shift ?? "",
     shiftAllocation: emp.shiftAllocation ?? "",
@@ -439,10 +440,10 @@ export function EmployeeForm({
                 )}
               </div>
               <div className={wideFieldClass}>
-                <Label htmlFor="workAddressCode" className="text-xs">Work Address Code</Label>
-                <Input id="workAddressCode" type="number" {...form.register("workAddressCode")} />
-                {form.formState.errors.workAddressCode && (
-                  <p className="text-xs text-destructive">{form.formState.errors.workAddressCode.message}</p>
+                <Label htmlFor="companyNumber" className="text-xs">Company Number</Label>
+                <Input id="companyNumber" type="text" {...form.register("companyNumber")} />
+                {form.formState.errors.companyNumber && (
+                  <p className="text-xs text-destructive">{form.formState.errors.companyNumber.message}</p>
                 )}
               </div>
               <div className={fieldClass}>

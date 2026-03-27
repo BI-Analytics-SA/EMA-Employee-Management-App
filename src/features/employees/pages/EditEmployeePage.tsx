@@ -72,6 +72,7 @@ export function EditEmployeePage() {
         hrsPerPeriod: values.hrsPerPeriod,
         hoursPerDay: values.hoursPerDay,
         workAddressCode: values.workAddressCode,
+        companyNumber: values.companyNumber || undefined,
         training: values.training,
         shift: values.shift || undefined,
         shiftAllocation: values.shiftAllocation || undefined,

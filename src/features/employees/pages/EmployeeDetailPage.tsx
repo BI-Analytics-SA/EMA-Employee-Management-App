@@ -252,7 +252,7 @@ export function EmployeeDetailPage() {
             <InfoRow label="Shift allocation" value={employee.shiftAllocation} />
             <InfoRow label="Hours per period" value={employee.hrsPerPeriod} />
             <InfoRow label="Hours per day" value={employee.hoursPerDay} />
-            <InfoRow label="Work address code" value={employee.workAddressCode} />
+            <InfoRow label="Company number" value={employee.companyNumber} />
             <InfoRow label="Training" value={employee.training != null ? (employee.training ? "Yes" : "No") : undefined} />
           </div>
         </section>
