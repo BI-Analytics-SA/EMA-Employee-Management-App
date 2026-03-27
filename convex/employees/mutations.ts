@@ -548,7 +548,7 @@ export const recalcAllOrgs = internalMutation({
  * Safe/idempotent — only fills companyNumber where it is empty and workAddressCode is set.
  * Run once after deploy via CLI: npx convex run --prod employees/mutations:migrateWorkAddressCodeToCompanyNumber
  */
-export const migrateWorkAddressCodeToCompanyNumber = mutation({
+export const migrateWorkAddressCodeToCompanyNumber = internalMutation({
   args: {},
   handler: async (ctx) => {
     const allEmployees = await ctx.db.query("employees").collect();
