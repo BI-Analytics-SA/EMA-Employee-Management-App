@@ -398,11 +398,11 @@ export const bulkClearColumns = mutation({
   handler: async (ctx, args) => {
     await requireRoleInOrganization(ctx, args.organizationId, "admin");
     if (args.columns.length === 0) {
-      throw new Error("At least one column must be selected");
+      throw new ConvexError("At least one column must be selected");
     }
     const invalid = args.columns.filter((c) => !CLEARABLE_SET.has(c));
     if (invalid.length > 0) {
-      throw new Error(`Invalid or protected columns: ${invalid.join(", ")}`);
+      throw new ConvexError(`Invalid or protected columns: ${invalid.join(", ")}`);
     }
     const now = Date.now();
     let updated = 0;

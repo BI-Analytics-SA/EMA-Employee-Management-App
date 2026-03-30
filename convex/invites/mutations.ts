@@ -172,7 +172,10 @@ export const useInvite = mutation({
     // If invite has a specific email, verify it matches
     if (invite.email) {
       const user = await ctx.db.get(userId);
-      if (user?.email?.toLowerCase() !== invite.email.toLowerCase()) {
+      if (!user?.email) {
+        throw new ConvexError("Your account does not have an email address associated with it");
+      }
+      if (user.email.toLowerCase() !== invite.email.toLowerCase()) {
         throw new ConvexError("This invite was sent to a different email address");
       }
     }
