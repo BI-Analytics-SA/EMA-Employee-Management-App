@@ -27,16 +27,14 @@ export function ColumnPicker({
   const [sheetOpen, setSheetOpen] = useState(false);
   const setPreferences = useMutation(api.reportPreferences.mutations.setReportColumnPreferences);
 
-  const effectiveSelected = selectedColumnIds;
-
   function toggleColumn(col: EmployeeReportColumnDef) {
-    const isCurrentlySelected = effectiveSelected.includes(col.id);
+    const isCurrentlySelected = selectedColumnIds.includes(col.id);
     let next: string[];
     if (isCurrentlySelected) {
-      const without = effectiveSelected.filter((id) => id !== col.id);
-      next = without.length > 0 ? without : effectiveSelected;
+      const without = selectedColumnIds.filter((id) => id !== col.id);
+      next = without.length > 0 ? without : selectedColumnIds;
     } else {
-      next = [...effectiveSelected, col.id];
+      next = [...selectedColumnIds, col.id];
     }
     onSelectedColumnIdsChange(next);
     onColumnsChange?.(next);
@@ -66,14 +64,14 @@ export function ColumnPicker({
           <button
             type="button"
             onClick={handleClearAll}
-            disabled={effectiveSelected.length === 0}
+            disabled={selectedColumnIds.length === 0}
             className="text-xs font-medium text-destructive hover:text-destructive/70 disabled:opacity-40 disabled:pointer-events-none mb-4 block text-left underline underline-offset-2"
           >
             Clear selections
           </button>
           <div className="flex flex-col gap-2">
             {EMPLOYEE_REPORT_COLUMNS.map((col) => {
-              const checked = effectiveSelected.includes(col.id);
+              const checked = selectedColumnIds.includes(col.id);
               return (
                 <label
                   key={col.id}
@@ -94,7 +92,7 @@ export function ColumnPicker({
             })}
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            At least one column must be selected. Your choice is saved automatically.
+            Select at least one column to display. Your choices are saved automatically.
           </p>
         </SheetContent>
       </Sheet>
