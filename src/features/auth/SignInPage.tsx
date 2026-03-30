@@ -431,7 +431,7 @@ export function SignInPage() {
               <div className="text-sm text-center text-muted-foreground">
                 <button
                   type="button"
-                  className="text-primary hover:underline"
+                  className="text-primary hover:underline font-medium"
                   onClick={() => switchFlow("forgot")}
                 >
                   Forgot password?
