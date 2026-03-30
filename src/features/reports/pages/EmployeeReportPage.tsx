@@ -126,7 +126,6 @@ export function EmployeeReportPage() {
           </Button>
           <ColumnPicker
             reportId={REPORT_ID_EMPLOYEES}
-            savedColumnIds={savedColumnIds ?? null}
             selectedColumnIds={selectedColumnIds}
             onSelectedColumnIdsChange={setSelectedColumnIds}
           />
