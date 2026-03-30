@@ -134,7 +134,7 @@ This email was sent to ${args.recipientEmail} by ${orgName}.
 
     if (error) {
       console.error("Failed to send contract email:", error);
-      throw new ConvexError(`Failed to send email: ${error.message}`);
+      throw new ConvexError("Failed to send contract email");
     }
 
     // Record when and to whom the contract was emailed

@@ -110,7 +110,7 @@ If you didn't expect this invitation, you can safely ignore this email.
 
     if (error) {
       console.error("Failed to send invite email:", error);
-      throw new ConvexError(`Failed to send email: ${error.message}`);
+      throw new ConvexError("Failed to send invite email");
     }
 
     // Mark invite as email sent
