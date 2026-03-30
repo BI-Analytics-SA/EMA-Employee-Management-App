@@ -1,7 +1,7 @@
 "use node";
 
 import { action } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { Resend } from "resend";
 import { internal } from "../_generated/api";
 
@@ -25,7 +25,7 @@ export const sendContractEmail = action({
   },
   handler: async (ctx, args) => {
     if (!/^\S+@\S+\.\S+$/.test(args.recipientEmail)) {
-      throw new Error("Invalid recipient email address");
+      throw new ConvexError("Invalid recipient email address");
     }
 
     const contractData = await ctx.runQuery(
@@ -38,7 +38,7 @@ export const sendContractEmail = action({
     }
 
     if (!contractData.pdfUrl) {
-      throw new Error("No PDF has been generated for this contract yet. Please generate the PDF first.");
+      throw new ConvexError("No PDF has been generated for this contract yet. Please generate the PDF first.");
     }
 
     const resendApiKey = process.env.RESEND_API_KEY;
@@ -60,12 +60,12 @@ export const sendContractEmail = action({
     try {
       const pdfResponse = await fetch(contractData.pdfUrl, { signal: controller.signal });
       if (!pdfResponse.ok) {
-        throw new Error(`Failed to fetch contract PDF: ${pdfResponse.statusText}`);
+        throw new ConvexError(`Failed to fetch contract PDF: ${pdfResponse.statusText}`);
       }
       pdfBuffer = await pdfResponse.arrayBuffer();
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        throw new Error("Timed out fetching the contract PDF from storage. Please try again.");
+        throw new ConvexError("Timed out fetching the contract PDF from storage. Please try again.");
       }
       throw err;
     } finally {
@@ -134,7 +134,7 @@ This email was sent to ${args.recipientEmail} by ${orgName}.
 
     if (error) {
       console.error("Failed to send contract email:", error);
-      throw new Error(`Failed to send email: ${error.message}`);
+      throw new ConvexError(`Failed to send email: ${error.message}`);
     }
 
     // Record when and to whom the contract was emailed

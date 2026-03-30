@@ -1,7 +1,7 @@
 "use node";
 
 import { action } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { Resend } from "resend";
 import { api } from "../_generated/api";
 
@@ -23,7 +23,7 @@ export const sendInviteEmail = action({
     }
 
     if (!invite.email) {
-      throw new Error("Invite does not have an email address");
+      throw new ConvexError("Invite does not have an email address");
     }
 
     // Initialize Resend
@@ -110,7 +110,7 @@ If you didn't expect this invitation, you can safely ignore this email.
 
     if (error) {
       console.error("Failed to send invite email:", error);
-      throw new Error(`Failed to send email: ${error.message}`);
+      throw new ConvexError(`Failed to send email: ${error.message}`);
     }
 
     // Mark invite as email sent

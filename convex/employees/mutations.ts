@@ -2,7 +2,7 @@ import { mutation, internalMutation } from "../_generated/server";
 import type { MutationCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 import { internal } from "../_generated/api";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageEmployees,
@@ -134,7 +134,7 @@ export const create = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot add employees");
+      throw new ConvexError("Access denied: You cannot add employees");
     }
 
     const existing = await ctx.db
@@ -146,7 +146,7 @@ export const create = mutation({
       )
       .unique();
     if (existing) {
-      throw new Error("An employee with this ID number already exists in this organization.");
+      throw new ConvexError("An employee with this ID number already exists in this organization.");
     }
 
     const now = Date.now();
@@ -237,7 +237,7 @@ export const update = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot edit employees");
+      throw new ConvexError("Access denied: You cannot edit employees");
     }
 
     if (updates.idNumber !== undefined && updates.idNumber !== employee.idNumber) {
@@ -250,7 +250,7 @@ export const update = mutation({
         )
         .unique();
       if (existing) {
-        throw new Error("Another employee already has this ID number.");
+        throw new ConvexError("Another employee already has this ID number.");
       }
     }
 
@@ -346,7 +346,7 @@ export const recalcDerivedFields = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot run this action");
+      throw new ConvexError("Access denied: You cannot run this action");
     }
     return runRecalcDerivedFieldsForOrg(ctx, args.organizationId);
   },
@@ -463,7 +463,7 @@ export const remove = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot delete employees");
+      throw new ConvexError("Access denied: You cannot delete employees");
     }
 
     // Cascade-delete associated employee documents and their storage files

@@ -1,5 +1,5 @@
 import { query } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -104,7 +104,7 @@ export const listByOrganization = query({
       .first();
 
     if (!currentProfile) {
-      throw new Error("Access denied");
+      throw new ConvexError("Access denied");
     }
 
     const profiles = await ctx.db

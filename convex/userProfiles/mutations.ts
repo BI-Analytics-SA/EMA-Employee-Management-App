@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -71,7 +71,7 @@ export const updateRole = mutation({
       .first();
 
     if (!currentProfile || currentProfile.role !== "admin") {
-      throw new Error("Only admins can change user roles");
+      throw new ConvexError("Only admins can change user roles");
     }
 
     // Prevent demoting yourself if you're the only admin
@@ -85,7 +85,7 @@ export const updateRole = mutation({
         .collect();
 
       if (adminCount.length <= 1) {
-        throw new Error("Cannot demote the only admin. Promote another user to admin first.");
+        throw new ConvexError("Cannot demote the only admin. Promote another user to admin first.");
       }
     }
 
@@ -123,12 +123,12 @@ export const deactivateUser = mutation({
       .first();
 
     if (!currentProfile || currentProfile.role !== "admin") {
-      throw new Error("Only admins can deactivate users");
+      throw new ConvexError("Only admins can deactivate users");
     }
 
     // Prevent deactivating yourself
     if (targetProfile._id === currentProfile._id) {
-      throw new Error("You cannot deactivate your own account");
+      throw new ConvexError("You cannot deactivate your own account");
     }
 
     await ctx.db.patch(args.profileId, { isActive: false });
@@ -165,7 +165,7 @@ export const reactivateUser = mutation({
       .first();
 
     if (!currentProfile || currentProfile.role !== "admin") {
-      throw new Error("Only admins can reactivate users");
+      throw new ConvexError("Only admins can reactivate users");
     }
 
     await ctx.db.patch(args.profileId, { isActive: true });
@@ -201,11 +201,11 @@ export const deleteUser = mutation({
       .first();
 
     if (!currentProfile || currentProfile.role !== "admin") {
-      throw new Error("Only admins can delete users");
+      throw new ConvexError("Only admins can delete users");
     }
 
     if (targetProfile._id === currentProfile._id) {
-      throw new Error("You cannot delete your own account");
+      throw new ConvexError("You cannot delete your own account");
     }
 
     if (targetProfile.role === "admin") {
@@ -218,7 +218,7 @@ export const deleteUser = mutation({
         .collect();
 
       if (adminCount.length <= 1) {
-        throw new Error("Cannot delete the only admin. Promote another user to admin first.");
+        throw new ConvexError("Cannot delete the only admin. Promote another user to admin first.");
       }
     }
 

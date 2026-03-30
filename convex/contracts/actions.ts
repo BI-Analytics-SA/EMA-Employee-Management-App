@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageContracts,
@@ -27,7 +27,7 @@ export const saveContractSignature = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot update contract signatures");
+      throw new ConvexError("Access denied: You cannot update contract signatures");
     }
 
     if (contract.signatureStorageId) {
@@ -64,7 +64,7 @@ export const deleteContractSignature = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot delete contract signatures");
+      throw new ConvexError("Access denied: You cannot delete contract signatures");
     }
 
     if (contract.signatureStorageId) {
@@ -103,7 +103,7 @@ export const saveContractPdf = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot update contract PDFs");
+      throw new ConvexError("Access denied: You cannot update contract PDFs");
     }
 
     if (contract.pdfStorageId) {
@@ -140,7 +140,7 @@ export const deleteContractPdf = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot delete contract PDFs");
+      throw new ConvexError("Access denied: You cannot delete contract PDFs");
     }
 
     if (contract.pdfStorageId) {

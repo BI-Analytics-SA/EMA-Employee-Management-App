@@ -27,7 +27,7 @@ export const create = mutation({
       .unique();
 
     if (existingOrg) {
-      throw new Error("An organization with this URL already exists. Please choose a different one.");
+      throw new ConvexError("An organization with this URL already exists. Please choose a different one.");
     }
 
     // Resolve display name: from args, or auth user, or fallback
@@ -87,7 +87,7 @@ export const updateSettings = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can update settings");
+      throw new ConvexError("Only organization admins can update settings");
     }
 
     // Preserve existing module/template/export settings when updating base settings
@@ -256,7 +256,7 @@ export const addDocumentType = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can manage document types");
+      throw new ConvexError("Only organization admins can manage document types");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -304,7 +304,7 @@ export const updateDocumentType = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can manage document types");
+      throw new ConvexError("Only organization admins can manage document types");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -357,7 +357,7 @@ export const removeDocumentType = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can manage document types");
+      throw new ConvexError("Only organization admins can manage document types");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -548,7 +548,7 @@ export const updateContractTemplate = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can update contract template");
+      throw new ConvexError("Only organization admins can update contract template");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -634,7 +634,7 @@ export const updateExportConfig = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can update export configuration");
+      throw new ConvexError("Only organization admins can update export configuration");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -682,7 +682,7 @@ export const migrateContractTemplates = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can run migration");
+      throw new ConvexError("Only organization admins can run migration");
     }
     const org = await ctx.db.get(profile.organizationId);
     if (!org) throw new Error("Organization not found");
@@ -784,7 +784,7 @@ export const saveEmployerSignature = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can update employer signature");
+      throw new ConvexError("Only organization admins can update employer signature");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -851,7 +851,7 @@ export const deleteEmployerSignature = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only organization admins can delete employer signature");
+      throw new ConvexError("Only organization admins can delete employer signature");
     }
 
     const org = await ctx.db.get(args.organizationId);
@@ -938,7 +938,7 @@ export const addContractTemplate = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can manage templates");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = org.settings?.contractTemplates ?? [];
@@ -988,7 +988,7 @@ export const updateContractTemplateById = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can manage templates");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = [...(org.settings?.contractTemplates ?? [])];
@@ -1019,13 +1019,13 @@ export const removeContractTemplate = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can manage templates");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = org.settings?.contractTemplates ?? [];
     const t = templates.find((x) => x.id === args.templateId);
     if (!t) throw new Error("Template not found");
-    if (t.isDefault) throw new Error("Cannot delete the default template");
+    if (t.isDefault) throw new ConvexError("Cannot delete the default template");
     const next = templates.filter((x) => x.id !== args.templateId);
     await ctx.db.patch(args.organizationId, {
       settings: buildFullSettings(org.settings, { contractTemplates: next }),
@@ -1045,7 +1045,7 @@ export const setDefaultContractTemplate = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can manage templates");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can manage templates");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = (org.settings?.contractTemplates ?? []).map((t) => ({
@@ -1076,7 +1076,7 @@ export const saveEmployerSignatureForTemplate = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can update employer signature");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can update employer signature");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = [...(org.settings?.contractTemplates ?? [])];
@@ -1114,7 +1114,7 @@ export const deleteEmployerSignatureForTemplate = mutation({
         q.eq("userId", userId).eq("organizationId", args.organizationId)
       )
       .first();
-    if (!profile || profile.role !== "admin") throw new Error("Only organization admins can delete employer signature");
+    if (!profile || profile.role !== "admin") throw new ConvexError("Only organization admins can delete employer signature");
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error("Organization not found");
     const templates = [...(org.settings?.contractTemplates ?? [])];
