@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageEmployees,
@@ -39,7 +39,7 @@ export const saveEmployeeImage = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot update employee photos");
+      throw new ConvexError("Access denied: You cannot update employee photos");
     }
 
     if (employee.imageStorageId) {
@@ -72,7 +72,7 @@ export const deleteEmployeeImage = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot delete employee photos");
+      throw new ConvexError("Access denied: You cannot delete employee photos");
     }
 
     if (employee.imageStorageId) {

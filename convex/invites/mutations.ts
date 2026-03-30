@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -43,7 +43,7 @@ export const create = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only admins can create invites");
+      throw new ConvexError("Only admins can create invites");
     }
 
     // Generate unique code
@@ -109,11 +109,11 @@ export const revoke = mutation({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only admins can revoke invites");
+      throw new ConvexError("Only admins can revoke invites");
     }
 
     if (invite.status !== "pending") {
-      throw new Error("Can only revoke pending invites");
+      throw new ConvexError("Can only revoke pending invites");
     }
 
     await ctx.db.patch(args.inviteId, { status: "revoked" });
@@ -144,11 +144,11 @@ export const useInvite = mutation({
       .unique();
 
     if (!invite) {
-      throw new Error("Invalid invite code");
+      throw new ConvexError("Invalid invite code");
     }
 
     if (invite.status !== "pending") {
-      throw new Error("This invite is no longer valid");
+      throw new ConvexError("This invite is no longer valid");
     }
 
     // Check if user is already a member of this organization
@@ -160,20 +160,23 @@ export const useInvite = mutation({
       .first();
 
     if (existingMembership) {
-      throw new Error("You are already a member of this organization");
+      throw new ConvexError("You are already a member of this organization");
     }
 
     if (invite.expiresAt && invite.expiresAt < Date.now()) {
       // Mark as expired
       await ctx.db.patch(invite._id, { status: "expired" });
-      throw new Error("This invite has expired");
+      throw new ConvexError("This invite has expired");
     }
 
     // If invite has a specific email, verify it matches
     if (invite.email) {
       const user = await ctx.db.get(userId);
-      if (user?.email?.toLowerCase() !== invite.email.toLowerCase()) {
-        throw new Error("This invite was sent to a different email address");
+      if (!user?.email) {
+        throw new ConvexError("Your account does not have an email address associated with it");
+      }
+      if (user.email.toLowerCase() !== invite.email.toLowerCase()) {
+        throw new ConvexError("This invite was sent to a different email address");
       }
     }
 

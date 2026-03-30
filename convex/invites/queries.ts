@@ -1,5 +1,5 @@
 import { query } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -61,7 +61,7 @@ export const listByOrganization = query({
       .first();
 
     if (!profile || profile.role !== "admin") {
-      throw new Error("Only admins can view invites");
+      throw new ConvexError("Only admins can view invites");
     }
 
     const invites = await ctx.db

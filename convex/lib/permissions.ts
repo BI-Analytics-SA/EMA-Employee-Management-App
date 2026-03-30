@@ -1,6 +1,7 @@
 import { QueryCtx, MutationCtx } from "../_generated/server";
 import { Id, Doc } from "../_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { ConvexError } from "convex/values";
 
 export type Role = "admin" | "manager" | "user";
 
@@ -19,7 +20,7 @@ export async function requireModuleEnabled(
   if (!org) throw new Error("Organization not found");
   const enabled = org.settings?.enabledModules?.[moduleName];
   if (!enabled) {
-    throw new Error(`Module "${moduleName}" is not enabled for this organization`);
+    throw new ConvexError(`Module "${moduleName}" is not enabled for this organization`);
   }
 }
 
@@ -47,11 +48,11 @@ export async function getAuthenticatedUserProfile(ctx: QueryCtx | MutationCtx): 
     .first();
 
   if (!profile) {
-    throw new Error("User profile not found. Please complete your profile setup.");
+    throw new ConvexError("User profile not found. Please complete your profile setup.");
   }
 
   if (!profile.isActive) {
-    throw new Error("User account is deactivated");
+    throw new ConvexError("User account is deactivated");
   }
 
   return profile;
@@ -90,11 +91,11 @@ export async function requireOrganizationAccess(
     .first();
 
   if (!profile) {
-    throw new Error("Access denied: You do not belong to this organization");
+    throw new ConvexError("Access denied: You do not belong to this organization");
   }
 
   if (!profile.isActive) {
-    throw new Error("User account is deactivated");
+    throw new ConvexError("User account is deactivated");
   }
 
   return profile;
@@ -124,7 +125,7 @@ export async function requireRole(
   const profile = await getAuthenticatedUserProfile(ctx);
 
   if (!hasMinimumRole(profile.role, requiredRole)) {
-    throw new Error(`Access denied: ${requiredRole} role or higher required`);
+    throw new ConvexError(`Access denied: ${requiredRole} role or higher required`);
   }
 
   return profile;
@@ -141,7 +142,7 @@ export async function requireRoleInOrganization(
   const profile = await requireOrganizationAccess(ctx, organizationId);
 
   if (!hasMinimumRole(profile.role, requiredRole)) {
-    throw new Error(`Access denied: ${requiredRole} role or higher required`);
+    throw new ConvexError(`Access denied: ${requiredRole} role or higher required`);
   }
 
   return profile;
