@@ -104,8 +104,10 @@ export function EmployeeListPage() {
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => { setSearchId(""); setSearchQuery(""); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label="Clear filter"
               title="Clear filter"
             >
               <X className="h-3.5 w-3.5" />
