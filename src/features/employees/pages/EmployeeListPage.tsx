@@ -100,38 +100,37 @@ export function EmployeeListPage() {
             onChange={(e) => setSearchId(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchId)}
             maxLength={13}
-            className="pl-9"
+            className={`pl-9${searchQuery ? " pr-8" : ""}`}
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => { setSearchId(""); setSearchQuery(""); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label="Clear filter"
+              title="Clear filter"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
-        <div className="flex w-full min-w-0 gap-2 sm:w-auto sm:flex-1">
+        <div className="flex w-full min-w-0 gap-2 sm:w-auto">
+          <Button
+            onClick={() => setSearchQuery(searchId)}
+            className="flex-1 sm:flex-initial min-w-0 px-6"
+          >
+            Search
+          </Button>
           <Button
             variant="outline"
             onClick={() => setScannerOpen(true)}
             title="Scan for ID number"
-            className="flex-1 min-w-0"
+            className="flex-1 sm:flex-initial min-w-0 px-6"
           >
             <QrCode className="h-4 w-4" />
             Scan
           </Button>
-          <Button
-            onClick={() => setSearchQuery(searchId)}
-            className="flex-1 min-w-0"
-          >
-            Search
-          </Button>
         </div>
-        {searchQuery && (
-          <button
-            onClick={() => {
-              setSearchId("");
-              setSearchQuery("");
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
-          >
-            ID: {searchQuery}
-            <X className="h-3 w-3" />
-          </button>
-        )}
       </div>
 
       <BarcodeScanner
