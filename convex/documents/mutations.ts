@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageEmployees,
@@ -34,7 +34,7 @@ export const create = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot add documents");
+      throw new ConvexError("Access denied: You cannot add documents");
     }
 
     const fileUrl = await ctx.storage.getUrl(args.storageId);
@@ -88,7 +88,7 @@ export const update = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot edit documents");
+      throw new ConvexError("Access denied: You cannot edit documents");
     }
 
     const patch: Record<string, unknown> = {};
@@ -122,7 +122,7 @@ export const remove = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot delete documents");
+      throw new ConvexError("Access denied: You cannot delete documents");
     }
 
     await ctx.storage.delete(doc.storageId);

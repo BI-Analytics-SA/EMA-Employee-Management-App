@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
+import { useEffect } from "react";
 import { api } from "../../../convex/_generated/api";
 import { Loader2 } from "lucide-react";
 
@@ -9,6 +10,11 @@ import { Loader2 } from "lucide-react";
  */
 export function RequireProfile() {
   const hasCompletedOnboarding = useQuery(api.userProfiles.queries.hasCompletedOnboarding);
+  const updateCurrentProfile = useMutation(api.userProfiles.mutations.updateCurrentProfile);
+
+  useEffect(() => {
+    updateCurrentProfile({});
+  }, []);
 
   // Loading state
   if (hasCompletedOnboarding === undefined) {

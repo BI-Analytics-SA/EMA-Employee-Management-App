@@ -1,5 +1,5 @@
 import { query, mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import {
   requireRoleInOrganization,
@@ -171,10 +171,10 @@ export const bulkUpsertEmployees = mutation({
       "user"
     );
     if (!canManageEmployees(profile.role)) {
-      throw new Error("Access denied: You cannot import employees");
+      throw new ConvexError("Access denied: You cannot import employees");
     }
     if (args.batch.length > BULK_IMPORT_BATCH_SIZE) {
-      throw new Error(
+      throw new ConvexError(
         `Batch size must be at most ${BULK_IMPORT_BATCH_SIZE}`
       );
     }

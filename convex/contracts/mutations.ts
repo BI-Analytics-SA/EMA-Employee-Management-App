@@ -1,5 +1,5 @@
 import { mutation, internalMutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   requireRoleInOrganization,
   canManageContracts,
@@ -39,7 +39,7 @@ export const create = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot create contracts");
+      throw new ConvexError("Access denied: You cannot create contracts");
     }
 
     const employee = await ctx.db.get(args.employeeId);
@@ -115,7 +115,7 @@ export const update = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot edit contracts");
+      throw new ConvexError("Access denied: You cannot edit contracts");
     }
 
     const patch: Record<string, unknown> = {};
@@ -154,7 +154,7 @@ export const remove = mutation({
       "manager"
     );
     if (!canManageContracts(profile.role)) {
-      throw new Error("Access denied: You cannot delete contracts");
+      throw new ConvexError("Access denied: You cannot delete contracts");
     }
 
     if (contract.signatureStorageId) {

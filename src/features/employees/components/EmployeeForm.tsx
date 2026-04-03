@@ -450,7 +450,7 @@ export function EmployeeForm({
                 </div>
                 <div className={fieldClass}>
                   <Label htmlFor="hoursPerDay" className="text-xs">Hours per Day</Label>
-                  <Input id="hoursPerDay" type="number" {...form.register("hoursPerDay")} />
+                  <Input id="hoursPerDay" type="number" step="0.01" {...form.register("hoursPerDay")} />
                   {form.formState.errors.hoursPerDay && (
                     <p className="text-xs text-destructive">{form.formState.errors.hoursPerDay.message}</p>
                   )}

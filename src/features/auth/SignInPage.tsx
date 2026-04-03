@@ -311,18 +311,7 @@ export function SignInPage() {
             {/* ── Sign in / Sign up: password field ── */}
             {(flow === "signIn" || flow === "signUp") && (
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  {flow === "signIn" && (
-                    <button
-                      type="button"
-                      className="text-xs text-primary hover:underline"
-                      onClick={() => switchFlow("forgot")}
-                    >
-                      Forgot password?
-                    </button>
-                  )}
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   name="password"
@@ -437,6 +426,18 @@ export function SignInPage() {
                 </>
               )}
             </Button>
+
+            {flow === "signIn" && (
+              <div className="text-sm text-center text-muted-foreground">
+                <button
+                  type="button"
+                  className="text-primary hover:underline font-medium"
+                  onClick={() => switchFlow("forgot")}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             <div className="text-sm text-center text-muted-foreground">
               {flow === "signIn" && (

@@ -1,5 +1,5 @@
 import { mutation } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { requireRoleInOrganization, requireModuleEnabled } from "../lib/permissions";
 
 const jobStatusValidator = v.union(
@@ -26,7 +26,7 @@ export const create = mutation({
     await requireModuleEnabled(ctx, args.organizationId, "jobs");
 
     if (args.startDate !== undefined && args.endDate !== undefined && args.endDate < args.startDate) {
-      throw new Error("End date cannot be before start date");
+      throw new ConvexError("End date cannot be before start date");
     }
 
     const now = Date.now();
@@ -69,7 +69,7 @@ export const update = mutation({
     const newStart = updates.startDate ?? job.startDate;
     const newEnd = updates.endDate ?? job.endDate;
     if (newStart !== undefined && newEnd !== undefined && newEnd < newStart) {
-      throw new Error("End date cannot be before start date");
+      throw new ConvexError("End date cannot be before start date");
     }
 
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
