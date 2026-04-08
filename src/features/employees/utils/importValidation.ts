@@ -104,7 +104,7 @@ function prepareRow(raw: Record<string, unknown>): Record<string, unknown> {
       out.bankName = canonical;
       // Auto-populate branchCode if not provided
       if (!out.branchCode) {
-        out.branchCode = BRANCH_CODES[canonical] ?? undefined;
+        out.branchCode = BRANCH_CODES[canonical];
       }
     }
   }
