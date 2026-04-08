@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { employeeFormSchema } from "@/lib/validations/employee";
+import { BANK_NAMES, BRANCH_CODES } from "@/lib/constants/bankDetails";
 
 export type ImportRow = z.infer<typeof employeeFormSchema>;
 
@@ -58,6 +59,11 @@ function XLSXSerialToDate(serial: number): Date | null {
   return date;
 }
 
+/** Case-insensitive lookup: lowercase bank name → canonical Title Case name */
+const BANK_NAME_LOOKUP = new Map<string, string>(
+  BANK_NAMES.map((name) => [name.toLowerCase(), name])
+);
+
 /** Fields whose values are validated against uppercase enums */
 const UPPERCASE_ENUM_FIELDS = [
   "title",
@@ -90,6 +96,18 @@ function prepareRow(raw: Record<string, unknown>): Record<string, unknown> {
       out[field] = v.toUpperCase();
     }
   }
+  // Normalise bank name to canonical Title Case (case-insensitive match)
+  const rawBank = out.bankName;
+  if (typeof rawBank === "string" && rawBank !== "") {
+    const canonical = BANK_NAME_LOOKUP.get(rawBank.toLowerCase().trim());
+    if (canonical) {
+      out.bankName = canonical;
+      // Auto-populate branchCode if not provided
+      if (!out.branchCode) {
+        out.branchCode = BRANCH_CODES[canonical] ?? undefined;
+      }
+    }
+  }
   return out;
 }
 
@@ -111,10 +129,16 @@ export function validateImportRows(
     if (result.success) {
       valid.push({ rowIndex, data: result.data });
     } else {
-      const first = result.error.issues[0];
-      const message = first?.message ?? "Validation failed";
-      const field = first?.path?.[0] as string | undefined;
-      errors.push({ row: rowIndex, message, field });
+      for (const issue of result.error.issues) {
+        const baseMessage = issue.message ?? "Validation failed";
+        const field = issue.path?.[0] as string | undefined;
+        const rawValue = field ? prepared[field] : undefined;
+        const message =
+          rawValue !== undefined && rawValue !== ""
+            ? `${baseMessage} (${String(rawValue)})`
+            : baseMessage;
+        errors.push({ row: rowIndex, message, field });
+      }
     }
   }
 
