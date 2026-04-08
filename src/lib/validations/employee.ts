@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parseLocalDate, formatDateInput } from "@/lib/dateUtils";
+import { BANK_NAMES } from "@/lib/constants/bankDetails";
 
 /** South African ID number: 13 digits */
 const idNumberSchema = z
@@ -110,7 +111,10 @@ export const employeeFormSchema = z.object({
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
   bankAccNo: optionalString,
-  bankName: optionalString,
+  bankName: z
+    .union([z.enum(BANK_NAMES), z.literal("")])
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
   branchCode: optionalString,
   accHolder: optionalString,
   accRelationship: z
