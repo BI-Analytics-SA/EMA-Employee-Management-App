@@ -120,7 +120,7 @@ export function ImportEmployeesPage() {
   }, [validRows, validationErrors, existingIdNumbers]);
 
   useEffect(() => {
-    if (step === 2 && validRows.length > 0) {
+    if (step === 2 && (validRows.length > 0 || validationErrors.length > 0)) {
       buildPreviewRows();
     }
   }, [step, validRows, validationErrors, existingIdNumbers, buildPreviewRows]);
@@ -293,7 +293,7 @@ export function ImportEmployeesPage() {
                     <p className="text-sm text-muted-foreground">
                       {rawRows.length} row(s) parsed. {validRows.length} valid, {validationErrors.length} with errors.
                     </p>
-                    <Button onClick={handleGoToPreview} disabled={validRows.length === 0}>
+                    <Button onClick={handleGoToPreview} disabled={validRows.length === 0 && validationErrors.length === 0}>
                       Continue to Preview
                       <ArrowRight className="h-4 w-4 ml-1" />
                     </Button>
@@ -419,10 +419,10 @@ export function ImportEmployeesPage() {
                           </td>
                         </tr>
                       ) : (
-                        filteredPreviewRows.map((r) => {
+                        filteredPreviewRows.map((r, idx) => {
                           if (r.type !== "error") return null;
                           return (
-                            <tr key={`err-${r.rowIndex}`} className="border-t">
+                            <tr key={`err-${r.rowIndex}-${idx}`} className="border-t">
                               <td className="p-2">{r.rowIndex}</td>
                               <td className="p-2 text-muted-foreground">{r.error.field ?? "—"}</td>
                               <td className="p-2 text-destructive">{r.error.message}</td>

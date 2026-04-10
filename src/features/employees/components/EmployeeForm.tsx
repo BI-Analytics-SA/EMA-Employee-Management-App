@@ -114,7 +114,7 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
     payMethod: emp.payMethod ?? "03",
     bankAccType: emp.bankAccType ?? "S",
     bankAccNo: emp.bankAccNo ?? "",
-    bankName: emp.bankName ?? "",
+    bankName: (emp.bankName ?? "") as "" | (typeof BANK_NAMES)[number],
     branchCode: emp.branchCode ?? "",
     accHolder: emp.accHolder ?? "",
     accRelationship: emp.accRelationship ?? "O",
