@@ -45,6 +45,27 @@ export const listAll = query({
 });
 
 /**
+ * Total number of employees in the organization.
+ */
+export const count = query({
+  args: {
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+
+    const employees = await ctx.db
+      .query("employees")
+      .withIndex("by_organization", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .collect();
+
+    return employees.length;
+  },
+});
+
+/**
  * Get a single employee by ID (must belong to user's organization)
  */
 export const getById = query({

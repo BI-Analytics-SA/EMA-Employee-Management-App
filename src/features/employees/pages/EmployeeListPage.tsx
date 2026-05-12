@@ -32,6 +32,11 @@ export function EmployeeListPage() {
       : "skip"
   );
 
+  const totalCount = useQuery(
+    api.employees.queries.count,
+    organizationId ? { organizationId } : "skip"
+  );
+
   if (userLoading || !organizationId) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -45,8 +50,6 @@ export function EmployeeListPage() {
   const isLoadingList = showSearch
     ? searchResults === undefined
     : status === "LoadingFirstPage";
-
-  const totalCount = results?.length ?? 0;
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -83,7 +86,7 @@ export function EmployeeListPage() {
               <Users className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalCount}</p>
+              <p className="text-2xl font-bold">{totalCount ?? "—"}</p>
               <p className="text-xs text-muted-foreground">Total Employees</p>
             </div>
           </div>
