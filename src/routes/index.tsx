@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
@@ -9,6 +9,11 @@ import { OrganizationProvider } from "@/contexts/OrganizationContext";
 // Auth Pages
 import { SignInPage } from "@/features/auth/SignInPage";
 import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
+
+// Landing Page
+import { LandingPage } from "@/features/landing/LandingPage";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 // Settings Pages
 import { TeamPage } from "@/features/settings/TeamPage";
@@ -45,6 +50,36 @@ import { JobDocumentUploadPage } from "@/features/jobs/pages/JobDocumentUploadPa
 import { JobDocumentsPage } from "@/features/jobs/pages/JobDocumentsPage";
 import { JobDocumentTypesPage } from "@/features/settings/JobDocumentTypesPage";
 
+/**
+ * Smart root wrapper: unauthenticated users on "/" see the landing page,
+ * all other cases fall through to the normal ProtectedRoute behaviour.
+ */
+function RootRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-accent" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    if (location.pathname === "/") {
+      return <LandingPage />;
+    }
+    const redirectTo = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirectTo)}`} replace />;
+  }
+
+  return <Outlet />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -62,9 +97,9 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    // Main app - requires auth AND profile
+    // Main app - requires auth AND profile; unauthenticated "/" shows landing page
     path: "/",
-    element: <ProtectedRoute />,
+    element: <RootRoute />,
     children: [
       {
         element: <RequireProfile />,
