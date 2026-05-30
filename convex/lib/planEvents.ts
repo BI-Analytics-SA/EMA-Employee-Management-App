@@ -29,11 +29,7 @@ export function isPaidForInvoicing(
 ): boolean {
   const status = org.planStatus;
   if (status === "expired") return false;
-  if (status === "trial") {
-    const ends = org.trialEndsAt;
-    if (ends !== undefined && ends <= now) return false;
-    return false;
-  }
+  if (status === "trial") return false;
   if (status === "active") return true;
   if (status === undefined) return true;
   return false;

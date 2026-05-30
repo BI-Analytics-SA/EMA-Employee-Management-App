@@ -34,7 +34,7 @@ export function RequireActivePlan({ children }: RequireActivePlanProps) {
 
   if (isLocked) {
     return (
-      <div className="min-h-screen bg-[hsl(220_70%_22%)] flex items-center justify-center p-4">
+      <div className="relative min-h-screen bg-[hsl(220_70%_22%)] flex items-center justify-center p-4">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[hsl(220_70%_28%)] via-[hsl(220_70%_22%)] to-[hsl(220_70%_14%)]" />
         <div className="relative w-full max-w-md text-center">
           <img

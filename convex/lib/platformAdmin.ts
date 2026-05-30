@@ -29,7 +29,7 @@ export async function isPlatformAdminEmail(
   const row = await ctx.db
     .query("platformAdmins")
     .withIndex("by_email", (q) => q.eq("email", normalized))
-    .unique();
+    .first();
   return row !== null;
 }
 

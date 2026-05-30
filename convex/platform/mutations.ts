@@ -201,6 +201,12 @@ export const extendTrial = mutation({
     if (!org) {
       throw new ConvexError("Organization not found");
     }
+    if (org.planStatus === "active" || org.planStatus === undefined) {
+      throw new ConvexError(
+        "Cannot extend trial for an organization on an active plan"
+      );
+    }
+
     const now = Date.now();
     const base =
       org.trialEndsAt && org.trialEndsAt > now ? org.trialEndsAt : now;
@@ -210,7 +216,6 @@ export const extendTrial = mutation({
       planStatus: "trial",
       trialEndsAt,
       trialStartedAt,
-      planActivatedAt: undefined,
       planExpiredAt: undefined,
     });
     const updated = await ctx.db.get(args.organizationId);

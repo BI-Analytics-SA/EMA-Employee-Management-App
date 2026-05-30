@@ -162,14 +162,14 @@ export function PlatformOrganizationsPage() {
     setOrgBusy(true);
     setOrgError(null);
     try {
-      const trialMs = datetimeLocalToMs(editTrialEnds);
+      const trialMs = datetimeLocalToMs(editTrialEnds) ?? undefined;
       await updateOrganization({
         organizationId: selectedId,
         planStatus: editPlanStatus,
-        signedUpAt: editSignedUp ? dateInputToMs(editSignedUp) : undefined,
-        trialStartedAt: editTrialStarted ? dateInputToMs(editTrialStarted) : undefined,
-        planActivatedAt: editPlanActivated ? dateInputToMs(editPlanActivated) : undefined,
-        planExpiredAt: editPlanExpired ? dateInputToMs(editPlanExpired) : undefined,
+        signedUpAt: editSignedUp ? dateInputToMs(editSignedUp) ?? undefined : undefined,
+        trialStartedAt: editTrialStarted ? dateInputToMs(editTrialStarted) ?? undefined : undefined,
+        planActivatedAt: editPlanActivated ? dateInputToMs(editPlanActivated) ?? undefined : undefined,
+        planExpiredAt: editPlanExpired ? dateInputToMs(editPlanExpired) ?? undefined : undefined,
         trialEndsAt: trialMs,
         allowedModules: editAllowed,
         setAllowedModules: configureAllowed,

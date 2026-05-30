@@ -7,6 +7,7 @@ import {
   monthlyInvoiceZar,
   countModules,
   moduleFlagsFromSettings,
+  emptyModuleFlags,
   MODULE_KEYS as BILLING_MODULE_KEYS,
 } from "../lib/billing";
 import { buildSastBuckets, toSastDateString } from "../lib/calendarDates";
@@ -241,7 +242,7 @@ export const getBillingAnalytics = query({
           : isTrial
             ? ("enabled" as const)
             : ("none" as const);
-        const modules = isPaid ? invoiced.modules : isTrial ? trialUsage.modules : invoiced.modules;
+        const modules = isPaid ? invoiced.modules : isTrial ? trialUsage.modules : emptyModuleFlags();
         const moduleCount = isPaid
           ? invoiced.moduleCount
           : isTrial
