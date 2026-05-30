@@ -3,6 +3,8 @@ import type { Id, Doc } from "../_generated/dataModel";
 import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireRoleInOrganization } from "../lib/permissions";
+import { canEnableModule, trialEndsAtFromNow } from "../lib/planAccess";
+import { syncPlanEventsFromOrg } from "../lib/planEvents";
 
 /**
  * Create a new organization
@@ -36,11 +38,21 @@ export const create = mutation({
       args.userName?.trim() || user?.name || user?.email || "Admin";
 
     // Create the organization
+    const now = Date.now();
     const organizationId = await ctx.db.insert("organizations", {
       name: args.name,
       slug: args.slug.toLowerCase(),
-      createdAt: Date.now(),
+      createdAt: now,
+      signedUpAt: now,
+      trialStartedAt: now,
+      planStatus: "trial",
+      trialEndsAt: trialEndsAtFromNow(now),
     });
+
+    const org = await ctx.db.get(organizationId);
+    if (org) {
+      await syncPlanEventsFromOrg(ctx, org);
+    }
 
     // Create the user's profile as admin of this organization
     const profileId = await ctx.db.insert("userProfiles", {
@@ -100,6 +112,7 @@ export const updateSettings = mutation({
         documentTypes: s?.documentTypes,
         jobDocumentTypes: s?.jobDocumentTypes,
         enabledModules: s?.enabledModules,
+        allowedModules: s?.allowedModules,
         contractTemplate: s?.contractTemplate,
         contractTemplates: s?.contractTemplates,
         exportConfig: s?.exportConfig,
@@ -134,6 +147,7 @@ function mergeSettingsWithDataArray(
     documentTypes: existing?.documentTypes,
     jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
+    allowedModules: existing?.allowedModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
     exportConfig: existing?.exportConfig,
@@ -228,6 +242,7 @@ function mergeSettings(
     documentTypes: override.documentTypes ?? existing?.documentTypes,
     jobDocumentTypes: override.jobDocumentTypes ?? existing?.jobDocumentTypes,
     enabledModules: existing?.enabledModules,
+    allowedModules: existing?.allowedModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
     exportConfig: existing?.exportConfig,
@@ -484,6 +499,7 @@ function mergeSettingsWithModules(
     documentTypes: existing?.documentTypes,
     jobDocumentTypes: existing?.jobDocumentTypes,
     enabledModules,
+    allowedModules: existing?.allowedModules,
     contractTemplate: existing?.contractTemplate,
     contractTemplates: existing?.contractTemplates,
     exportConfig: existing?.exportConfig,
@@ -504,6 +520,17 @@ export const toggleModule = mutation({
     const org = await ctx.db.get(args.organizationId);
     if (!org) {
       throw new Error("Organization not found");
+    }
+    if (args.enabled && !canEnableModule(org, args.moduleName)) {
+      if (org.planStatus === "trial" && org.trialEndsAt && org.trialEndsAt <= Date.now()) {
+        throw new ConvexError("Your trial has ended. Contact us to upgrade.");
+      }
+      if (org.planStatus === "expired") {
+        throw new ConvexError("Your plan has expired. Contact us to reactivate.");
+      }
+      throw new ConvexError(
+        "This module is not included in your plan. Contact us to upgrade."
+      );
     }
     const allowedKeys = ["contracts", "documents", "exporting", "jobs"] as const;
     const current = org.settings?.enabledModules ?? {};
@@ -591,6 +618,7 @@ export const updateContractTemplate = mutation({
       documentTypes: s?.documentTypes,
       jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
+      allowedModules: s?.allowedModules,
       contractTemplate: newTemplate,
       exportConfig: s?.exportConfig,
     };
@@ -655,6 +683,7 @@ export const updateExportConfig = mutation({
       documentTypes: s?.documentTypes,
       jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
+      allowedModules: s?.allowedModules,
       contractTemplate: s?.contractTemplate,
       contractTemplates: s?.contractTemplates,
       exportConfig: { columns: args.columns },
@@ -732,6 +761,7 @@ export const migrateContractTemplates = mutation({
       documentTypes: s?.documentTypes,
       jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
+      allowedModules: s?.allowedModules,
       contractTemplates: templates,
       exportConfig: s?.exportConfig,
     };
@@ -820,6 +850,7 @@ export const saveEmployerSignature = mutation({
       documentTypes: s?.documentTypes,
       jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
+      allowedModules: s?.allowedModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
       exportConfig: s?.exportConfig,
@@ -889,6 +920,7 @@ export const deleteEmployerSignature = mutation({
       documentTypes: s?.documentTypes,
       jobDocumentTypes: s?.jobDocumentTypes,
       enabledModules: s?.enabledModules,
+      allowedModules: s?.allowedModules,
       contractTemplate: newTemplate,
       contractTemplates: s?.contractTemplates,
       exportConfig: s?.exportConfig,
@@ -917,6 +949,7 @@ function buildFullSettings(
     documentTypes: s?.documentTypes,
     jobDocumentTypes: s?.jobDocumentTypes,
     enabledModules: s?.enabledModules,
+    allowedModules: s?.allowedModules,
     contractTemplate: s?.contractTemplate,
     contractTemplates: override.contractTemplates,
     exportConfig: s?.exportConfig,

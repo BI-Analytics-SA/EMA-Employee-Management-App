@@ -15,6 +15,7 @@ import {
   CalendarOff,
   FileQuestion,
 } from "lucide-react";
+import { PlatformBootstrapBanner } from "@/features/platform/PlatformBootstrapBanner";
 
 export function HomePage() {
   const {
@@ -53,6 +54,7 @@ export function HomePage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <PlatformBootstrapBanner />
       {/* Welcome card */}
       <div className="rounded-xl border bg-card p-6 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-3">

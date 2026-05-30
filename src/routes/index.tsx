@@ -1,14 +1,20 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RequireProfile } from "@/components/auth/RequireProfile";
+import { RequireActivePlan } from "@/components/auth/RequireActivePlan";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 
 // Auth Pages
 import { SignInPage } from "@/features/auth/SignInPage";
 import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
+
+// Landing Page
+import { LandingPage } from "@/features/landing/LandingPage";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 // Settings Pages
 import { TeamPage } from "@/features/settings/TeamPage";
@@ -44,6 +50,39 @@ import { EditJobPage } from "@/features/jobs/pages/EditJobPage";
 import { JobDocumentUploadPage } from "@/features/jobs/pages/JobDocumentUploadPage";
 import { JobDocumentsPage } from "@/features/jobs/pages/JobDocumentsPage";
 import { JobDocumentTypesPage } from "@/features/settings/JobDocumentTypesPage";
+import { RequirePlatformAdmin } from "@/components/auth/RequirePlatformAdmin";
+import { PlatformShell } from "@/components/layout/PlatformShell";
+import { PlatformOrganizationsPage } from "@/features/platform/PlatformOrganizationsPage";
+
+/**
+ * Smart root wrapper: unauthenticated users on "/" see the landing page,
+ * all other cases fall through to the normal ProtectedRoute behaviour.
+ */
+function RootRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-accent" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    if (location.pathname === "/") {
+      return <LandingPage />;
+    }
+    const redirectTo = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirectTo)}`} replace />;
+  }
+
+  return <Outlet />;
+}
 
 export const router = createBrowserRouter([
   {
@@ -62,17 +101,37 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    // Main app - requires auth AND profile
+    // Main app - requires auth AND profile; unauthenticated "/" shows landing page
     path: "/",
-    element: <ProtectedRoute />,
+    element: <RootRoute />,
     children: [
       {
         element: <RequireProfile />,
         children: [
           {
+            path: "platform",
+            element: (
+              <RequirePlatformAdmin>
+                <PlatformShell />
+              </RequirePlatformAdmin>
+            ),
+            children: [
+              {
+                index: true,
+                element: <Navigate to="organizations" replace />,
+              },
+              {
+                path: "organizations",
+                element: <PlatformOrganizationsPage />,
+              },
+            ],
+          },
+          {
             element: (
               <OrganizationProvider>
-                <AppShell />
+                <RequireActivePlan>
+                  <AppShell />
+                </RequireActivePlan>
               </OrganizationProvider>
             ),
             children: [
