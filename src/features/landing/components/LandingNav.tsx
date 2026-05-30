@@ -82,7 +82,7 @@ export function LandingNav() {
               <Link to="/login">Log In</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link to="/login?flow=signup">Get Started</Link>
+              <Link to="/login?flow=signup">Start Free Trial</Link>
             </Button>
           </div>
         </div>
@@ -124,7 +124,7 @@ export function LandingNav() {
                 <Link to="/login">Log In</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/login?flow=signup">Get Started</Link>
+                <Link to="/login?flow=signup">Start Free Trial</Link>
               </Button>
             </div>
           </div>

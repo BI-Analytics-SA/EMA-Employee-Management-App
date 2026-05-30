@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { TrialBanner } from "./TrialBanner";
 
 const MIN_WIDTH = 60;   // collapsed icon-only
 const DEFAULT_WIDTH = 320;
@@ -128,6 +129,7 @@ export function AppShell() {
 
       {/* Content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
+        <TrialBanner />
         <Header onMenuClick={() => setSheetOpen(true)} />
         <main className="flex-1 overflow-y-auto">
           <Outlet />

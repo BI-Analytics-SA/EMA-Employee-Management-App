@@ -45,7 +45,7 @@ export function HeroSection() {
             className="w-full bg-accent text-accent-foreground hover:bg-accent/90 sm:w-auto"
           >
             <Link to="/login?flow=signup">
-              Get Started
+              Start Your Free Trial
               <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
@@ -60,7 +60,7 @@ export function HeroSection() {
         </div>
 
         <p className="mt-4 text-sm text-white/50">
-          Start managing your team today.
+          14-day free trial with all features. No credit card required.
         </p>
       </div>
     </section>

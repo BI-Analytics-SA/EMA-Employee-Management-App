@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RequireProfile } from "@/components/auth/RequireProfile";
+import { RequireActivePlan } from "@/components/auth/RequireActivePlan";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 
 // Auth Pages
@@ -49,6 +50,9 @@ import { EditJobPage } from "@/features/jobs/pages/EditJobPage";
 import { JobDocumentUploadPage } from "@/features/jobs/pages/JobDocumentUploadPage";
 import { JobDocumentsPage } from "@/features/jobs/pages/JobDocumentsPage";
 import { JobDocumentTypesPage } from "@/features/settings/JobDocumentTypesPage";
+import { RequirePlatformAdmin } from "@/components/auth/RequirePlatformAdmin";
+import { PlatformShell } from "@/components/layout/PlatformShell";
+import { PlatformOrganizationsPage } from "@/features/platform/PlatformOrganizationsPage";
 
 /**
  * Smart root wrapper: unauthenticated users on "/" see the landing page,
@@ -105,9 +109,29 @@ export const router = createBrowserRouter([
         element: <RequireProfile />,
         children: [
           {
+            path: "platform",
+            element: (
+              <RequirePlatformAdmin>
+                <PlatformShell />
+              </RequirePlatformAdmin>
+            ),
+            children: [
+              {
+                index: true,
+                element: <Navigate to="organizations" replace />,
+              },
+              {
+                path: "organizations",
+                element: <PlatformOrganizationsPage />,
+              },
+            ],
+          },
+          {
             element: (
               <OrganizationProvider>
-                <AppShell />
+                <RequireActivePlan>
+                  <AppShell />
+                </RequireActivePlan>
               </OrganizationProvider>
             ),
             children: [

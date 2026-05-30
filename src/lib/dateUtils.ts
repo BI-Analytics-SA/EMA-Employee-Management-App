@@ -1,4 +1,16 @@
 /**
+ * Calendar date utilities for `<input type="date">` and display.
+ *
+ * **Why this exists:** Parsing `YYYY-MM-DD` with `Date.UTC(...)` or `new Date(str)`
+ * treats midnight as UTC and shifts the day in South Africa (UTC+2). Always use
+ * `parseLocalDate` / `formatDateInput` in the browser for form fields.
+ *
+ * **Server (Convex):** Day-bucketed analytics use `convex/lib/calendarDates.ts`
+ * (SAST) and accept `YYYY-MM-DD` strings — do not bucket by UTC day on timestamps
+ * sent from the client.
+ */
+
+/**
  * Parse a YYYY-MM-DD string as local midnight, avoiding UTC offset day-shift.
  * Returns the timestamp in ms, or undefined if the string is empty or invalid.
  */

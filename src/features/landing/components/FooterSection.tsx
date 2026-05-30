@@ -22,8 +22,8 @@ export function FooterSection() {
             Ready to Simplify Employee Management?
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base text-white/70 sm:text-lg">
-            Join organisations already using Pepl to manage their workforce more
-            efficiently.
+            Start your 14-day free trial with full access to every feature — no
+            credit card required.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Button
@@ -32,7 +32,7 @@ export function FooterSection() {
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90 sm:w-auto"
             >
               <Link to="/login?flow=signup">
-                Get Started
+                Start Your Free Trial
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>

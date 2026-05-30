@@ -77,6 +77,9 @@ export function PricingSection() {
             Start with the essentials and add modules as you grow. Only pay for
             what you need.
           </p>
+          <p className="mx-auto mt-4 inline-flex rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
+            Try everything free for 14 days — all modules included
+          </p>
         </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
@@ -109,7 +112,7 @@ export function PricingSection() {
               </ul>
 
               <Button size="lg" asChild className="mt-8 w-full">
-                <Link to="/login?flow=signup">Sign Up Now</Link>
+                <Link to="/login?flow=signup">Start Free Trial</Link>
               </Button>
             </CardContent>
           </Card>
