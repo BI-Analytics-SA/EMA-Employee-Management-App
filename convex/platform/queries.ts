@@ -217,7 +217,7 @@ export const getBillingAnalytics = query({
 
         const invoiced = resolveInvoicedModules(org, now);
         const trialUsage = resolveTrialUsageModules(org, now);
-        const isPaid = isPaidForInvoicing(org, now) && !isOrgPlanLocked(org, now);
+        const isPaid = isPaidForInvoicing(org) && !isOrgPlanLocked(org, now);
         const isTrial = isActiveTrialOrg(org, now);
 
         const lastActiveAt = members.reduce<number | null>((max, m) => {
@@ -280,7 +280,7 @@ export const getBillingAnalytics = query({
     const snapshot = {
       totalOrgs: orgs.length,
       activeTrial: orgs.filter((o) => isActiveTrialOrg(o, now)).length,
-      activePaid: orgs.filter((o) => isPaidForInvoicing(o, now) && !isOrgPlanLocked(o, now))
+      activePaid: orgs.filter((o) => isPaidForInvoicing(o) && !isOrgPlanLocked(o, now))
         .length,
       expired: orgs.filter(
         (o) => o.planStatus === "expired" || (o.planStatus === "trial" && isOrgPlanLocked(o, now))

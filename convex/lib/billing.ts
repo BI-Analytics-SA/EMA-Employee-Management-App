@@ -40,7 +40,7 @@ export function resolveInvoicedModules(
   org: Doc<"organizations">,
   now = Date.now()
 ): { source: "allowed" | "enabled" | "none"; modules: ModuleFlags; moduleCount: number } {
-  if (!isPaidForInvoicing(org, now) || isOrgPlanLocked(org, now)) {
+  if (!isPaidForInvoicing(org) || isOrgPlanLocked(org, now)) {
     return { source: "none", modules: emptyModuleFlags(), moduleCount: 0 };
   }
 

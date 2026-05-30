@@ -23,10 +23,7 @@ export function effectiveTrialStartedAt(org: Doc<"organizations">): number | nul
 }
 
 /** Paid for billing: active plan or legacy (undefined status) that is not locked. */
-export function isPaidForInvoicing(
-  org: Doc<"organizations">,
-  now = Date.now()
-): boolean {
+export function isPaidForInvoicing(org: Doc<"organizations">): boolean {
   const status = org.planStatus;
   if (status === "expired") return false;
   if (status === "trial") return false;
