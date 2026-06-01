@@ -4,6 +4,13 @@ import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
   ...authTables,
+  // Platform administrators (Pepl staff — manage all organisations)
+  platformAdmins: defineTable({
+    email: v.string(),
+    addedAt: v.number(),
+    addedByEmail: v.optional(v.string()),
+  }).index("by_email", ["email"]),
+
   // Organizations (Multi-tenant Root)
   organizations: defineTable({
     name: v.string(),
@@ -38,6 +45,14 @@ export default defineSchema({
           )
         ),
         enabledModules: v.optional(
+          v.object({
+            contracts: v.optional(v.boolean()),
+            documents: v.optional(v.boolean()),
+            exporting: v.optional(v.boolean()),
+            jobs: v.optional(v.boolean()),
+          })
+        ),
+        allowedModules: v.optional(
           v.object({
             contracts: v.optional(v.boolean()),
             documents: v.optional(v.boolean()),
@@ -87,8 +102,35 @@ export default defineSchema({
         ),
       })
     ),
+    planStatus: v.optional(
+      v.union(v.literal("trial"), v.literal("active"), v.literal("expired"))
+    ),
+    trialEndsAt: v.optional(v.number()),
+    /** When the org was converted to a paid (active) plan — for billing analytics. */
+    planActivatedAt: v.optional(v.number()),
+    /** Exact sign-up date for analytics (defaults to createdAt on new orgs). */
+    signedUpAt: v.optional(v.number()),
+    /** When the trial period began. */
+    trialStartedAt: v.optional(v.number()),
+    /** When a paid plan ended (churn / downgrade). */
+    planExpiredAt: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
+
+  /** Immutable-style plan timeline for exact billing analytics (rebuilt from org dates on platform save). */
+  organizationPlanEvents: defineTable({
+    organizationId: v.id("organizations"),
+    eventType: v.union(
+      v.literal("signed_up"),
+      v.literal("trial_started"),
+      v.literal("trial_ended"),
+      v.literal("plan_activated"),
+      v.literal("plan_expired")
+    ),
+    occurredAt: v.number(),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_occurredAt", ["occurredAt"]),
 
   // Invites (for inviting users to organizations)
   invites: defineTable({

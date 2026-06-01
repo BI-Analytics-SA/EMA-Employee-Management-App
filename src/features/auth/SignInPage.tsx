@@ -130,8 +130,10 @@ export function SignInPage() {
     inviteCode ? { code: inviteCode } : "skip"
   );
 
-  // Default to sign-up flow if coming from an invite
-  const [flow, setFlow] = useState<AuthFlow>(inviteCode ? "signUp" : "signIn");
+  // Default to sign-up flow if coming from an invite or ?flow=signup
+  const [flow, setFlow] = useState<AuthFlow>(
+    inviteCode || searchParams.get("flow") === "signup" ? "signUp" : "signIn"
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
