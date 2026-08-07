@@ -24,13 +24,28 @@ const optionalNumeric = z
     return Number.isNaN(n) ? undefined : n;
   });
 
-/** Reusable schema: optional date string → timestamp, guards against invalid dates */
+/**
+ * Reusable schema: optional YYYY-MM-DD date string → local-midnight timestamp.
+ *
+ * Strict by design. `<input type="date">` only ever emits YYYY-MM-DD, and the
+ * importer normalises every accepted date shape to YYYY-MM-DD before parsing, so
+ * anything else reaching here is malformed and must surface as a validation
+ * error rather than silently becoming `undefined` and dropping the date.
+ */
 const optionalDateTimestamp = z
   .string()
   .optional()
-  .transform((s) => {
+  .transform((s, ctx) => {
     if (!s) return undefined;
-    return parseLocalDate(s);
+    const ts = parseLocalDate(s);
+    if (ts === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid date — use year-first format, e.g. 2026-03-26",
+      });
+      return undefined;
+    }
+    return ts;
   });
 
 export const employeeTitleEnum = z.enum(["MR", "MISS", "MRS", "MS", "DR", "PROF", "REV"]);

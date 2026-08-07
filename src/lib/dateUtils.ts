@@ -10,19 +10,30 @@
  * sent from the client.
  */
 
+/** Strictly year-first: 4-digit year, then month, then day. */
+const LOCAL_DATE_RE = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
+
 /**
  * Parse a YYYY-MM-DD string as local midnight, avoiding UTC offset day-shift.
  * Returns the timestamp in ms, or undefined if the string is empty or invalid.
+ *
+ * Rejects anything that is not year-first. A day-first string like "26-03-2026"
+ * would otherwise be read as year 26, silently storing a date in the 1930s.
+ * Also rejects non-existent days such as "2026-02-30".
  */
 export function parseLocalDate(dateStr: string): number | undefined {
-  if (!dateStr.trim()) return undefined;
-  const parts = dateStr.split("-");
-  if (parts.length !== 3) return undefined;
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const day = parseInt(parts[2], 10);
-  if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return undefined;
-  const ts = new Date(year, month - 1, day).getTime();
+  const match = dateStr.trim().match(LOCAL_DATE_RE);
+  if (!match) return undefined;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  const d = new Date(year, month - 1, day);
+  // Round-trip check: JS rolls invalid days over into the next month
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+    return undefined;
+  }
+  const ts = d.getTime();
   return Number.isNaN(ts) ? undefined : ts;
 }
 
