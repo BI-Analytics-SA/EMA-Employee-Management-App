@@ -99,6 +99,7 @@ export function PlatformOrganizationsPage() {
     jobs: false,
   });
   const [configureAllowed, setConfigureAllowed] = useState(true);
+  const [editDiscountZar, setEditDiscountZar] = useState("0");
   const [orgError, setOrgError] = useState<string | null>(null);
   const [orgBusy, setOrgBusy] = useState(false);
 
@@ -111,6 +112,7 @@ export function PlatformOrganizationsPage() {
     setEditTrialEnds(msToDatetimeLocal(org.trialEndsAt));
     setEditAllowed({ ...org.allowedModules });
     setConfigureAllowed(org.hasAllowedModulesConfigured || org.planStatus === "active");
+    setEditDiscountZar(String(org.discountZar ?? 0));
     setOrgError(null);
   };
 
@@ -163,6 +165,12 @@ export function PlatformOrganizationsPage() {
     setOrgError(null);
     try {
       const trialMs = datetimeLocalToMs(editTrialEnds) ?? undefined;
+      const discountParsed = Number(editDiscountZar);
+      if (!Number.isFinite(discountParsed) || discountParsed < 0) {
+        setOrgError("Discount must be a non-negative number");
+        setOrgBusy(false);
+        return;
+      }
       await updateOrganization({
         organizationId: selectedId,
         planStatus: editPlanStatus,
@@ -173,6 +181,7 @@ export function PlatformOrganizationsPage() {
         trialEndsAt: trialMs,
         allowedModules: editAllowed,
         setAllowedModules: configureAllowed,
+        discountZar: discountParsed,
       });
     } catch (err) {
       setOrgError(err instanceof Error ? err.message : "Failed to update organisation");
@@ -503,6 +512,24 @@ export function PlatformOrganizationsPage() {
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="discount-zar">Discount (R/mo ex VAT)</Label>
+                    <Input
+                      id="discount-zar"
+                      type="number"
+                      min={0}
+                      step={1}
+                      inputMode="decimal"
+                      value={editDiscountZar}
+                      onChange={(e) => setEditDiscountZar(e.target.value)}
+                      disabled={orgBusy}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Fixed monthly discount subtracted from list price (base + modules). Default
+                      0.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
