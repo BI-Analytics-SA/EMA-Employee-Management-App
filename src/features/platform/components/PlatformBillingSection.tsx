@@ -108,6 +108,7 @@ type OrgRow = {
   moduleSource: string;
   modules: Record<string, boolean>;
   moduleCount: number;
+  discountZar: number;
   monthlyInvoiceZar: number;
   memberCount: number;
   activeMembers30d: number;
@@ -168,7 +169,10 @@ function OrgTable({
             <th className="px-3 py-2 font-medium">Modules</th>
             <th className="px-3 py-2 font-medium text-right">Count</th>
             {showRevenue && (
-              <th className="px-3 py-2 font-medium text-right whitespace-nowrap">R/mo ex VAT</th>
+              <>
+                <th className="px-3 py-2 font-medium text-right whitespace-nowrap">Discount</th>
+                <th className="px-3 py-2 font-medium text-right whitespace-nowrap">R/mo ex VAT</th>
+              </>
             )}
             <th className="px-3 py-2 font-medium text-right">Employees</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Last active</th>
@@ -191,9 +195,14 @@ function OrgTable({
               </td>
               <td className="px-3 py-2 text-right font-medium">{row.moduleCount}</td>
               {showRevenue && (
-                <td className="px-3 py-2 text-right font-medium">
-                  R{row.monthlyInvoiceZar.toLocaleString()}
-                </td>
+                <>
+                  <td className="px-3 py-2 text-right text-muted-foreground">
+                    {row.discountZar > 0 ? `R${row.discountZar.toLocaleString()}` : "—"}
+                  </td>
+                  <td className="px-3 py-2 text-right font-medium">
+                    R{row.monthlyInvoiceZar.toLocaleString()}
+                  </td>
+                </>
               )}
               <td className="px-3 py-2 text-right">{row.employeeCount}</td>
               <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
@@ -211,7 +220,10 @@ function OrgTable({
               </td>
               <td className="px-3 py-2 text-right">{totals.modules}</td>
               {showRevenue && (
-                <td className="px-3 py-2 text-right">R{totals.revenue.toLocaleString()}</td>
+                <>
+                  <td className="px-3 py-2" />
+                  <td className="px-3 py-2 text-right">R{totals.revenue.toLocaleString()}</td>
+                </>
               )}
               <td colSpan={3} />
             </tr>
@@ -255,6 +267,7 @@ export function PlatformBillingSection() {
       Exporting: r.modules.exporting ? "Yes" : "",
       Jobs: r.modules.jobs ? "Yes" : "",
       "Module count": r.moduleCount,
+      "Discount (ZAR)": r.discountZar,
       "Monthly (ZAR ex VAT)": r.monthlyInvoiceZar,
       Members: r.memberCount,
       "Active members (30d)": r.activeMembers30d,

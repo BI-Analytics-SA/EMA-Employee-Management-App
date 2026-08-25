@@ -114,6 +114,8 @@ export default defineSchema({
     trialStartedAt: v.optional(v.number()),
     /** When a paid plan ended (churn / downgrade). */
     planExpiredAt: v.optional(v.number()),
+    /** Fixed monthly discount in ZAR (ex VAT). Missing/undefined treated as 0. */
+    discountZar: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
 

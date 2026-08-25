@@ -126,6 +126,7 @@ export const listOrganizations = query({
             jobs: org.settings?.enabledModules?.jobs === true,
           },
           hasAllowedModulesConfigured: org.settings?.allowedModules !== undefined,
+          discountZar: org.discountZar ?? 0,
         };
       })
     );
@@ -262,7 +263,10 @@ export const getBillingAnalytics = query({
           moduleSource,
           modules,
           moduleCount,
-          monthlyInvoiceZar: isPaid ? monthlyInvoiceZar(invoiced.moduleCount) : 0,
+          discountZar: org.discountZar ?? 0,
+          monthlyInvoiceZar: isPaid
+            ? monthlyInvoiceZar(invoiced.moduleCount, org.discountZar ?? 0)
+            : 0,
           memberCount: members.length,
           activeMembers30d,
           employeeCount: employees.length,

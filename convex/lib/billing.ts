@@ -31,8 +31,11 @@ export function countModules(modules: ModuleFlags): number {
   return MODULE_KEYS.filter((k) => modules[k]).length;
 }
 
-export function monthlyInvoiceZar(moduleCount: number): number {
-  return BASE_PRICE_ZAR + MODULE_PRICE_ZAR * moduleCount;
+/** List price minus discount (ZAR). Discount defaults to 0; result never goes below 0. */
+export function monthlyInvoiceZar(moduleCount: number, discountZar = 0): number {
+  const list = BASE_PRICE_ZAR + MODULE_PRICE_ZAR * moduleCount;
+  const discount = Number.isFinite(discountZar) ? Math.max(0, discountZar) : 0;
+  return Math.max(0, list - discount);
 }
 
 /** Paid orgs only: modules on the invoice (allowed, or enabled if legacy without allowed). */

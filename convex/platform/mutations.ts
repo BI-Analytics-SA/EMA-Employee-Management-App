@@ -138,6 +138,8 @@ export const updateOrganization = mutation({
     planExpiredAt: optionalTimestamp,
     allowedModules: moduleFlagsValidator,
     setAllowedModules: v.boolean(),
+    /** Fixed monthly discount in ZAR (ex VAT). Defaults to 0. */
+    discountZar: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requirePlatformAdmin(ctx);
@@ -168,6 +170,13 @@ export const updateOrganization = mutation({
     applyOptionalTimestamp(patch, "trialStartedAt", args.trialStartedAt);
     applyOptionalTimestamp(patch, "planActivatedAt", args.planActivatedAt);
     applyOptionalTimestamp(patch, "planExpiredAt", args.planExpiredAt);
+
+    if (args.discountZar !== undefined) {
+      if (!Number.isFinite(args.discountZar) || args.discountZar < 0) {
+        throw new ConvexError("Discount must be a non-negative number");
+      }
+      patch.discountZar = args.discountZar;
+    }
 
     if (args.setAllowedModules) {
       patch.settings = mergeSettingsWithAllowedModules(
