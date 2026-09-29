@@ -312,3 +312,34 @@ describe("parseLocalDate hardening", () => {
     }
   });
 });
+
+describe("validateImportRows — bank name", () => {
+  const ID = "9001015001087";
+
+  it.each(["Zero Bank", "zero bank", "ZERO BANK", "  Zero Bank  "])(
+    "normalises %j to Zero Bank and auto-populates branch code 888000",
+    (bankName) => {
+      const { valid, errors } = validateImportRows([{ idNumber: ID, bankName }]);
+      expect(errors).toEqual([]);
+      expect(valid).toHaveLength(1);
+      expect(valid[0].data.bankName).toBe("Zero Bank");
+      expect(valid[0].data.branchCode).toBe("888000");
+    }
+  );
+
+  it("keeps a branch code supplied in the file", () => {
+    const { valid, errors } = validateImportRows([
+      { idNumber: ID, bankName: "Zero Bank", branchCode: "123456" },
+    ]);
+    expect(errors).toEqual([]);
+    expect(valid[0].data.branchCode).toBe("123456");
+  });
+
+  it("rejects an unknown bank name", () => {
+    const { valid, errors } = validateImportRows([
+      { idNumber: ID, bankName: "Not A Bank" },
+    ]);
+    expect(valid).toHaveLength(0);
+    expect(errors[0].field).toBe("bankName");
+  });
+});

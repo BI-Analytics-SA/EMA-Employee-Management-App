@@ -10,13 +10,13 @@ The Employee table currently has no banking information. Users need to capture a
 | payMethod | Dropdown | `02` = "02.Cash", `03` = "03.Electronic Payment" |
 | bankAccType | Dropdown | `S` = "S.Savings", `C` = "C.Cheque" |
 | bankAccNo | Text | Free text |
-| bankName | Dropdown | Absa Bank, African Bank, African Bank Business, Bidvest-Old Mutual, Capitec Bank, Discovery Bank, First National Bank, Grindrod Bank, Nedbank, Standard Bank, Tyme Bank |
+| bankName | Dropdown | Absa Bank, African Bank, African Bank Business, Bidvest-Old Mutual, Capitec Bank, Discovery Bank, First National Bank, Grindrod Bank, Nedbank, Standard Bank, Tyme Bank, Zero Bank |
 | branchCode | Auto-populated | Read-only, derived from bankName (see mapping below) |
 | accHolder | Text | Free text |
 | accRelationship | Dropdown | `O` = "O.Own", `T` = "T.3rd Party" |
 
 **Branch Code Mapping:**
-Absa=632005, African Bank=430000, African Bank Business=430000, Bidvest-Old Mutual=462005, Capitec=470010, Discovery=679000, FNB=250655, Grindrod=223626, Nedbank=198765, Standard Bank=051001, Tyme Bank=678910
+Absa=632005, African Bank=430000, African Bank Business=430000, Bidvest-Old Mutual=462005, Capitec=470010, Discovery=679000, FNB=250655, Grindrod=223626, Nedbank=198765, Standard Bank=051001, Tyme Bank=678910, Zero Bank=888000
 
 ## Implementation Steps
 

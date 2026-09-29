@@ -170,7 +170,7 @@ const REFERENCE_SHEET_DATA = [
   ["Bank Account Type", "S (Savings)", "C (Current/Cheque)"],
   ["Account Relationship", "O (Own)", "T (Third party)"],
   ["Bank Name", "Absa Bank", "African Bank", "African Bank Business", "Bidvest-Old Mutual", "Capitec Bank", "Discovery Bank"],
-  ["", "First National Bank", "Grindrod Bank", "Nedbank", "Standard Bank", "Tyme Bank"],
+  ["", "First National Bank", "Grindrod Bank", "Nedbank", "Standard Bank", "Tyme Bank", "Zero Bank"],
   ["", "Case is not important — names are corrected automatically. Branch code is auto-populated."],
   ["Training", "true", "false"],
   [""],
