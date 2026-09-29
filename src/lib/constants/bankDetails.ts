@@ -23,6 +23,7 @@ export const BANK_NAMES = [
   "Nedbank",
   "Standard Bank",
   "Tyme Bank",
+  "Zero Bank",
 ] as const;
 
 /** Branch code by bank name (for lookup/auto-populate) */
@@ -38,6 +39,7 @@ export const BRANCH_CODES: Record<string, string> = {
   "Nedbank": "198765",
   "Standard Bank": "051001",
   "Tyme Bank": "678910",
+  "Zero Bank": "888000",
 };
 
 /** Account holder relationship: O = Own, T = 3rd Party */
