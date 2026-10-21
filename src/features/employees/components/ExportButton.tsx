@@ -7,11 +7,11 @@ import { extractConvexError } from "@/lib/convex-error";
 import { FileDown, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import * as XLSX from "xlsx";
-import type { ExportColumn } from "@/features/settings/ExportConfigPage";
+import type { ExportColumn } from "@/features/settings/utils/exportConfig";
 import {
   DEFAULT_DATABASE_COLUMNS,
   mergeExportColumns,
-} from "@/features/settings/ExportConfigPage";
+} from "@/features/settings/utils/exportConfig";
 
 function formatDate(ts: number | undefined): string {
   if (ts == null || ts === 0) return "";
