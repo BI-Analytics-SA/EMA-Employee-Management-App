@@ -64,7 +64,7 @@ export function PlatformTrendChart({ data, className }: PlatformTrendChartProps)
         width,
         height,
         padding,
-        centerX: (_i: number) => 0,
+        centerX: () => 0,
       };
     }
 

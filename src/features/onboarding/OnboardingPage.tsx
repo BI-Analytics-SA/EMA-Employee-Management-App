@@ -35,7 +35,7 @@ export function OnboardingPage() {
   const inviteCodeFromUrl = searchParams.get("invite");
 
   const createOrganization = useMutation(api.organizations.mutations.create);
-  const useInvite = useMutation(api.invites.mutations.useInvite);
+  const redeemInvite = useMutation(api.invites.mutations.useInvite);
   const hasCompletedOnboarding = useQuery(api.userProfiles.queries.hasCompletedOnboarding);
 
   // Determine initial mode based on URL
@@ -148,7 +148,7 @@ export function OnboardingPage() {
     setIsLoading(true);
 
     try {
-      await useInvite({
+      await redeemInvite({
         code: inviteCode.toUpperCase(),
         userName: userName.trim(),
       });
