@@ -18,7 +18,8 @@ export const stripMedicalModule = mutation({
     for (const org of organizations) {
       const modules = org.settings?.enabledModules;
       if (modules && "medical" in modules) {
-        const { medical: _, ...rest } = modules as Record<string, boolean>;
+        const rest = { ...modules } as Record<string, boolean>;
+        delete rest.medical;
         const s = org.settings as Doc<"organizations">["settings"] | undefined;
         type EnabledModules = NonNullable<NonNullable<Doc<"organizations">["settings"]>["enabledModules"]>;
         const enabledModules: EnabledModules | undefined =

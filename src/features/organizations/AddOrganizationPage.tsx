@@ -38,7 +38,7 @@ export function AddOrganizationPage() {
   const { setActiveOrganization } = useOrganizationContext();
 
   const createOrganization = useMutation(api.organizations.mutations.create);
-  const useInvite = useMutation(api.invites.mutations.useInvite);
+  const redeemInvite = useMutation(api.invites.mutations.useInvite);
 
   const [mode, setMode] = useState<AddOrgMode>(
     modeParam === "join" || inviteCodeFromUrl ? "join" : "choose"
@@ -133,7 +133,7 @@ export function AddOrganizationPage() {
     }
     setIsLoading(true);
     try {
-      const { organizationId } = await useInvite({
+      const { organizationId } = await redeemInvite({
         code: inviteCode.toUpperCase(),
         userName: userName.trim(),
       });

@@ -56,7 +56,7 @@ export function Sheet({ open, onOpenChange, children, side = "left", className }
   );
 }
 
-interface SheetContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+type SheetContentProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function SheetContent({ className, ...props }: SheetContentProps) {
   return (

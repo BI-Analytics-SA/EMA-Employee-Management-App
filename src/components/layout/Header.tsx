@@ -152,7 +152,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                   Organizations
                 </p>
                 {organizations.length > 0 &&
-                  organizations.map(({ profile: _profile, organization: org }) => (
+                  organizations.map(({ organization: org }) => (
                     <button
                       key={org._id}
                       type="button"

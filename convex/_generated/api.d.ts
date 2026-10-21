@@ -23,6 +23,7 @@ import type * as employees_actions from "../employees/actions.js";
 import type * as employees_import from "../employees/import.js";
 import type * as employees_mutations from "../employees/mutations.js";
 import type * as employees_queries from "../employees/queries.js";
+import type * as employees_search from "../employees/search.js";
 import type * as http from "../http.js";
 import type * as invites_actions from "../invites/actions.js";
 import type * as invites_mutations from "../invites/mutations.js";
@@ -74,6 +75,7 @@ declare const fullApi: ApiFromModules<{
   "employees/import": typeof employees_import;
   "employees/mutations": typeof employees_mutations;
   "employees/queries": typeof employees_queries;
+  "employees/search": typeof employees_search;
   http: typeof http;
   "invites/actions": typeof invites_actions;
   "invites/mutations": typeof invites_mutations;

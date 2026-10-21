@@ -15,7 +15,7 @@ import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 export function EmployeeListPage() {
   const { organizationId, isLoading: userLoading, isAdmin } = useCurrentUser();
   const exportingEnabled = useModuleEnabled("exporting");
-  const [searchId, setSearchId] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
 
@@ -26,9 +26,9 @@ export function EmployeeListPage() {
   );
 
   const searchResults = useQuery(
-    api.employees.queries.searchByIdNumber,
+    api.employees.queries.search,
     organizationId && searchQuery.trim()
-      ? { organizationId, idNumber: searchQuery.trim() }
+      ? { organizationId, search: searchQuery.trim() }
       : "skip"
   );
 
@@ -98,17 +98,17 @@ export function EmployeeListPage() {
         <div className="relative w-full min-w-0 sm:flex-1 sm:min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by ID number (13 digits)"
-            value={searchId}
-            onChange={(e) => setSearchId(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchId)}
-            maxLength={13}
+            placeholder="Search all employee fields…"
+            aria-label="Search all employee fields"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchInput)}
             className={`pl-9${searchQuery ? " pr-8" : ""}`}
           />
           {searchQuery && (
             <button
               type="button"
-              onClick={() => { setSearchId(""); setSearchQuery(""); }}
+              onClick={() => { setSearchInput(""); setSearchQuery(""); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label="Clear filter"
               title="Clear filter"
@@ -119,7 +119,7 @@ export function EmployeeListPage() {
         </div>
         <div className="flex w-full min-w-0 gap-2 sm:w-auto">
           <Button
-            onClick={() => setSearchQuery(searchId)}
+            onClick={() => setSearchQuery(searchInput)}
             className="flex-1 sm:flex-initial min-w-0 px-6"
           >
             Search
@@ -141,7 +141,7 @@ export function EmployeeListPage() {
         onClose={() => setScannerOpen(false)}
         onDetected={(code) => {
           const trimmed = code.trim();
-          setSearchId(trimmed);
+          setSearchInput(trimmed);
           setSearchQuery(trimmed);
           setScannerOpen(false);
         }}
@@ -158,7 +158,7 @@ export function EmployeeListPage() {
             <Users className="h-10 w-10 text-muted-foreground/50 mb-3" />
             <p className="text-sm text-muted-foreground">
               {showSearch
-                ? "No employees match that ID number."
+                ? "No employees match your search."
                 : "No employees yet. Add your first employee to get started."}
             </p>
             {!showSearch && (

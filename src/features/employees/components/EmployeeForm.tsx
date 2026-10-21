@@ -122,7 +122,6 @@ function employeeToFormValues(emp: Doc<"employees">): Partial<EmployeeFormInput>
 }
 
 export function EmployeeForm({
-  organizationId: _organizationId,
   defaultValues,
   employee,
   onSubmit,

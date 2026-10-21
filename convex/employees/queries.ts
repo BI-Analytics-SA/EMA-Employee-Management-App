@@ -2,6 +2,7 @@ import { query } from "../_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireOrganizationAccess } from "../lib/permissions";
+import { matchesEmployeeSearch } from "./search";
 
 /**
  * List employees for the current user's organization with pagination
@@ -105,6 +106,28 @@ export const searchByIdNumber = query({
       .take(20);
 
     return results;
+  },
+});
+
+/** Search all employee fields across the current organization, without a 20-result cap. */
+export const search = query({
+  args: {
+    organizationId: v.id("organizations"),
+    search: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId);
+    if (!args.search.trim()) return [];
+
+    const employees = await ctx.db
+      .query("employees")
+      .withIndex("by_organization_createdAt", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .order("desc")
+      .collect();
+
+    return employees.filter((employee) => matchesEmployeeSearch(employee, args.search));
   },
 });
 
