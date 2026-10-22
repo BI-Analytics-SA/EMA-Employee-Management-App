@@ -205,6 +205,27 @@ These prefixes are valid but do **not** trigger a version bump:
 - A **colon is required** after the type: `feat: add X` not `feat add X`
 - Use present tense, lowercase after the colon: `fix: resolve overlap`
 
+### Release tracking
+
+- **Shipped (prod):** every release creates a [GitHub Release](https://github.com/BI-Analytics-SA/EMA-Employee-Management-App/releases) with notes generated from the commits, and comments "released in vX" on each shipped PR.
+- **Waiting to ship (on dev, not in prod):** keep one PR open from `dev` → `main` titled **"Release: next"**. Its Commits and Files tabs always show what's on dev but not in prod. Merging it is the production release; open a fresh one afterwards. From the CLI:
+  ```bash
+  git fetch origin && git log --oneline --no-merges origin/main..origin/dev
+  ```
+- **Jira (PEPL):** put the PEPL key in the branch name, PR title, and a `Refs:` commit footer (see [Jira keys](#jira-keys)). The GitHub for Jira app then shows each issue's commits and PRs, and the release workflow's `production` environment shows when they reached prod.
+
+### Jira keys
+
+Use uppercase PEPL keys so GitHub for Jira can match them:
+
+| Where | Example |
+|---|---|
+| Branch | `feat/PEPL-123-build-info` |
+| PR title | `feat: show build commit in header (PEPL-123)` |
+| Commit footer | `Refs: PEPL-123` |
+
+Keep the Conventional Commit prefix first — the key goes in the branch, the PR title suffix, or the footer, never in place of `feat:` / `fix:`.
+
 ---
 
 ## Deploying Convex to production (manual)

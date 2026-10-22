@@ -11,6 +11,9 @@ When working in this repo, follow the project’s Cursor rules.
   - Mark complete with `bd close <id>` — **do not** edit `.beads/issues.jsonl` by hand.
   - Sync with `bd sync` when appropriate (or rely on git hooks).
 
+- **Jira (PEPL)**  
+  Jira project **PEPL** is the tracker of record; Beads is the local scratch pad. Link Beads issues to PEPL keys with `--external-ref`, and put the PEPL key in branch names, PR titles, and `Refs:` commit footers.
+
 - **Versioning and commits**  
   Use **Conventional Commits** so automated versioning works (see `.cursor/rules/versioning-and-commits.mdc`):
   - `fix:` or `fix(scope):` → PATCH bump (e.g. 0.1.0 → 0.1.1).
