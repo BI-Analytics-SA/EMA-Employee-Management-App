@@ -40,6 +40,12 @@
   [headers.values]
     Cache-Control = "no-cache"
 
+# Build metadata (commit/branch/context) -- always revalidate so QA sees the live build
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-cache"
+
 # Service worker -- always revalidate so browser detects new builds
 [[headers]]
   for = "/sw.js"
