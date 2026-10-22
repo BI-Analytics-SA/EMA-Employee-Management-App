@@ -42,6 +42,20 @@ Other prefixes (`chore:`, `docs:`, `refactor:`, `style:`, `test:`, `ci:`) do **n
 - **When:** On **push to `main`**. If there are releasable commits (at least one `fix:` or `feat:` since last tag), the GitHub Action runs semantic-release, which updates `package.json`, commits, and creates a git tag (e.g. `v0.1.1`). The workflow then triggers a Netlify build via build hook, so the deployed app is built from the commit that has the version bump.
 - **No releasable commits:** semantic-release does nothing; no new tag or commit. So not every merge to main produces a new version—only when there are fix/feat commits.
 
+## Linking work to Jira (PEPL)
+
+Jira project **PEPL** is the tracker of record. When a task has a PEPL issue, reference its key (uppercase) so GitHub for Jira links the work:
+
+- Branch: `feat/PEPL-123-short-description`
+- PR title: `feat: short description (PEPL-123)`
+- Commit footer: `Refs: PEPL-123`
+
+The Conventional Commit prefix always comes first; never replace `feat:` / `fix:` with the key.
+
+## Releases
+
+Each release publishes a GitHub Release (via `@semantic-release/github`) and comments on the shipped PRs. Unreleased work is whatever is on `dev` but not `main` — keep a standing `dev` → `main` PR titled "Release: next" open to see it. See `DEPLOYMENT.md` → Release tracking.
+
 ## Netlify deploy order (no race with semantic-release)
 
 To avoid Netlify deploying before the release workflow has pushed the version-bump commit:

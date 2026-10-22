@@ -11,11 +11,16 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: write # push the version bump commit, tag, and GitHub Release
+  issues: write # @semantic-release/github opens an issue if a release fails
+  pull-requests: write # comment "released in vX" on shipped PRs
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Reports a GitHub deployment to "production", which GitHub for Jira
+    # shows on any PEPL issue whose key appears in the shipped commits.
+    environment: production
     steps:
       - uses: actions/checkout@v4
         with:
