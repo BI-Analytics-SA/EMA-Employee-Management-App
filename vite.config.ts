@@ -23,7 +23,8 @@ function getCommit(): string {
 const buildInfo = {
   version: pkg.version,
   commit: getCommit(),
-  branch: process.env.BRANCH ?? 'local',
+  // HEAD is the source branch name; BRANCH is "pull/<n>/head" on deploy previews
+  branch: process.env.HEAD ?? process.env.BRANCH ?? 'local',
   context: process.env.CONTEXT ?? 'local',
   pullRequest: process.env.PULL_REQUEST === 'true' ? (process.env.REVIEW_ID ?? null) : null,
   deployId: process.env.DEPLOY_ID ?? null,
