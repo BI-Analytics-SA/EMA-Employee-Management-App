@@ -4,7 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, FileText, Trash2, User, FileStack } from "lucide-react";
+import { Loader2, Pencil, Camera, FileText, Trash2, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { formatDisplayDate } from "@/lib/formatDisplayDate";
@@ -15,6 +15,7 @@ import {
   ACC_RELATIONSHIPS,
 } from "@/lib/constants/bankDetails";
 import { useState } from "react";
+import { EmployeeAvatar } from "../components/EmployeeAvatar";
 import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms", DR: "Dr", PROF: "Prof", REV: "Rev" };
@@ -99,8 +100,6 @@ export function EmployeeDetailPage() {
     );
   }
 
-  const initials = `${employee.firstName?.[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
-
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Profile header card */}
@@ -108,17 +107,11 @@ export function EmployeeDetailPage() {
         <div className="flex flex-wrap items-center gap-5">
           {/* Avatar */}
           <div className="shrink-0 flex justify-center sm:justify-start">
-            {employee.imageUrl ? (
-              <img
-                src={employee.imageUrl}
-                alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
-                className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
-              />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold ring-2 ring-border">
-                {initials || <User className="h-8 w-8" />}
-              </div>
-            )}
+            <EmployeeAvatar
+              employee={employee}
+              size="lg"
+              alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
+            />
           </div>
 
           {/* Name + subtitle - min-width so name stays on one line and buttons wrap when tight */}

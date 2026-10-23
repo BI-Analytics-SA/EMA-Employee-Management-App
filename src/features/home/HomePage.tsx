@@ -1,3 +1,4 @@
+import { EmployeeAvatar } from "@/features/employees/components/EmployeeAvatar";
 import { Link } from "react-router-dom";
 import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { useQuery } from "convex/react";
@@ -149,7 +150,7 @@ export function HomePage() {
               <Button variant="outline" className="w-full sm:w-auto" asChild>
                 <Link to="/employees">
                   <FileDown className="h-4 w-4" />
-                  Export to Excel
+                  Export Employees
                 </Link>
               </Button>
             </div>
@@ -208,7 +209,6 @@ export function HomePage() {
             {/* Rows */}
             <ul className="divide-y">
               {stats.recentEmployees.map((emp) => {
-                const initials = `${emp.firstName?.[0] ?? ""}${emp.lastName?.[0] ?? ""}`.toUpperCase();
                 const addedDate = formatDisplayDate(emp.createdAt);
                 return (
                   <li key={emp._id}>
@@ -217,17 +217,7 @@ export function HomePage() {
                       className="flex items-center gap-4 px-4 py-3 min-h-[48px] hover:bg-muted/50 transition-colors"
                     >
                       {/* Avatar */}
-                      {emp.imageUrl ? (
-                        <img
-                          src={emp.imageUrl}
-                          alt=""
-                          className="h-10 w-10 shrink-0 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                          {initials}
-                        </div>
-                      )}
+                      <EmployeeAvatar employee={emp} />
                       {/* Name + subtitle */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">

@@ -40,12 +40,12 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideT
   const filteredSettingsNavItems = filterByModule(settingsNavItems);
 
   return (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground [container-type:inline-size]">
       {/* Logo area */}
       <div className={cn(
         "flex h-16 items-center border-b border-white/10",
         collapsed ? "justify-center px-2" : "gap-3 px-3"
-      )}>
+      )} role="group" aria-label="Employee Management">
         {collapsed ? (
           /* When collapsed: show expand button centered */
           !hideToggle && onToggleCollapse ? (
@@ -62,8 +62,9 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavClick, hideT
         ) : (
           /* When expanded: logo + text + collapse button */
           <>
-            <img src={logoImg} alt="Pepl" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-            <span className="text-lg font-semibold text-white truncate">Empl Management</span>
+            <img src={logoImg} alt="Pepl" className="h-9 w-9 shrink-0 rounded-lg object-contain [@container(max-width:180px)]:hidden" />
+            <span className="min-w-0 text-sm font-semibold leading-tight text-white [@container(max-width:220px)]:hidden">Employee<br />Management</span>
+            <span className="hidden text-sm font-semibold text-white [@container(max-width:220px)]:inline" title="Employee Management">EMA</span>
             {!hideToggle && onToggleCollapse && (
               <button
                 onClick={onToggleCollapse}

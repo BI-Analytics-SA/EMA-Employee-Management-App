@@ -354,9 +354,9 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
             <div className={sectionContentClass}>
               <div className="flex flex-wrap gap-2">
                 <div className={fieldClass}>
-                  <Label htmlFor="nameSurname" className="text-xs">Name &amp; Surname</Label>
+                  <Label htmlFor="nameSurname" className="text-xs" required>Name &amp; Surname</Label>
                   <Input
-                    id="nameSurname"
+                    id="nameSurname" aria-required="true"
                     {...form.register("nameSurname")}
                   />
                   {form.formState.errors.nameSurname && (
@@ -364,23 +364,23 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   )}
                 </div>
                 <div className={fieldClass}>
-                  <Label htmlFor="idNumber" className="text-xs">ID Number</Label>
-                  <Input id="idNumber" {...form.register("idNumber")} />
+                  <Label htmlFor="idNumber" className="text-xs" required>ID Number</Label>
+                  <Input id="idNumber" aria-required="true" {...form.register("idNumber")} />
                   {form.formState.errors.idNumber && (
                     <p className="text-xs text-destructive">{form.formState.errors.idNumber.message}</p>
                   )}
                 </div>
                 <div className={fieldClass}>
-                  <Label htmlFor="employeeNo" className="text-xs">Employee No</Label>
-                  <Input id="employeeNo" {...form.register("employeeNo")} />
+                  <Label htmlFor="employeeNo" className="text-xs" required>Employee No</Label>
+                  <Input id="employeeNo" aria-required="true" {...form.register("employeeNo")} />
                   {form.formState.errors.employeeNo && (
                     <p className="text-xs text-destructive">{form.formState.errors.employeeNo.message}</p>
                   )}
                 </div>
                 <div className={dateFieldClass}>
-                  <Label htmlFor="signedDate" className="text-xs">Signed Date</Label>
+                  <Label htmlFor="signedDate" className="text-xs" required>Signed Date</Label>
                   <Input
-                    id="signedDate"
+                    id="signedDate" aria-required="true"
                     type="date"
                     {...form.register("signedDate")}
                   />
@@ -389,9 +389,9 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   )}
                 </div>
                 <div className={dateFieldClass}>
-                  <Label htmlFor="startDate" className="text-xs">Start Date</Label>
+                  <Label htmlFor="startDate" className="text-xs" required>Start Date</Label>
                   <Input
-                    id="startDate"
+                    id="startDate" aria-required="true"
                     type="date"
                     {...form.register("startDate")}
                   />

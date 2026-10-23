@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BarcodeScanner } from "@/components/shared/BarcodeScanner";
 import { ClearColumnsDialog } from "@/features/employees/components/ClearColumnsDialog";
+import { EmployeeAvatar } from "@/features/employees/components/EmployeeAvatar";
 import { ExportButton } from "@/features/employees/components/ExportButton";
 import { Loader2, UserPlus, Search, QrCode, Users, X, FileUp } from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
@@ -181,7 +182,6 @@ export function EmployeeListPage() {
             {/* Table rows */}
             <ul className="divide-y">
               {list.map((emp) => {
-                const initials = `${emp.firstName?.[0] ?? ""}${emp.lastName?.[0] ?? ""}`.toUpperCase();
                 return (
                   <li key={emp._id}>
                     <Link
@@ -189,17 +189,7 @@ export function EmployeeListPage() {
                       className="flex items-center gap-4 px-4 py-3 min-h-[48px] hover:bg-muted/50 transition-colors"
                     >
                       {/* Avatar */}
-                      {emp.imageUrl ? (
-                        <img
-                          src={emp.imageUrl}
-                          alt=""
-                          className="h-10 w-10 shrink-0 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                          {initials}
-                        </div>
-                      )}
+                      <EmployeeAvatar employee={emp} />
                       {/* Name + subtitle */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
