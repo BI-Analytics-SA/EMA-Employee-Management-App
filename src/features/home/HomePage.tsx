@@ -1,3 +1,4 @@
+import { EmployeeAvatar } from "@/features/employees/components/EmployeeAvatar";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -207,7 +208,6 @@ export function HomePage() {
             {/* Rows */}
             <ul className="divide-y">
               {stats.recentEmployees.map((emp) => {
-                const initials = `${emp.firstName?.[0] ?? ""}${emp.lastName?.[0] ?? ""}`.toUpperCase();
                 const addedDate = new Date(emp.createdAt).toLocaleDateString(
                   "en-ZA",
                   { day: "2-digit", month: "short", year: "numeric" }
@@ -219,17 +219,7 @@ export function HomePage() {
                       className="flex items-center gap-4 px-4 py-3 min-h-[48px] hover:bg-muted/50 transition-colors"
                     >
                       {/* Avatar */}
-                      {emp.imageUrl ? (
-                        <img
-                          src={emp.imageUrl}
-                          alt=""
-                          className="h-10 w-10 shrink-0 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                          {initials}
-                        </div>
-                      )}
+                      <EmployeeAvatar employee={emp} />
                       {/* Name + subtitle */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">

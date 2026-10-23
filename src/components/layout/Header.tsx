@@ -112,7 +112,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <button
               type="button"
               aria-label="User menu"
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary focus:bg-secondary outline-none transition-colors"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary focus-visible:bg-secondary focus-visible:ring-2 focus-visible:ring-ring outline-none transition-colors"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
                 {initials}
