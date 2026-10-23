@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -208,10 +209,7 @@ export function HomePage() {
             <ul className="divide-y">
               {stats.recentEmployees.map((emp) => {
                 const initials = `${emp.firstName?.[0] ?? ""}${emp.lastName?.[0] ?? ""}`.toUpperCase();
-                const addedDate = new Date(emp.createdAt).toLocaleDateString(
-                  "en-ZA",
-                  { day: "2-digit", month: "short", year: "numeric" }
-                );
+                const addedDate = formatDisplayDate(emp.createdAt);
                 return (
                   <li key={emp._id}>
                     <Link

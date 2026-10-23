@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 
 type TrendPoint = {
   label: string;
+  startMs: number;
   trialOrgsAtPeriodEnd: number;
   paidOrgsAtPeriodEnd: number;
   signups: number;
@@ -234,7 +236,7 @@ export function PlatformTrendChart({ data, className }: PlatformTrendChartProps)
               textAnchor="middle"
               className="fill-muted-foreground text-[10px]"
             >
-              {d.label}
+              {formatDisplayDate(d.startMs, { timeZone: "Africa/Johannesburg" })}
             </text>
           ) : null;
         })}

@@ -10,7 +10,7 @@ import { getEffectiveTemplates } from "@/lib/contractTemplates";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, FileText, Plus, FileCheck, Trash2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { timestampToDateString } from "@/lib/validations/contract";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms" };
 
@@ -126,10 +126,10 @@ export function ContractListPage() {
                     <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">
-                        Signed {timestampToDateString(c.signedDate)}
+                        Signed {formatDisplayDate(c.signedDate || undefined, { timeZone: "UTC", fallback: "" })}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Start: {timestampToDateString(c.startDate)}
+                        Start: {formatDisplayDate(c.startDate || undefined, { timeZone: "UTC", fallback: "" })}
                         <span className="ml-1.5">
                           · Template: {getTemplateName(c.templateId)}
                         </span>

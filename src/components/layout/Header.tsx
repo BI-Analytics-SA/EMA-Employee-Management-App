@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { formatDisplayDateTime } from "@/lib/formatDisplayDate";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -144,7 +145,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 )}
                 <p
                   className="text-xs text-muted-foreground mt-1"
-                  title={`Commit ${BUILD_INFO.commit}\nBranch ${BUILD_INFO.branch} (${BUILD_INFO.context})\nBuilt ${BUILD_INFO.builtAt}`}
+                  title={`Commit ${BUILD_INFO.commit}\nBranch ${BUILD_INFO.branch} (${BUILD_INFO.context})\nBuilt ${formatDisplayDateTime(BUILD_INFO.builtAt, { timeZone: "UTC" })} UTC`}
                 >
                   App version {APP_VERSION} · <span className="font-mono">{BUILD_COMMIT}</span>
                   {BUILD_INFO.context !== "production" && <> · {BUILD_INFO.branch}</>}

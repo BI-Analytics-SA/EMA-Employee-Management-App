@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ContractForm, type ContractFormHandle } from "@/features/contracts/components/ContractForm";
 import type { ContractFormValues } from "@/lib/validations/contract";
 import { timestampToDateString } from "@/lib/validations/contract";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { Loader2, ArrowLeft, FileText, FileDown, Trash2, ExternalLink, Mail } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { getDefaultTemplate } from "@/lib/contractTemplates";
@@ -228,7 +229,7 @@ export function ContractDetailPage() {
           </Link>
         </div>
         <h1 className="text-2xl font-bold break-words min-w-0">
-          Contract · {displayName} · {timestampToDateString(contract.signedDate)}
+          Contract · {displayName} · {formatDisplayDate(contract.signedDate || undefined, { timeZone: "UTC", fallback: "" })}
         </h1>
         {canManageContracts && (
           <div className="flex flex-wrap gap-2 w-full min-w-0 sm:w-auto">
@@ -401,7 +402,7 @@ export function ContractDetailPage() {
               )}
               {!showEmailForm && !emailSuccess && contract.emailSentAt && (
                 <p className="text-xs text-muted-foreground w-full basis-full">
-                  Last emailed {new Date(contract.emailSentAt).toLocaleDateString()}
+                  Last emailed {formatDisplayDate(contract.emailSentAt)}
                   {contract.emailSentTo && ` to ${contract.emailSentTo}`}.
                 </p>
               )}

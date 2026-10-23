@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Pencil, Camera, FileText, Trash2, User, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { timestampToDateString } from "@/lib/validations/employee";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import {
   PAY_METHODS,
   BANK_ACC_TYPES,
@@ -187,7 +187,7 @@ export function EmployeeDetailPage() {
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Full name" value={[employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ")} />
             <InfoRow label="Initials" value={employee.initials} />
-            <InfoRow label="Date of birth" value={timestampToDateString(employee.dateOfBirth) || "—"} />
+            <InfoRow label="Date of birth" value={formatDisplayDate(employee.dateOfBirth || undefined)} />
             <InfoRow label="Gender" value={employee.gender ? (GENDERS[employee.gender] ?? employee.gender) : undefined} />
             <InfoRow label="Ethnic group" value={employee.ethnicGroup ? (ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup) : undefined} />
             <InfoRow label="Language" value={employee.language} />
@@ -228,14 +228,14 @@ export function EmployeeDetailPage() {
             <h3 className={sectionTitleClass}>Dates</h3>
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
-            <InfoRow label="Date registered" value={timestampToDateString(employee.dateRegistered)} />
-            <InfoRow label="Date engaged" value={timestampToDateString(employee.dateEngaged)} />
-            <InfoRow label="Last date worked" value={timestampToDateString(employee.lastDateWorked)} />
-            <InfoRow label="UIF end date" value={timestampToDateString(employee.uifEndDate)} />
+            <InfoRow label="Date registered" value={formatDisplayDate(employee.dateRegistered || undefined, { fallback: "" })} />
+            <InfoRow label="Date engaged" value={formatDisplayDate(employee.dateEngaged || undefined, { fallback: "" })} />
+            <InfoRow label="Last date worked" value={formatDisplayDate(employee.lastDateWorked || undefined, { fallback: "" })} />
+            <InfoRow label="UIF end date" value={formatDisplayDate(employee.uifEndDate || undefined, { fallback: "" })} />
             <InfoRow label="Tax number" value={employee.taxNumber} />
             <InfoRow label="Certificate" value={employee.certificate} />
-            <InfoRow label="Tax year start" value={timestampToDateString(employee.taxYearStart)} />
-            <InfoRow label="New UIF start date" value={timestampToDateString(employee.newUifStartDate)} />
+            <InfoRow label="Tax year start" value={formatDisplayDate(employee.taxYearStart || undefined, { fallback: "" })} />
+            <InfoRow label="New UIF start date" value={formatDisplayDate(employee.newUifStartDate || undefined, { fallback: "" })} />
           </div>
         </section>
 

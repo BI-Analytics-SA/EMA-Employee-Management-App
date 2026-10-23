@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -16,6 +17,11 @@ import {
 import type { Doc } from "../../../../convex/_generated/dataModel";
 
 const REPORT_ID_EMPLOYEES = "employees";
+// Presentation only: getValue stays unchanged for Excel output and filtering.
+const DISPLAY_DATE_FIELDS = [
+  "dateOfBirth", "dateEngaged", "dateRegistered", "lastDateWorked",
+  "uifEndDate", "taxYearStart", "newUifStartDate",
+] as const;
 
 export function EmployeeReportPage() {
   const { organizationId, isLoading: userLoading } = useCurrentUser();
@@ -171,7 +177,8 @@ export function EmployeeReportPage() {
                     <tr key={emp._id} className="hover:bg-muted/30 transition-colors">
                       {effectiveColumnIds.map((colId) => {
                         const col = EMPLOYEE_REPORT_COLUMNS.find((c) => c.id === colId);
-                        const value = col?.getValue(emp);
+                        const dateField = DISPLAY_DATE_FIELDS.find((field) => field === colId);
+                        const value = dateField ? formatDisplayDate(emp[dateField]) : col?.getValue(emp);
                         return (
                           <td key={colId} className="px-4 py-3 truncate max-w-[12rem]">
                             {value != null ? String(value) : "—"}
