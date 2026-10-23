@@ -60,7 +60,7 @@ export function InvitesPage() {
 
   const invites = useQuery(
     api.invites.queries.listByOrganization,
-    organizationId ? { organizationId } : "skip"
+    isAdmin && organizationId ? { organizationId } : "skip"
   );
 
   const [isCreating, setIsCreating] = useState(false);
@@ -172,12 +172,7 @@ export function InvitesPage() {
   if (!isAdmin) {
     return (
       <div className="p-4">
-        <Card>
-          <CardContent className="flex items-center gap-3 p-6">
-            <AlertCircle className="h-5 w-5 text-warning" />
-            <p>Only administrators can manage invites.</p>
-          </CardContent>
-        </Card>
+        <p className="text-destructive">Only organization admins can manage invites.</p>
       </div>
     );
   }

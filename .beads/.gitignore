@@ -17,6 +17,9 @@ last-touched
 # Local version tracking (prevents upgrade notification spam after git ops)
 .local_version
 
+# Last time bd showed the "Migrate to Dolt" hint (per-machine throttle timestamp)
+.migration-hint-ts
+
 # Legacy database files
 db.sqlite
 bd.db

@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganizationContext } from "@/contexts/OrganizationContext";
 import { useTheme } from "@/components/theme-provider";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
-import { APP_VERSION } from "@/lib/version";
+import { APP_VERSION, BUILD_COMMIT, BUILD_INFO } from "@/lib/version";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -142,8 +142,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                 {organization?.name && (
                   <p className="text-xs text-muted-foreground truncate">{organization.name}</p>
                 )}
-                <p className="text-xs text-muted-foreground mt-1" title="App version">
-                  App version {APP_VERSION}
+                <p
+                  className="text-xs text-muted-foreground mt-1"
+                  title={`Commit ${BUILD_INFO.commit}\nBranch ${BUILD_INFO.branch} (${BUILD_INFO.context})\nBuilt ${BUILD_INFO.builtAt}`}
+                >
+                  App version {APP_VERSION} · <span className="font-mono">{BUILD_COMMIT}</span>
+                  {BUILD_INFO.context !== "production" && <> · {BUILD_INFO.branch}</>}
                 </p>
               </div>
               {/* Organizations */}
