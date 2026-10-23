@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-export function NotFoundPage() {
+type NotFoundPageProps = {
+  homeTo?: string;
+  homeLabel?: string;
+};
+
+export function NotFoundPage({ homeTo = "/", homeLabel = "Back to Home" }: NotFoundPageProps) {
   return (
     <div className="p-4 md:p-6">
       <section className="space-y-4 rounded-lg border bg-card p-6 text-card-foreground">
@@ -10,7 +15,7 @@ export function NotFoundPage() {
           The page you are looking for may have moved or no longer exists.
         </p>
         <Button asChild className="w-full sm:w-auto">
-          <Link to="/">Back to Home</Link>
+          <Link to={homeTo}>{homeLabel}</Link>
         </Button>
       </section>
     </div>

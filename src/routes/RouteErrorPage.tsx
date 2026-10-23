@@ -2,6 +2,22 @@ import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotFoundPage } from "./NotFoundPage";
 
+function formatErrorDetails(error: unknown): string {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  const details = isRouteErrorResponse(error)
+    ? { status: error.status, statusText: error.statusText, data: error.data }
+    : error;
+
+  try {
+    return JSON.stringify(details, null, 2) ?? String(error);
+  } catch {
+    return String(error);
+  }
+}
+
 export function RouteErrorPage() {
   const error = useRouteError();
 
@@ -28,7 +44,7 @@ export function RouteErrorPage() {
           <details className="text-sm">
             <summary className="cursor-pointer">Error details</summary>
             <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap break-words rounded bg-muted p-3">
-              {error instanceof Error ? error.stack ?? error.message : String(error)}
+              {formatErrorDetails(error)}
             </pre>
           </details>
         )}

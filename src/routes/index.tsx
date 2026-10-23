@@ -130,6 +130,10 @@ export const router = createBrowserRouter([
                     path: "organizations",
                     element: <PlatformOrganizationsPage />,
                   },
+                  {
+                    path: "*",
+                    element: <NotFoundPage homeTo="/platform/organizations" homeLabel="Back to Organizations" />,
+                  },
                 ],
               },
               {
