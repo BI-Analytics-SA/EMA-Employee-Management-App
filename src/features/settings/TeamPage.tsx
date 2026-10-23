@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -394,7 +395,7 @@ export function TeamPage() {
                           </div>
                           <div className="text-sm text-muted-foreground truncate">{member.email ?? "—"}</div>
                           <div className="text-xs text-muted-foreground">
-                            Last session: {member.lastLoginAt ? new Date(member.lastLoginAt).toLocaleDateString() : "Never"}
+                            Last session: {member.lastLoginAt ? formatDisplayDate(member.lastLoginAt) : "Never"}
                           </div>
                         </div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
