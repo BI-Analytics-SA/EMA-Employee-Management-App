@@ -113,3 +113,21 @@ it("shows SAST day/month bucket dates in platform chart labels without changing 
   expect(point.label).toBe("Sept 2026");
   expect(point.startMs).toBe(Date.parse("2026-08-31T22:00:00Z"));
 });
+
+it.each([1, 7, 10, 12, 13, 30, 89, 90, 91, 365])("keeps platform date ticks separated for %i buckets", (count) => {
+  const data = Array.from({ length: count }, (_, i) => ({
+    label: `day-${i}`,
+    startMs: Date.parse("2026-08-31T22:00:00Z") + i * 86_400_000,
+    trialOrgsAtPeriodEnd: 1, paidOrgsAtPeriodEnd: 1, signups: 0, paidActivations: 0,
+  }));
+  const { container } = render(<PlatformTrendChart data={data} />);
+  const labels = Array.from(container.querySelectorAll("svg text")).filter((node) =>
+    /^\d{4}\/\d{2}\/\d{2}$/.test(node.textContent ?? "")
+  );
+  expect(labels[0]).toHaveTextContent("2026/09/01");
+  if (count > 1) expect(labels.length).toBeGreaterThan(1);
+  labels.slice(1).forEach((label, i) => {
+    const gap = Number(label.getAttribute("x")) - Number(labels[i].getAttribute("x"));
+    expect(gap).toBeGreaterThanOrEqual(80);
+  });
+});

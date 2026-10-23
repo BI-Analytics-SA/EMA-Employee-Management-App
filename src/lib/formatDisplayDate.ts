@@ -6,6 +6,8 @@ type DisplayDateOptions = {
   fallback?: string;
 };
 
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
 /** Display only. Never use for inputs, storage, imports, exports or contracts. */
 function formatDisplay(value: DisplayDate, includeTime: boolean, options: DisplayDateOptions): string {
   const fallback = options.fallback ?? "—";
@@ -29,11 +31,17 @@ function formatDisplay(value: DisplayDate, includeTime: boolean, options: Displa
   }
   if (Number.isNaN(date.getTime())) return fallback;
 
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    calendar: "gregory", numberingSystem: "latn",
-    year: "numeric", month: "2-digit", day: "2-digit", timeZone,
-    ...(includeTime ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" } as const : {}),
-  }).formatToParts(date);
+  const key = `${timeZone ?? "local"}:${includeTime ? "datetime" : "date"}`;
+  let formatter = formatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("en-GB", {
+      calendar: "gregory", numberingSystem: "latn",
+      year: "numeric", month: "2-digit", day: "2-digit", timeZone,
+      ...(includeTime ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" } as const : {}),
+    });
+    formatters.set(key, formatter);
+  }
+  const parts = formatter.formatToParts(date);
   const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
   const day = `${part("year").padStart(4, "0")}/${part("month")}/${part("day")}`;
   return includeTime ? `${day} ${part("hour")}:${part("minute")}` : day;

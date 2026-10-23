@@ -172,6 +172,9 @@ export function PlatformTrendChart({ data, className }: PlatformTrendChartProps)
 
   const { paths, bars, yMax, yTicks, width, height, padding, centerX } = chart;
   const innerH = height - padding.top - padding.bottom;
+  // Reserve 80 viewBox units for each ~65-unit date label plus a gap.
+  const bandWidth = (width - padding.left - padding.right) / data.length;
+  const labelStep = Math.ceil(80 / bandWidth);
 
   return (
     <div className={cn("w-full overflow-x-auto", className)}>
@@ -226,8 +229,7 @@ export function PlatformTrendChart({ data, className }: PlatformTrendChartProps)
         )}
 
         {data.map((d, i) => {
-          const showLabel =
-            data.length <= 12 || i % Math.ceil(data.length / 12) === 0 || i === data.length - 1;
+          const showLabel = i % labelStep === 0;
           return showLabel ? (
             <text
               key={d.label}
