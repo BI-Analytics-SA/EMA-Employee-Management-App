@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid" | "none";
 
@@ -16,11 +17,7 @@ export function getExpiryStatus(
 }
 
 export function formatExpiryDate(expiryDate: number): string {
-  return new Date(expiryDate).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatDisplayDate(expiryDate);
 }
 
 export type ExpiryBadgeProps = {

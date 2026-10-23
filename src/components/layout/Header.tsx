@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { formatDisplayDateTime } from "@/lib/formatDisplayDate";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -26,7 +28,6 @@ export function Header({ onMenuClick }: HeaderProps) {
   const showExpiryBell = documentsEnabled || jobsEnabled;
   const { isPlatformAdmin } = usePlatformAdmin();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Expiring items count (aggregates documents and job documents when their modules are enabled)
   const expiringDocs = useQuery(
@@ -38,18 +39,6 @@ export function Header({ onMenuClick }: HeaderProps) {
     jobsEnabled && organizationId ? { organizationId, daysAhead: 30 } : "skip"
   );
   const expiringCount = (expiringDocs?.length ?? 0) + (expiringJobDocs?.length ?? 0);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!dropdownOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [dropdownOpen]);
 
   const handleSignOut = async () => {
     setDropdownOpen(false);
@@ -119,23 +108,24 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Button>
 
         {/* User avatar dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary transition-colors"
-          >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              {initials}
-            </div>
-            <span className="hidden lg:inline text-sm font-medium truncate max-w-[200px]" title={userName}>
-              {userName}
-            </span>
-            <ChevronDown className="hidden lg:inline h-4 w-4 text-muted-foreground" />
-          </button>
-
-          {/* Dropdown menu */}
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-64 rounded-lg border bg-card shadow-dropdown py-1 z-50">
+        <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              aria-label="User menu"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary focus-visible:bg-secondary focus-visible:ring-2 focus-visible:ring-ring outline-none transition-colors"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                {initials}
+              </div>
+              <span className="hidden lg:inline text-sm font-medium truncate max-w-[200px]" title={userName}>
+                {userName}
+              </span>
+              <ChevronDown className="hidden lg:inline h-4 w-4 text-muted-foreground" />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content align="end" sideOffset={4} collisionPadding={8} className="z-50 w-64 max-w-[calc(100vw-1rem)] rounded-lg border bg-card shadow-dropdown py-1">
               {/* User info */}
               <div className="px-3 py-2 border-b">
                 <p className="text-sm font-medium truncate">{userName}</p>
@@ -144,7 +134,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 )}
                 <p
                   className="text-xs text-muted-foreground mt-1"
-                  title={`Commit ${BUILD_INFO.commit}\nBranch ${BUILD_INFO.branch} (${BUILD_INFO.context})\nBuilt ${BUILD_INFO.builtAt}`}
+                  title={`Commit ${BUILD_INFO.commit}\nBranch ${BUILD_INFO.branch} (${BUILD_INFO.context})\nBuilt ${formatDisplayDateTime(BUILD_INFO.builtAt, { timeZone: "UTC" })} UTC`}
                 >
                   App version {APP_VERSION} · <span className="font-mono">{BUILD_COMMIT}</span>
                   {BUILD_INFO.context !== "production" && <> · {BUILD_INFO.branch}</>}
@@ -157,69 +147,80 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </p>
                 {organizations.length > 0 &&
                   organizations.map(({ organization: org }) => (
-                    <button
-                      key={org._id}
-                      type="button"
-                      onClick={() => {
-                        setActiveOrganization(org._id);
-                        setDropdownOpen(false);
-                      }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-secondary transition-colors"
-                    >
-                      {activeOrganizationId === org._id ? (
-                        <Check className="h-4 w-4 shrink-0 text-primary" />
-                      ) : (
-                        <span className="w-4 shrink-0" />
-                      )}
-                      <span className="truncate">{org.name}</span>
-                    </button>
+                    <DropdownMenu.Item asChild key={org._id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveOrganization(org._id);
+                          setDropdownOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-secondary focus:bg-secondary outline-none transition-colors"
+                      >
+                        {activeOrganizationId === org._id ? (
+                          <Check className="h-4 w-4 shrink-0 text-primary" />
+                        ) : (
+                          <span className="w-4 shrink-0" />
+                        )}
+                        <span className="truncate">{org.name}</span>
+                      </button>
+                    </DropdownMenu.Item>
                   ))}
-                <Link
-                  to="/organizations/new"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                >
-                  <Building2 className="h-4 w-4 shrink-0" />
-                  Create Organization
-                </Link>
-                <Link
-                  to="/organizations/new?mode=join"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                >
-                  <UserPlus className="h-4 w-4 shrink-0" />
-                  Join Organization
-                </Link>
+                <DropdownMenu.Item asChild>
+                  <Link
+                    to="/organizations/new"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground outline-none transition-colors"
+                  >
+                    <Building2 className="h-4 w-4 shrink-0" />
+                    Create Organization
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item asChild>
+                  <Link
+                    to="/organizations/new?mode=join"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground outline-none transition-colors"
+                  >
+                    <UserPlus className="h-4 w-4 shrink-0" />
+                    Join Organization
+                  </Link>
+                </DropdownMenu.Item>
               </div>
               {/* Actions */}
               {isPlatformAdmin && (
-                <Link
-                  to="/platform/organizations"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                >
-                  <Shield className="h-4 w-4" />
-                  Platform — Organisations
-                </Link>
+                <DropdownMenu.Item asChild>
+                  <Link
+                    to="/platform/organizations"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground outline-none transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Platform — Organisations
+                  </Link>
+                </DropdownMenu.Item>
               )}
-              <Link
-                to="/settings/profile"
-                onClick={() => setDropdownOpen(false)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-              >
-                <User className="h-4 w-4" />
-                Profile
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </button>
-            </div>
-          )}
-        </div>
+              <DropdownMenu.Item asChild>
+                <Link
+                  to="/settings/profile"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground outline-none transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  Profile
+                </Link>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item asChild>
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground outline-none transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </button>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
     </header>
   );

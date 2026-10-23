@@ -137,7 +137,7 @@ export function EditJobPage() {
           </div>
           <div className={`${sectionContentClass} space-y-4`}>
             <div className="space-y-1.5">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title" required>Title</Label>
               <Input
                 id="title"
                 value={title}

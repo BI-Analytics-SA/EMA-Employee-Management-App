@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -142,11 +143,11 @@ export function JobListPage() {
                       {(job.startDate || job.endDate) && (
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {job.startDate
-                            ? new Date(job.startDate).toLocaleDateString()
+                            ? formatDisplayDate(job.startDate)
                             : ""}
                           {job.startDate && job.endDate ? " – " : ""}
                           {job.endDate
-                            ? new Date(job.endDate).toLocaleDateString()
+                            ? formatDisplayDate(job.endDate)
                             : ""}
                         </p>
                       )}

@@ -4,10 +4,10 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useModuleEnabled } from "@/hooks/useModuleEnabled";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Camera, FileText, Trash2, User, FileStack } from "lucide-react";
+import { Loader2, Pencil, Camera, FileText, Trash2, FileStack } from "lucide-react";
 import { getExpiryStatus } from "@/components/shared/ExpiryBadge";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { timestampToDateString } from "@/lib/validations/employee";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import {
   PAY_METHODS,
   BANK_ACC_TYPES,
@@ -15,6 +15,7 @@ import {
   ACC_RELATIONSHIPS,
 } from "@/lib/constants/bankDetails";
 import { useState } from "react";
+import { EmployeeAvatar } from "../components/EmployeeAvatar";
 import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 
 const TITLES: Record<string, string> = { MR: "Mr", MISS: "Miss", MRS: "Mrs", MS: "Ms", DR: "Dr", PROF: "Prof", REV: "Rev" };
@@ -99,8 +100,6 @@ export function EmployeeDetailPage() {
     );
   }
 
-  const initials = `${employee.firstName?.[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
-
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Profile header card */}
@@ -108,17 +107,11 @@ export function EmployeeDetailPage() {
         <div className="flex flex-wrap items-center gap-5">
           {/* Avatar */}
           <div className="shrink-0 flex justify-center sm:justify-start">
-            {employee.imageUrl ? (
-              <img
-                src={employee.imageUrl}
-                alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
-                className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
-              />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold ring-2 ring-border">
-                {initials || <User className="h-8 w-8" />}
-              </div>
-            )}
+            <EmployeeAvatar
+              employee={employee}
+              size="lg"
+              alt={`${employee.firstName ?? ""} ${employee.lastName ?? ""}`}
+            />
           </div>
 
           {/* Name + subtitle - min-width so name stays on one line and buttons wrap when tight */}
@@ -187,7 +180,7 @@ export function EmployeeDetailPage() {
           <div className={`${sectionContentClass} space-y-1`}>
             <InfoRow label="Full name" value={[employee.firstName, employee.secondName, employee.lastName].filter(Boolean).join(" ")} />
             <InfoRow label="Initials" value={employee.initials} />
-            <InfoRow label="Date of birth" value={timestampToDateString(employee.dateOfBirth) || "—"} />
+            <InfoRow label="Date of birth" value={formatDisplayDate(employee.dateOfBirth || undefined)} />
             <InfoRow label="Gender" value={employee.gender ? (GENDERS[employee.gender] ?? employee.gender) : undefined} />
             <InfoRow label="Ethnic group" value={employee.ethnicGroup ? (ETHNIC[employee.ethnicGroup] ?? employee.ethnicGroup) : undefined} />
             <InfoRow label="Language" value={employee.language} />
@@ -228,14 +221,14 @@ export function EmployeeDetailPage() {
             <h3 className={sectionTitleClass}>Dates</h3>
           </div>
           <div className={`${sectionContentClass} space-y-1`}>
-            <InfoRow label="Date registered" value={timestampToDateString(employee.dateRegistered)} />
-            <InfoRow label="Date engaged" value={timestampToDateString(employee.dateEngaged)} />
-            <InfoRow label="Last date worked" value={timestampToDateString(employee.lastDateWorked)} />
-            <InfoRow label="UIF end date" value={timestampToDateString(employee.uifEndDate)} />
+            <InfoRow label="Date registered" value={formatDisplayDate(employee.dateRegistered || undefined, { fallback: "" })} />
+            <InfoRow label="Date engaged" value={formatDisplayDate(employee.dateEngaged || undefined, { fallback: "" })} />
+            <InfoRow label="Last date worked" value={formatDisplayDate(employee.lastDateWorked || undefined, { fallback: "" })} />
+            <InfoRow label="UIF end date" value={formatDisplayDate(employee.uifEndDate || undefined, { fallback: "" })} />
             <InfoRow label="Tax number" value={employee.taxNumber} />
             <InfoRow label="Certificate" value={employee.certificate} />
-            <InfoRow label="Tax year start" value={timestampToDateString(employee.taxYearStart)} />
-            <InfoRow label="New UIF start date" value={timestampToDateString(employee.newUifStartDate)} />
+            <InfoRow label="Tax year start" value={formatDisplayDate(employee.taxYearStart || undefined, { fallback: "" })} />
+            <InfoRow label="New UIF start date" value={formatDisplayDate(employee.newUifStartDate || undefined, { fallback: "" })} />
           </div>
         </section>
 
