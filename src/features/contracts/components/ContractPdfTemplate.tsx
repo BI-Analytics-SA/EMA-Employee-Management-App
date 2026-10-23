@@ -44,7 +44,7 @@ export function ContractPdfTemplate({
   return (
     <div className="contract-pdf-root" style={{ fontFamily: "system-ui, sans-serif", fontSize: "11pt", color: "#000", padding: "24px", maxWidth: "210mm" }}>
       <header style={{ marginBottom: "16px", borderBottom: "1px solid #ccc", paddingBottom: "8px" }}>
-        <div style={{ fontWeight: 700, marginBottom: "4px" }}>{contractHeading || "Contract of Employment"}</div>
+        <div style={{ fontWeight: 700, marginBottom: "4px" }}>{contractHeading || "Co-Employment"}</div>
         <div>
           <span>{companyName || "—"}</span>
         </div>

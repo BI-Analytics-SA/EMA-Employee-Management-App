@@ -6,7 +6,7 @@ afterEach(cleanup);
 
 describe("ContractPdfTemplate heading", () => {
   it.each([
-    ["", "Contract of Employment"],
+    ["", "Co-Employment"],
     ["Co Employemnt", "Co Employemnt"],
     ["Custom heading", "Custom heading"],
   ])("uses the default only for an empty heading (%s)", (contractHeading, expected) => {

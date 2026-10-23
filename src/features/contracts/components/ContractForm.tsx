@@ -412,7 +412,7 @@ export const ContractForm = forwardRef<ContractFormHandle, Props>(function Contr
                   <Input
                     id="contractHeading"
                     {...form.register("contractHeading")}
-                    placeholder="e.g. Contract of Employment"
+                    placeholder="e.g. Co-Employment"
                   />
                 </div>
                 <div className={cn(fieldClass, "sm:min-w-[140px]")}>
