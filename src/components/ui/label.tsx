@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 
 const Label = React.forwardRef<
   HTMLLabelElement,
-  React.LabelHTMLAttributes<HTMLLabelElement>
->(({ className, ...props }, ref) => (
+  React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean }
+>(({ className, required, children, ...props }, ref) => (
   <label
     ref={ref}
     className={cn(
@@ -13,7 +13,10 @@ const Label = React.forwardRef<
       className
     )}
     {...props}
-  />
+  >
+    {children}
+    {required && <> <span aria-hidden="true">*</span><span className="sr-only"> (required)</span></>}
+  </label>
 ))
 Label.displayName = "Label"
 

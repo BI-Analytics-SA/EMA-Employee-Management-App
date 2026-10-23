@@ -166,9 +166,10 @@ export function EmployeeForm({
 
   // Field wrapper classes - full width on mobile, wrap with min-widths from sm up (see ui-layout-patterns.mdc)
   const fieldClass = "space-y-1 w-full min-w-0 sm:min-w-[100px] sm:flex-1";
+  const selectFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[220px] sm:flex-1";
   const dateFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[160px] sm:flex-1"; // Wider for date picker icon
   const wideFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-1";
-  const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Title, Initials
+  const narrowFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[70px] sm:flex-1 sm:max-w-[100px]"; // Street No, Initials
   const nameFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[140px] sm:flex-[2]"; // Names, illness condition
   const emailFieldClass = "space-y-1 w-full min-w-0 sm:min-w-[220px] sm:flex-[2]"; // Email
 
@@ -184,9 +185,10 @@ export function EmployeeForm({
           <div className={sectionContentClass}>
             <div className="flex flex-col gap-2">
               <div className="space-y-1">
-                <Label htmlFor="idNumber" className="text-xs">ID Number (13 digits)</Label>
+                <Label htmlFor="idNumber" className="text-xs" required>ID Number (13 digits)</Label>
                 <Input
                   id="idNumber"
+                  aria-required="true"
                   {...form.register("idNumber")}
                   placeholder="9001015001087"
                   maxLength={13}
@@ -299,7 +301,7 @@ export function EmployeeForm({
             <div className="flex flex-col gap-2">
               {/* Row 1: Title, Initials, First Name, Second Name */}
               <div className="flex flex-wrap gap-2">
-                <div className={narrowFieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="title" className="text-xs">Title</Label>
                   <select id="title" className={selectClass} {...form.register("title")}>
                     <option value="">— Select —</option>
@@ -353,7 +355,7 @@ export function EmployeeForm({
                     <p className="text-xs text-destructive">{form.formState.errors.dateOfBirth.message}</p>
                   )}
                 </div>
-                <div className={narrowFieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="gender" className="text-xs">Gender</Label>
                   <select id="gender" className={selectClass} {...form.register("gender")}>
                     <option value="">— Select —</option>
@@ -362,7 +364,7 @@ export function EmployeeForm({
                     ))}
                   </select>
                 </div>
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="ethnicGroup" className="text-xs">Ethnic Group</Label>
                   <select id="ethnicGroup" className={selectClass} {...form.register("ethnicGroup")}>
                     <option value="">— Select —</option>
@@ -371,7 +373,7 @@ export function EmployeeForm({
                     ))}
                   </select>
                 </div>
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="maritalStatus" className="text-xs">Marital Status</Label>
                   <select id="maritalStatus" className={selectClass} {...form.register("maritalStatus")}>
                     <option value="">— Select —</option>
@@ -464,7 +466,7 @@ export function EmployeeForm({
               </div>
               {/* Row 2: Training, Shift, Shift Allocation */}
               <div className="flex flex-wrap gap-2">
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="training" className="text-xs">Training</Label>
                   <select id="training" className={selectClass} {...form.register("training")}>
                     <option value="">— Select —</option>
@@ -473,7 +475,7 @@ export function EmployeeForm({
                     ))}
                   </select>
                 </div>
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="shift" className="text-xs">Shift</Label>
                   <select id="shift" className={selectClass} {...form.register("shift")}>
                     <option value="">— Select —</option>
@@ -482,7 +484,7 @@ export function EmployeeForm({
                     ))}
                   </select>
                 </div>
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="shiftAllocation" className="text-xs">Shift Allocation</Label>
                   <select id="shiftAllocation" className={selectClass} {...form.register("shiftAllocation")}>
                     <option value="">— Select —</option>
@@ -494,7 +496,7 @@ export function EmployeeForm({
               </div>
               {/* Row 3: Department Group */}
               <div className="flex flex-wrap gap-2">
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="deptGroup" className="text-xs">Department Group</Label>
                   <select id="deptGroup" className={selectClass} {...form.register("deptGroup")}>
                     <option value="">— Select —</option>
@@ -506,7 +508,7 @@ export function EmployeeForm({
               </div>
               {/* Row 4: Department, Department Worked */}
               <div className="flex flex-wrap gap-2">
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="department" className="text-xs">Department</Label>
                   <select id="department" className={selectClass} {...form.register("department")}>
                     <option value="">— Select —</option>
@@ -515,7 +517,7 @@ export function EmployeeForm({
                     ))}
                   </select>
                 </div>
-                <div className={fieldClass}>
+                <div className={selectFieldClass}>
                   <Label htmlFor="departmentWorked" className="text-xs">Department Worked</Label>
                   <select id="departmentWorked" className={selectClass} {...form.register("departmentWorked")}>
                     <option value="">— Select —</option>
@@ -536,7 +538,7 @@ export function EmployeeForm({
           </div>
           <div className={sectionContentClass}>
             <div className="flex flex-wrap gap-2">
-              <div className={fieldClass}>
+              <div className={selectFieldClass}>
                 <Label htmlFor="payMethod" className="text-xs">Pay Method</Label>
                 <select id="payMethod" className={selectClass} {...form.register("payMethod")}>
                   <option value="">— Select —</option>
@@ -545,7 +547,7 @@ export function EmployeeForm({
                   ))}
                 </select>
               </div>
-              <div className={fieldClass}>
+              <div className={selectFieldClass}>
                 <Label htmlFor="bankName" className="text-xs">Bank Name</Label>
                 <select id="bankName" className={selectClass} {...form.register("bankName")}>
                   <option value="">— Select —</option>
@@ -554,7 +556,7 @@ export function EmployeeForm({
                   ))}
                 </select>
               </div>
-              <div className={fieldClass}>
+              <div className={selectFieldClass}>
                 <Label htmlFor="bankAccType" className="text-xs">Account Type</Label>
                 <select id="bankAccType" className={selectClass} {...form.register("bankAccType")}>
                   <option value="">— Select —</option>
@@ -580,7 +582,7 @@ export function EmployeeForm({
                 <Label htmlFor="accHolder" className="text-xs">Account Holder</Label>
                 <Input id="accHolder" {...form.register("accHolder")} />
               </div>
-              <div className={fieldClass}>
+              <div className={selectFieldClass}>
                 <Label htmlFor="accRelationship" className="text-xs">Relationship</Label>
                 <select id="accRelationship" className={selectClass} {...form.register("accRelationship")}>
                   <option value="">— Select —</option>

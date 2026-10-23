@@ -379,7 +379,7 @@ export function ContractTemplatePage() {
                 id="contractHeading"
                 value={contractHeading}
                 onChange={(e) => setContractHeading(e.target.value)}
-                placeholder="e.g. Co-Employment"
+                placeholder="e.g. Contract of Employment"
                 className="max-w-md"
               />
               <p className="text-xs text-muted-foreground">

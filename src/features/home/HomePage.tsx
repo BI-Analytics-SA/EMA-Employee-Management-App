@@ -148,7 +148,7 @@ export function HomePage() {
               <Button variant="outline" className="w-full sm:w-auto" asChild>
                 <Link to="/employees">
                   <FileDown className="h-4 w-4" />
-                  Export to Excel
+                  Export Employees
                 </Link>
               </Button>
             </div>
