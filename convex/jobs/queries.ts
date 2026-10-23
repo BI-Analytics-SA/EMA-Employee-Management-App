@@ -23,9 +23,12 @@ export const listByOrganization = query({
  * Get a single job by ID.
  */
 export const getById = query({
-  args: { id: v.id("jobs") },
+  // Route params are untrusted strings; malformed IDs are missing records.
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    const job = await ctx.db.get(args.id);
+    const id = ctx.db.normalizeId("jobs", args.id);
+    if (!id) return null;
+    const job = await ctx.db.get(id);
     if (!job) {
       return null;
     }
