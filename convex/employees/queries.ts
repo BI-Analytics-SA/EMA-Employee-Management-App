@@ -70,9 +70,12 @@ export const count = query({
  * Get a single employee by ID (must belong to user's organization)
  */
 export const getById = query({
-  args: { id: v.id("employees") },
+  // Route params are untrusted strings; malformed IDs are missing records.
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    const employee = await ctx.db.get(args.id);
+    const id = ctx.db.normalizeId("employees", args.id);
+    if (!id) return null;
+    const employee = await ctx.db.get(id);
     if (!employee) {
       return null;
     }

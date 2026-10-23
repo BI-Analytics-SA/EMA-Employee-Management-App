@@ -1,5 +1,8 @@
 import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 
+import { NotFoundPage } from "./NotFoundPage";
+import { RouteErrorPage } from "./RouteErrorPage";
+
 // Layout
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -86,195 +89,208 @@ function RootRoute() {
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <SignInPage />,
-  },
-  {
-    // Onboarding - requires auth but not profile
-    path: "/onboarding",
-    element: <ProtectedRoute />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
-        index: true,
-        element: <OnboardingPage />,
+        path: "/login",
+        element: <SignInPage />,
       },
-    ],
-  },
-  {
-    // Main app - requires auth AND profile; unauthenticated "/" shows landing page
-    path: "/",
-    element: <RootRoute />,
-    children: [
       {
-        element: <RequireProfile />,
+        // Onboarding - requires auth but not profile
+        path: "/onboarding",
+        element: <ProtectedRoute />,
         children: [
           {
-            path: "platform",
-            element: (
-              <RequirePlatformAdmin>
-                <PlatformShell />
-              </RequirePlatformAdmin>
-            ),
-            children: [
-              {
-                index: true,
-                element: <Navigate to="organizations" replace />,
-              },
-              {
-                path: "organizations",
-                element: <PlatformOrganizationsPage />,
-              },
-            ],
+            index: true,
+            element: <OnboardingPage />,
           },
+        ],
+      },
+      {
+        // Main app - requires auth AND profile; unauthenticated "/" shows landing page
+        path: "/",
+        element: <RootRoute />,
+        children: [
           {
-            element: (
-              <OrganizationProvider>
-                <RequireActivePlan>
-                  <AppShell />
-                </RequireActivePlan>
-              </OrganizationProvider>
-            ),
+            element: <RequireProfile />,
             children: [
               {
-                index: true,
-                element: <HomePage />,
-              },
-              {
-                path: "settings/team",
-                element: <TeamPage />,
-              },
-              {
-                path: "settings/profile",
-                element: <ProfilePage />,
-              },
-              {
-                path: "settings/document-types",
-                element: <DocumentTypesPage />,
-              },
-              {
-                path: "settings/modules",
-                element: <ModulesPage />,
-              },
-              {
-                path: "settings/data-management",
-                element: <DataManagementPage />,
-              },
-              {
-                path: "settings/contract-template",
-                element: <ContractTemplatePage />,
-              },
-              {
-                path: "settings/export-config",
-                element: <ExportConfigPage />,
-              },
-              {
-                path: "settings/job-document-types",
-                element: <JobDocumentTypesPage />,
-              },
-              {
-                path: "expiring-items",
-                element: <ExpiringDocumentsPage />,
-              },
-              {
-                path: "documents/expiring",
-                element: <Navigate to="/expiring-items" replace />,
-              },
-              {
-                path: "reports/employees",
-                element: <EmployeeReportPage />,
-              },
-              {
-                path: "organizations/new",
-                element: <AddOrganizationPage />,
-              },
-              {
-                path: "jobs",
+                path: "platform",
+                element: (
+                  <RequirePlatformAdmin>
+                    <PlatformShell />
+                  </RequirePlatformAdmin>
+                ),
                 children: [
                   {
                     index: true,
-                    element: <JobListPage />,
+                    element: <Navigate to="organizations" replace />,
                   },
                   {
-                    path: "new",
-                    element: <NewJobPage />,
+                    path: "organizations",
+                    element: <PlatformOrganizationsPage />,
                   },
                   {
-                    path: ":id",
-                    element: <JobDetailPage />,
-                  },
-                  {
-                    path: ":id/edit",
-                    element: <EditJobPage />,
-                  },
-                  {
-                    path: ":id/documents",
-                    children: [
-                      {
-                        index: true,
-                        element: <JobDocumentsPage />,
-                      },
-                      {
-                        path: "upload",
-                        element: <JobDocumentUploadPage />,
-                      },
-                    ],
+                    path: "*",
+                    element: <NotFoundPage homeTo="/platform/organizations" homeLabel="Back to Organizations" />,
                   },
                 ],
               },
               {
-                path: "employees",
+                element: (
+                  <OrganizationProvider>
+                    <RequireActivePlan>
+                      <AppShell />
+                    </RequireActivePlan>
+                  </OrganizationProvider>
+                ),
                 children: [
                   {
+                    path: "*",
+                    element: <NotFoundPage />,
+                  },
+                  {
                     index: true,
-                    element: <EmployeeListPage />,
+                    element: <HomePage />,
                   },
                   {
-                    path: "new",
-                    element: <AddEmployeePage />,
+                    path: "settings/team",
+                    element: <TeamPage />,
                   },
                   {
-                    path: "import",
-                    element: <ImportEmployeesPage />,
+                    path: "settings/profile",
+                    element: <ProfilePage />,
                   },
                   {
-                    path: ":id",
-                    element: <EmployeeDetailPage />,
+                    path: "settings/document-types",
+                    element: <DocumentTypesPage />,
                   },
                   {
-                    path: ":id/edit",
-                    element: <EditEmployeePage />,
+                    path: "settings/modules",
+                    element: <ModulesPage />,
                   },
                   {
-                    path: ":id/capture",
-                    element: <CaptureImagePage />,
+                    path: "settings/data-management",
+                    element: <DataManagementPage />,
                   },
                   {
-                    path: ":id/documents",
+                    path: "settings/contract-template",
+                    element: <ContractTemplatePage />,
+                  },
+                  {
+                    path: "settings/export-config",
+                    element: <ExportConfigPage />,
+                  },
+                  {
+                    path: "settings/job-document-types",
+                    element: <JobDocumentTypesPage />,
+                  },
+                  {
+                    path: "expiring-items",
+                    element: <ExpiringDocumentsPage />,
+                  },
+                  {
+                    path: "documents/expiring",
+                    element: <Navigate to="/expiring-items" replace />,
+                  },
+                  {
+                    path: "reports/employees",
+                    element: <EmployeeReportPage />,
+                  },
+                  {
+                    path: "organizations/new",
+                    element: <AddOrganizationPage />,
+                  },
+                  {
+                    path: "jobs",
                     children: [
                       {
                         index: true,
-                        element: <EmployeeDocumentsPage />,
+                        element: <JobListPage />,
                       },
                       {
-                        path: "upload",
-                        element: <DocumentUploadPage />,
+                        path: "new",
+                        element: <NewJobPage />,
+                      },
+                      {
+                        path: ":id",
+                        element: <JobDetailPage />,
+                      },
+                      {
+                        path: ":id/edit",
+                        element: <EditJobPage />,
+                      },
+                      {
+                        path: ":id/documents",
+                        children: [
+                          {
+                            index: true,
+                            element: <JobDocumentsPage />,
+                          },
+                          {
+                            path: "upload",
+                            element: <JobDocumentUploadPage />,
+                          },
+                        ],
                       },
                     ],
                   },
                   {
-                    path: ":id/contracts",
+                    path: "employees",
                     children: [
                       {
                         index: true,
-                        element: <ContractListPage />,
+                        element: <EmployeeListPage />,
                       },
                       {
                         path: "new",
-                        element: <NewContractPage />,
+                        element: <AddEmployeePage />,
                       },
                       {
-                        path: ":contractId",
-                        element: <ContractDetailPage />,
+                        path: "import",
+                        element: <ImportEmployeesPage />,
+                      },
+                      {
+                        path: ":id",
+                        element: <EmployeeDetailPage />,
+                      },
+                      {
+                        path: ":id/edit",
+                        element: <EditEmployeePage />,
+                      },
+                      {
+                        path: ":id/capture",
+                        element: <CaptureImagePage />,
+                      },
+                      {
+                        path: ":id/documents",
+                        children: [
+                          {
+                            index: true,
+                            element: <EmployeeDocumentsPage />,
+                          },
+                          {
+                            path: "upload",
+                            element: <DocumentUploadPage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: ":id/contracts",
+                        children: [
+                          {
+                            index: true,
+                            element: <ContractListPage />,
+                          },
+                          {
+                            path: "new",
+                            element: <NewContractPage />,
+                          },
+                          {
+                            path: ":contractId",
+                            element: <ContractDetailPage />,
+                          },
+                        ],
                       },
                     ],
                   },

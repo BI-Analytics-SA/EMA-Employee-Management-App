@@ -6,9 +6,11 @@ import { requireOrganizationAccess } from "../lib/permissions";
  * List all documents for an employee (must belong to user's organization).
  */
 export const listByEmployee = query({
-  args: { employeeId: v.id("employees") },
+  args: { employeeId: v.string() },
   handler: async (ctx, args) => {
-    const employee = await ctx.db.get(args.employeeId);
+    const employeeId = ctx.db.normalizeId("employees", args.employeeId);
+    if (!employeeId) return [];
+    const employee = await ctx.db.get(employeeId);
     if (!employee) {
       return [];
     }
@@ -16,7 +18,7 @@ export const listByEmployee = query({
 
     return await ctx.db
       .query("employeeDocuments")
-      .withIndex("by_employee", (q) => q.eq("employeeId", args.employeeId))
+      .withIndex("by_employee", (q) => q.eq("employeeId", employeeId))
       .order("desc")
       .collect();
   },
@@ -26,9 +28,12 @@ export const listByEmployee = query({
  * Get a single document by ID.
  */
 export const getById = query({
-  args: { id: v.id("employeeDocuments") },
+  // Route params are untrusted strings; malformed IDs are missing records.
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    const doc = await ctx.db.get(args.id);
+    const id = ctx.db.normalizeId("employeeDocuments", args.id);
+    if (!id) return null;
+    const doc = await ctx.db.get(id);
     if (!doc) {
       return null;
     }

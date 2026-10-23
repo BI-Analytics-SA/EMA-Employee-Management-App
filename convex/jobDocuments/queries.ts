@@ -6,9 +6,11 @@ import { requireOrganizationAccess, requireModuleEnabled } from "../lib/permissi
  * List all documents for a job.
  */
 export const listByJob = query({
-  args: { jobId: v.id("jobs") },
+  args: { jobId: v.string() },
   handler: async (ctx, args) => {
-    const job = await ctx.db.get(args.jobId);
+    const jobId = ctx.db.normalizeId("jobs", args.jobId);
+    if (!jobId) return [];
+    const job = await ctx.db.get(jobId);
     if (!job) {
       return [];
     }
@@ -17,7 +19,7 @@ export const listByJob = query({
 
     return await ctx.db
       .query("jobDocuments")
-      .withIndex("by_job", (q) => q.eq("jobId", args.jobId))
+      .withIndex("by_job", (q) => q.eq("jobId", jobId))
       .order("desc")
       .collect();
   },
@@ -27,9 +29,12 @@ export const listByJob = query({
  * Get a single job document by ID.
  */
 export const getById = query({
-  args: { id: v.id("jobDocuments") },
+  // Route params are untrusted strings; malformed IDs are missing records.
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    const doc = await ctx.db.get(args.id);
+    const id = ctx.db.normalizeId("jobDocuments", args.id);
+    if (!id) return null;
+    const doc = await ctx.db.get(id);
     if (!doc) {
       return null;
     }

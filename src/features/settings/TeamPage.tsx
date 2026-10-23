@@ -73,11 +73,11 @@ export function TeamPage() {
 
   const members = useQuery(
     api.userProfiles.queries.listByOrganization,
-    organizationId ? { organizationId } : "skip"
+    isAdmin && organizationId ? { organizationId } : "skip"
   );
   const invites = useQuery(
     api.invites.queries.listByOrganization,
-    organizationId ? { organizationId } : "skip"
+    isAdmin && organizationId ? { organizationId } : "skip"
   );
 
   const [activeTab, setActiveTab] = useState<"members" | "invites">("members");
@@ -250,12 +250,7 @@ export function TeamPage() {
   if (!isAdmin) {
     return (
       <div className="p-4">
-        <Card>
-          <CardContent className="flex items-center gap-3 p-6">
-            <AlertCircle className="h-5 w-5 text-warning" />
-            <p>Only administrators can manage the team.</p>
-          </CardContent>
-        </Card>
+        <p className="text-destructive">Only organization admins can manage the team.</p>
       </div>
     );
   }
