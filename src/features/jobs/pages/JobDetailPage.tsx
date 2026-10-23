@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -291,15 +292,15 @@ export function JobDetailPage() {
           {job.description && <InfoRow label="Description" value={job.description} />}
           <InfoRow
             label="Start Date"
-            value={job.startDate ? new Date(job.startDate).toLocaleDateString() : undefined}
+            value={job.startDate ? formatDisplayDate(job.startDate) : undefined}
           />
           <InfoRow
             label="End Date"
-            value={job.endDate ? new Date(job.endDate).toLocaleDateString() : undefined}
+            value={job.endDate ? formatDisplayDate(job.endDate) : undefined}
           />
           <InfoRow
             label="Created"
-            value={new Date(job.createdAt).toLocaleDateString()}
+            value={formatDisplayDate(job.createdAt)}
           />
         </div>
       </section>

@@ -10,6 +10,7 @@ import { Loader2, Download, Lightbulb, ChevronDown } from "lucide-react";
 import { PlatformTrendChart } from "./PlatformTrendChart";
 import { cn } from "@/lib/utils";
 import { formatDateInput } from "@/lib/dateUtils";
+import { formatDisplayDate } from "@/lib/formatDisplayDate";
 
 const MODULE_SHORT: Record<string, string> = {
   contracts: "Con",
@@ -187,8 +188,8 @@ function OrgTable({
                 <div className="text-xs text-muted-foreground">{row.slug}</div>
               </td>
               <td className="px-3 py-2">{formatPlan(row.planStatus)}</td>
-              <td className="px-3 py-2 whitespace-nowrap">{formatDate(row.signedUpAt)}</td>
-              <td className="px-3 py-2 whitespace-nowrap">{formatDate(row.payingSince)}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{formatDisplayDate(row.signedUpAt || undefined)}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{formatDisplayDate(row.payingSince || undefined)}</td>
               <td className="px-3 py-2 text-right">{row.daysAsPayingCustomer ?? "—"}</td>
               <td className="px-3 py-2">
                 <ModuleBadges row={row} />
@@ -206,7 +207,7 @@ function OrgTable({
               )}
               <td className="px-3 py-2 text-right">{row.employeeCount}</td>
               <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                {formatDate(row.lastActiveAt)}
+                {formatDisplayDate(row.lastActiveAt || undefined)}
               </td>
               <td className="px-3 py-2 text-right">{row.activeMembers30d}</td>
             </tr>
@@ -500,17 +501,17 @@ export function PlatformBillingSection() {
                           <div className="text-xs text-muted-foreground">{row.slug}</div>
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
-                          {formatDate(row.signedUpAt)}
+                          {formatDisplayDate(row.signedUpAt || undefined)}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
-                          {formatDate(row.trialEndedAt)}
+                          {formatDisplayDate(row.trialEndedAt || undefined)}
                         </td>
                         <td className="px-3 py-2">
                           <ModuleBadges row={row as OrgRow} />
                         </td>
                         <td className="px-3 py-2 text-right font-medium">{row.moduleCount}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                          {formatDate(row.lastActiveAt)}
+                          {formatDisplayDate(row.lastActiveAt || undefined)}
                         </td>
                         <td className="px-3 py-2 text-right">{row.activeMembers30d}</td>
                       </tr>
